@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+@theme {
+  --color-surface-0: #08090d;
+  --color-surface-1: #0d0e14;
+  --color-surface-2: #12131a;
+  --color-surface-3: #1a1b24;
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-border-hover: rgba(255, 255, 255, 0.12);
+  --color-text-primary: rgba(255, 255, 255, 0.92);
+  --color-text-secondary: rgba(255, 255, 255, 0.55);
+  --color-text-tertiary: rgba(255, 255, 255, 0.3);
+  --color-accent: #2dd4bf;
+  --color-accent-dim: rgba(45, 212, 191, 0.15);
+  --color-accent-border: rgba(45, 212, 191, 0.25);
+  --color-critical: #ef4444;
+  --color-critical-dim: rgba(239, 68, 68, 0.1);
+  --color-minor: #f59e0b;
+  --color-minor-dim: rgba(245, 158, 11, 0.1);
+  --color-pass: #22c55e;
+  --color-pass-dim: rgba(34, 197, 94, 0.1);
+  --font-display: "DM Sans", system-ui, sans-serif;
+  --font-body: "DM Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 300 800;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/dmsans/v15/rP2tp2ywxg089UriI5-g4vlH9VoD8CmcqZG40F9JadbnoEwA_opsOSer.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/jetbrainsmono/v18/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxTOlOTk6OThhvA.woff2") format("woff2");
+}
+
+html {
+  background: var(--color-surface-0);
+  color: var(--color-text-primary);
+}
+
+body {
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: rgba(45, 212, 191, 0.25);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+}
+
+textarea::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
