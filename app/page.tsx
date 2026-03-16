@@ -21,6 +21,70 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const reportEndRef = useRef<HTMLDivElement>(null);
 
+  const processScreenshot = (s: Screenshot): Promise<{ data: string; mediaType: string }> => {
+    const MAX_WIDTH = 1920;
+    const MAX_HEIGHT = 1080;
+
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        const widthRatio = MAX_WIDTH / width;
+        const heightRatio = MAX_HEIGHT / height;
+        const ratio = Math.min(widthRatio, heightRatio, 1);
+
+        const targetWidth = Math.round(width * ratio);
+        const targetHeight = Math.round(height * ratio);
+
+        const canvas = document.createElement("canvas");
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Canvas not supported"));
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error("Image compression failed"));
+              return;
+            }
+
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const result = reader.result;
+              if (typeof result !== "string") {
+                reject(new Error("Failed to read compressed image"));
+                return;
+              }
+
+              const base64 = result.split(",")[1] || "";
+              resolve({
+                data: base64,
+                mediaType: "image/jpeg",
+              });
+            };
+            reader.onerror = () => reject(new Error("Failed to read compressed image"));
+            reader.readAsDataURL(blob);
+          },
+          "image/jpeg",
+          0.8
+        );
+      };
+
+      img.onerror = () => reject(new Error("Failed to load image"));
+      img.src = s.dataUrl;
+    });
+  };
+
   const isEvaluating = evalPhase !== "idle" && evalPhase !== "done" && evalPhase !== "error";
   const canEvaluate = screenshots.length > 0 && frameworks.length > 0 && !isEvaluating;
   const showInput = evalPhase === "idle";
@@ -41,11 +105,7 @@ export default function Home() {
     setError(null);
 
     try {
-      // Convert screenshots to base64
-      const images = screenshots.map((s) => ({
-        data: s.dataUrl.split(",")[1],
-        mediaType: s.file.type || "image/png",
-      }));
+      const images = await Promise.all(screenshots.map((s) => processScreenshot(s)));
 
       setEvalPhase("analyzing");
 
