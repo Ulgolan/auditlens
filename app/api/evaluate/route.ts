@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 
-export const maxDuration = 120;
+export const maxDuration = 300;
 export const runtime = "nodejs";
 
 // ═══════════════════════════════════════════════════════
@@ -243,6 +243,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         model: "claude-sonnet-5",
         max_tokens: 16000,
+        output_config: { effort: "medium" },
         stream: true,
         system: buildSystemPrompt(frameworks, audience),
         messages: [{ role: "user", content }],
