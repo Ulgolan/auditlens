@@ -3,3 +3,9 @@ node_modules/
 .env.local
 .env*.local
 out/
+
+# Build artifacts
+*.tsbuildinfo
+
+# OS
+.DS_Store
