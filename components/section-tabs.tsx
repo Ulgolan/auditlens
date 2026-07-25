@@ -39,7 +39,7 @@ export function SectionTabs({ sections, activeId, onSelect }: SectionTabsProps) 
               role="tab"
               aria-selected={isActive}
               onClick={() => onSelect(s.id)}
-              className={`font-mono flex items-center gap-2 rounded-pill border px-4 py-[0.6em] text-[0.68rem] font-medium uppercase tracking-[0.1em] transition-colors cursor-pointer ${
+              className={`font-mono flex items-center gap-2 rounded-pill border px-4 py-[0.6em] text-[0.85rem] font-medium uppercase tracking-[0.1em] transition-colors cursor-pointer ${
                 isActive
                   ? "bg-navy border-navy text-ivory"
                   : "bg-card border-border text-text-primary hover:border-border-strong"
@@ -87,7 +87,7 @@ function StatusDot({
       <span
         aria-label="incomplete — cut off"
         title="Incomplete — this section was cut off"
-        className="h-2 w-2 rounded-[2px] border-2 border-minor bg-minor"
+        className="h-2.5 w-2.5 rounded-[2px] border-2 border-minor bg-minor"
       />
     );
   }
@@ -97,7 +97,7 @@ function StatusDot({
       <span
         aria-label="did not complete"
         title="This section did not complete"
-        className="h-2 w-2 rounded-[2px] border-2 border-critical bg-critical"
+        className="h-2.5 w-2.5 rounded-[2px] border-2 border-critical bg-critical"
       />
     );
   }

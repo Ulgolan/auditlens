@@ -44,17 +44,17 @@ export function FrameworkProgress({ sections, preparing }: FrameworkProgressProp
   return (
     <div className="px-5 py-4 bg-card border border-border rounded-xl mb-5">
       <div className="flex items-center justify-between mb-3">
-        <div className="font-mono text-[0.66rem] font-medium uppercase tracking-[0.16em] text-text-primary">
+        <div className="font-mono text-[0.82rem] font-medium uppercase tracking-[0.16em] text-text-primary">
           {preparing ? "Processing screenshots" : "Running audit"}
         </div>
-        <div className="font-mono text-[0.66rem] text-text-tertiary">
+        <div className="font-mono text-[0.82rem] text-text-tertiary">
           {done.length}/{sections.length}
         </div>
       </div>
 
       <div className="flex flex-col gap-1.5">
         {sections.map((s) => (
-          <div key={s.id} className="flex items-center gap-2.5 text-[13px]">
+          <div key={s.id} className="flex items-center gap-2.5 text-[16px]">
             <StatusIcon status={s.status} />
             <span
               className={
@@ -71,7 +71,7 @@ export function FrameworkProgress({ sections, preparing }: FrameworkProgressProp
                 carries hue, the word carries meaning, and the word stays navy
                 so it is legible at 11px on white. */}
             <span
-              className={`ml-auto font-mono text-[0.64rem] uppercase tracking-[0.08em] ${
+              className={`ml-auto font-mono text-[0.8rem] uppercase tracking-[0.08em] ${
                 s.status === "truncated" || s.status === "failed"
                   ? "font-medium text-text-primary"
                   : "text-text-tertiary"

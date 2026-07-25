@@ -67,15 +67,15 @@ export function SectionCard({ section, onRetry, busy, flush }: SectionCardProps)
             {status === "failed" ? "🔴" : "⚠️"}
           </span>
           <div>
-            <div className="text-[13px] font-bold mb-0.5 text-text-primary">
+            <div className="text-[16px] font-bold mb-0.5 text-text-primary">
               {declaration.headline}
             </div>
             {declaration.detail && (
-              <div className="text-xs text-text-secondary leading-relaxed">
+              <div className="text-[15px] text-text-secondary leading-relaxed">
                 {declaration.detail}
               </div>
             )}
-            <div className="text-xs text-text-secondary leading-relaxed mt-1">
+            <div className="text-[15px] text-text-secondary leading-relaxed mt-1">
               {declaration.caution}
             </div>
 
@@ -83,7 +83,7 @@ export function SectionCard({ section, onRetry, busy, flush }: SectionCardProps)
               <button
                 onClick={onRetry}
                 disabled={busy}
-                className={`font-mono mt-3 rounded-pill border px-4 py-[0.6em] text-[0.66rem] font-medium uppercase tracking-[0.1em] transition-transform duration-150 ${
+                className={`font-mono mt-3 rounded-pill border px-4 py-[0.6em] text-[0.82rem] font-medium uppercase tracking-[0.1em] transition-transform duration-150 ${
                   busy
                     ? "border-border text-text-tertiary cursor-not-allowed"
                     : "border-border-strong text-text-primary cursor-pointer hover:-translate-y-[2px]"
@@ -99,13 +99,13 @@ export function SectionCard({ section, onRetry, busy, flush }: SectionCardProps)
       {text ? (
         <ReportRenderer content={text} />
       ) : (
-        <div className="font-voice text-[13px] text-text-tertiary">
+        <div className="font-voice text-[16px] text-text-tertiary">
           No content was produced for this section.
         </div>
       )}
 
       {status === "streaming" && (
-        <div className="flex items-center gap-2 mt-4 text-xs text-text-secondary">
+        <div className="flex items-center gap-2 mt-4 text-[15px] text-text-secondary">
           <div
             className="w-3 h-3 rounded-full border-2 border-border border-t-navy"
             style={{ animation: "spin 0.8s linear infinite" }}

@@ -16,7 +16,7 @@ export function AudienceSelector({ selected, onChange }: AudienceSelectorProps) 
           onClick={() => onChange(a.id)}
           title={a.description}
           className={`
-            px-3.5 py-1.5 rounded-pill text-xs font-medium cursor-pointer transition-all duration-150 border
+            px-4 py-2 rounded-pill text-[15px] font-medium cursor-pointer transition-all duration-150 border
             ${selected === a.id
               ? "bg-navy-dim border-navy text-navy font-semibold"
               : "bg-card border-border text-text-secondary hover:text-text-primary hover:border-border-strong"

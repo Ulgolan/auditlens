@@ -37,19 +37,19 @@ export function OverallPanel({
       <button
         onClick={onToggle}
         aria-expanded={open}
-        className="font-mono w-full flex items-center gap-3 px-5 py-3.5 rounded-card bg-navy text-ivory text-[0.72rem] font-medium uppercase tracking-[0.16em] cursor-pointer transition-opacity hover:opacity-90"
+        className="font-mono w-full flex items-center gap-3 px-5 py-3.5 rounded-card bg-navy text-ivory text-[0.9rem] font-medium uppercase tracking-[0.16em] cursor-pointer transition-opacity hover:opacity-90"
         style={open ? { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 } : undefined}
       >
         <span
           aria-hidden="true"
-          className="text-[0.9rem] leading-none transition-transform duration-200"
+          className="text-[1.1rem] leading-none transition-transform duration-200"
           style={{ transform: open ? "rotate(90deg)" : "rotate(0deg)" }}
         >
           ›
         </span>
         Overall Assessment
         {declaration && (
-          <span className="ml-auto flex items-center gap-2 normal-case tracking-[0.06em] text-[0.62rem]">
+          <span className="ml-auto flex items-center gap-2 normal-case tracking-[0.06em] text-[0.78rem]">
             <span
               className={`h-2 w-2 rounded-[2px] ${
                 section.status === "failed" ? "bg-critical" : "bg-minor"
@@ -60,7 +60,7 @@ export function OverallPanel({
           </span>
         )}
         {section.status === "streaming" && (
-          <span className="ml-auto normal-case tracking-[0.06em] text-[0.62rem]">
+          <span className="ml-auto normal-case tracking-[0.06em] text-[0.78rem]">
             Evaluating…
           </span>
         )}

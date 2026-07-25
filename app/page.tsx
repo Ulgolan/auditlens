@@ -49,7 +49,15 @@ export default function Home() {
   const [exporting, setExporting] = useState(false);
   /** Which framework tab is in focus. Empty until a run starts. */
   const [activeTab, setActiveTab] = useState<string>("");
+  /**
+   * True once the operator has picked a tab by hand. Auto-follow drives
+   * until then and never again for that run — reading a finished section
+   * while the next one streams is the whole point of the tab bar, and an
+   * auto-follow that keeps yanking the view away makes it useless.
+   */
+  const [tabPinned, setTabPinned] = useState(false);
   const [overallOpen, setOverallOpen] = useState(true);
+  const [confirmingHome, setConfirmingHome] = useState(false);
   const reportEndRef = useRef<HTMLDivElement>(null);
   const sectionAnchorRef = useRef<HTMLDivElement>(null);
 
@@ -151,12 +159,12 @@ export default function Home() {
    * operator last put it.
    */
   useEffect(() => {
-    if (evalPhase !== "running") return;
+    if (evalPhase !== "running" || tabPinned) return;
     const streaming = sections.find(
       (s) => s.status === "streaming" && s.id !== OVERALL_ID
     );
     if (streaming && streaming.id !== activeTab) setActiveTab(streaming.id);
-  }, [sections, evalPhase, activeTab]);
+  }, [sections, evalPhase, activeTab, tabPinned]);
 
   /**
    * Run a single section and stream it into state.
@@ -300,6 +308,7 @@ export default function Home() {
     });
     setSections(initial);
     setActiveTab(initial[0]?.id ?? "");
+    setTabPinned(false);
     setOverallOpen(true);
 
     try {
@@ -449,13 +458,34 @@ export default function Home() {
     visibleFrameworkSections.find((s) => s.id === activeTab) ??
     visibleFrameworkSections[0];
 
-  /** Tabs double as anchors: selecting one brings the section into view. */
+  /**
+   * Tabs double as anchors: selecting one brings the section into view.
+   * A manual pick also ends auto-follow for the rest of the run — the
+   * streaming tab keeps its pulsing ring, so rejoining the live section
+   * is one click away.
+   */
   const selectTab = (id: string) => {
     setActiveTab(id);
+    setTabPinned(true);
     sectionAnchorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  /**
+   * The lockup is the way home. Mid-run it asks first: a reflex click on
+   * a logo should not be able to destroy an audit that is minutes into
+   * an irreversible sequence of API calls.
+   */
+  const goHome = () => {
+    if (isEvaluating) {
+      setConfirmingHome(true);
+      return;
+    }
+    resetAll();
+  };
+
   const resetAll = () => {
+    setConfirmingHome(false);
+    setTabPinned(false);
     setScreenshots([]);
     setConceptText("");
     setTaskScenario("");
@@ -469,28 +499,33 @@ export default function Home() {
     <div className="min-h-screen bg-ground">
       {/* Header — north-star as the product mark, lockup per the brand kit. */}
       <header className="px-6 py-4 border-b border-border bg-card">
-        <div className="max-w-[960px] mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-[11px]">
+        <div className="max-w-[1040px] mx-auto flex items-center justify-between">
+        {/* The lockup is the way home. */}
+        <button
+          onClick={goHome}
+          aria-label="AuditLens — start a new audit"
+          className="flex items-center gap-[11px] text-left cursor-pointer transition-opacity hover:opacity-70"
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/motifs/north-star.svg" alt="" className="h-7 w-7 flex-none" />
+          <img src="/motifs/north-star.svg" alt="" className="h-9 w-9 flex-none" />
           <div className="leading-[1.1]">
-            <div className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-text-tertiary">
+            <div className="font-mono text-[0.75rem] uppercase tracking-[0.16em] text-text-tertiary">
               UX Evaluation
             </div>
-            <div className="font-display text-[0.95rem] font-extrabold text-text-primary">
+            <div className="font-display text-[1.2rem] font-extrabold text-text-primary">
               AuditLens
-              <span className="font-mono text-[0.6rem] font-normal text-text-tertiary ml-2 tracking-[0.08em]">
+              <span className="font-mono text-[0.75rem] font-normal text-text-tertiary ml-2 tracking-[0.08em]">
                 v2.0
               </span>
             </div>
           </div>
-        </div>
+        </button>
         {showReport && (
           <div className="flex items-center gap-2.5">
             <button
               onClick={exportReport}
               disabled={!canExport || exporting}
-              className={`font-mono rounded-pill px-4 py-[0.7em] text-[0.68rem] font-medium uppercase tracking-[0.1em] transition-transform duration-150 ${
+              className={`font-mono rounded-pill px-4 py-[0.7em] text-[0.85rem] font-medium uppercase tracking-[0.1em] transition-transform duration-150 ${
                 canExport && !exporting
                   ? "bg-accent text-ivory cursor-pointer hover:-translate-y-[2px]"
                   : "border border-border text-text-tertiary cursor-not-allowed"
@@ -500,24 +535,52 @@ export default function Home() {
             </button>
             <button
               onClick={resetAll}
-              className="font-mono rounded-pill border border-border-strong px-4 py-[0.7em] text-[0.68rem] font-medium uppercase tracking-[0.1em] text-text-primary cursor-pointer transition-transform duration-150 hover:-translate-y-[2px]"
+              className="font-mono rounded-pill border border-border-strong px-4 py-[0.7em] text-[0.85rem] font-medium uppercase tracking-[0.1em] text-text-primary cursor-pointer transition-transform duration-150 hover:-translate-y-[2px]"
             >
               ← New audit
             </button>
           </div>
         )}
         </div>
+
+        {/* Mid-run guard. Inline rather than a browser dialog so the
+            question is asked in the app's own voice, and so the running
+            audit stays visible behind it. */}
+        {confirmingHome && (
+          <div className="max-w-[1040px] mx-auto mt-3 flex items-center gap-3 flex-wrap px-4 py-3 rounded-card bg-minor-dim border border-minor border-l-[4px]">
+            <span className="text-[16px] font-bold text-text-primary">
+              An audit is still running.
+            </span>
+            <span className="text-[15px] text-text-secondary">
+              Starting over discards everything produced so far.
+            </span>
+            <div className="ml-auto flex gap-2.5">
+              <button
+                onClick={resetAll}
+                className="font-mono rounded-pill bg-accent text-ivory px-4 py-[0.6em] text-[0.82rem] font-medium uppercase tracking-[0.1em] cursor-pointer transition-transform duration-150 hover:-translate-y-[2px]"
+              >
+                Discard and start over
+              </button>
+              <button
+                onClick={() => setConfirmingHome(false)}
+                className="font-mono rounded-pill border border-border-strong px-4 py-[0.6em] text-[0.82rem] font-medium uppercase tracking-[0.1em] text-text-primary cursor-pointer transition-transform duration-150 hover:-translate-y-[2px]"
+              >
+                Keep auditing
+              </button>
+            </div>
+          </div>
+        )}
       </header>
 
-      <main className="max-w-[960px] mx-auto px-6 py-8">
+      <main className="max-w-[1040px] mx-auto px-6 py-8">
         {/* ═══ INPUT PANEL ═══ */}
         {showInput && (
           <div className="animate-[fadeIn_0.3s_ease]">
             <div className="text-center mb-10">
-              <h1 className="font-display text-[30px] font-extrabold text-text-primary mb-2">
+              <h1 className="font-display text-[38px] font-extrabold text-text-primary mb-2">
                 Show it or describe it. Then ship better.
               </h1>
-              <p className="font-voice text-[1.02rem] leading-[1.45] text-text-secondary max-w-[520px] mx-auto">
+              <p className="font-voice text-[1.3rem] leading-[1.45] text-text-secondary max-w-[620px] mx-auto">
                 Drop screenshots, write out the concept, or both. Select your frameworks. Get a
                 senior-grade UX audit with actionable fixes and metrics.
               </p>
@@ -525,7 +588,7 @@ export default function Home() {
 
             {/* Screenshots */}
             <div className="mb-5">
-              <label className="font-mono text-[0.68rem] font-medium uppercase tracking-[0.16em] text-text-primary mb-2 block">
+              <label className="font-mono text-[0.85rem] font-medium uppercase tracking-[0.16em] text-text-primary mb-2 block">
                 SCREENSHOTS{" "}
                 <span className="font-normal normal-case tracking-normal text-text-tertiary">
                   · optional if you describe the concept below
@@ -540,7 +603,7 @@ export default function Home() {
 
             {/* Concept description */}
             <div className="mb-7">
-              <label className="font-mono text-[0.68rem] font-medium uppercase tracking-[0.16em] text-text-primary mb-2 block">
+              <label className="font-mono text-[0.85rem] font-medium uppercase tracking-[0.16em] text-text-primary mb-2 block">
                 CONCEPT DESCRIPTION{" "}
                 <span className="font-normal normal-case tracking-normal text-text-tertiary">
                   {hasVisuals
@@ -555,10 +618,10 @@ export default function Home() {
                   "Describe the idea or flow in prose. The more concrete, the sharper the audit.\n\ne.g. 'A returning customer opens the app and lands on a saved-orders list. Tapping an order opens a detail view with a Reorder button. Reorder skips straight to payment using the stored card, showing a confirmation sheet with the total and a 5-second undo window before the order is placed.'"
                 }
                 rows={7}
-                className="w-full px-4 py-3 rounded-xl text-sm bg-field border border-border text-text-primary resize-y leading-relaxed outline-none transition-colors focus:border-navy"
+                className="w-full px-4 py-3 rounded-xl text-[17px] bg-field border border-border text-text-primary resize-y leading-relaxed outline-none transition-colors focus:border-navy"
               />
               {!hasVisuals && concept.length > 0 && (
-                <div className="mt-2 px-3.5 py-2.5 rounded-lg bg-minor-dim border-l-[3px] border border-minor text-[11px] text-text-secondary leading-relaxed">
+                <div className="mt-2 px-3.5 py-2.5 rounded-lg bg-minor-dim border-l-[3px] border border-minor text-[14px] text-text-secondary leading-relaxed">
                   <span className="font-semibold text-text-primary">Concept mode.</span> With no
                   visuals, anything measured — contrast, target sizes, text size, focus rings,
                   visual hierarchy — cannot be assessed, and the report will say so rather than
@@ -569,7 +632,7 @@ export default function Home() {
 
             {/* Task Scenario */}
             <div className="mb-7">
-              <label className="font-mono text-[0.68rem] font-medium uppercase tracking-[0.16em] text-text-primary mb-2 block">
+              <label className="font-mono text-[0.85rem] font-medium uppercase tracking-[0.16em] text-text-primary mb-2 block">
                 TASK SCENARIO{" "}
                 <span className="font-normal normal-case tracking-normal text-text-tertiary">· optional but recommended</span>
               </label>
@@ -578,13 +641,13 @@ export default function Home() {
                 onChange={(e) => setTaskScenario(e.target.value)}
                 placeholder="What is the user trying to accomplish? e.g., 'First-time user trying to send their first message' or 'Returning user checking out with items in cart'"
                 rows={3}
-                className="w-full px-4 py-3 rounded-xl text-sm bg-field border border-border text-text-primary resize-y leading-relaxed outline-none transition-colors focus:border-navy"
+                className="w-full px-4 py-3 rounded-xl text-[17px] bg-field border border-border text-text-primary resize-y leading-relaxed outline-none transition-colors focus:border-navy"
               />
             </div>
 
             {/* Audience */}
             <div className="mb-7">
-              <label className="font-mono text-[0.68rem] font-medium uppercase tracking-[0.16em] text-text-primary mb-2 block">
+              <label className="font-mono text-[0.85rem] font-medium uppercase tracking-[0.16em] text-text-primary mb-2 block">
                 AUDIENCE CONTEXT
               </label>
               <AudienceSelector selected={audience} onChange={setAudience} />
@@ -592,7 +655,7 @@ export default function Home() {
 
             {/* Frameworks */}
             <div className="mb-9">
-              <label className="font-mono text-[0.68rem] font-medium uppercase tracking-[0.16em] text-text-primary mb-2 block">
+              <label className="font-mono text-[0.85rem] font-medium uppercase tracking-[0.16em] text-text-primary mb-2 block">
                 EVALUATION FRAMEWORKS
               </label>
               <FrameworkToggles selected={frameworks} onChange={setFrameworks} />
@@ -603,7 +666,7 @@ export default function Home() {
               onClick={runEvaluation}
               disabled={!canEvaluate}
               className={`
-                font-mono w-full py-[1.15em] px-6 rounded-pill text-[0.78rem] font-medium uppercase tracking-[0.12em] transition-transform duration-150
+                font-mono w-full py-[1.15em] px-6 rounded-pill text-[0.98rem] font-medium uppercase tracking-[0.12em] transition-transform duration-150
                 ${canEvaluate
                   ? "bg-accent text-ivory cursor-pointer hover:-translate-y-[2px]"
                   : "border border-border text-text-tertiary cursor-not-allowed"
@@ -642,11 +705,11 @@ export default function Home() {
             {/* Error */}
             {error && (
               <div className="px-5 py-4 bg-critical-dim border border-critical border-l-[3px] rounded-xl mb-5">
-                <div className="text-sm font-bold text-critical mb-1">Evaluation failed</div>
-                <div className="text-[13px] text-text-secondary">{error}</div>
+                <div className="text-[17px] font-bold text-critical mb-1">Evaluation failed</div>
+                <div className="text-[16px] text-text-secondary">{error}</div>
                 <button
                   onClick={resetAll}
-                  className="font-mono mt-3 rounded-pill border border-border-strong px-4 py-[0.6em] text-[0.66rem] font-medium uppercase tracking-[0.1em] text-text-primary cursor-pointer transition-transform duration-150 hover:-translate-y-[2px]"
+                  className="font-mono mt-3 rounded-pill border border-border-strong px-4 py-[0.6em] text-[0.82rem] font-medium uppercase tracking-[0.1em] text-text-primary cursor-pointer transition-transform duration-150 hover:-translate-y-[2px]"
                 >
                   Try again
                 </button>

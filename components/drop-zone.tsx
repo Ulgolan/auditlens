@@ -81,10 +81,10 @@ export function DropZone({ screenshots, onAdd, onRemove }: DropZoneProps) {
         {screenshots.length === 0 ? (
           <div className="text-center">
             <div className="text-4xl mb-3 opacity-40">📸</div>
-            <div className="text-[15px] font-semibold text-text-secondary mb-1">
+            <div className="text-[19px] font-semibold text-text-secondary mb-1">
               Drop screenshots here
             </div>
-            <div className="text-xs text-text-tertiary">
+            <div className="text-[15px] text-text-tertiary">
               or click to browse · paste from clipboard · supports multiple files
             </div>
           </div>

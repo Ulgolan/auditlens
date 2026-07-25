@@ -105,13 +105,21 @@ export function ExportDocument({
             <dt className="font-mono">Frameworks</dt>
             <dd>{meta.frameworkLabels}</dd>
           </div>
-          {meta.taskScenario.trim() && (
-            <div>
-              <dt className="font-mono">Task</dt>
-              <dd>{meta.taskScenario}</dd>
-            </div>
-          )}
         </dl>
+
+        {/*
+          Task sits below the grid, full width, on purpose. A real task
+          scenario is often several sentences describing a whole journey,
+          and inside a three-column meta grid it wrapped into a narrow
+          ribbon or ran past the fold. The client has to be able to read
+          what was actually audited.
+        */}
+        {meta.taskScenario.trim() && (
+          <div className="doc-task">
+            <div className="font-mono doc-task-kicker">Task scenario</div>
+            <p>{meta.taskScenario}</p>
+          </div>
+        )}
 
         {meta.conceptText.trim() && (
           <div className="doc-concept">

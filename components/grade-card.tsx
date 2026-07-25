@@ -58,24 +58,24 @@ export function GradeCard({ sections }: GradeCardProps) {
         }`}
       >
         {/* Grade — or the withheld placeholder */}
-        <div className="text-center min-w-[92px]">
+        <div className="text-center min-w-[110px]">
           {grade && band ? (
             <>
               <div
-                className={`grade-chip font-display flex h-[76px] w-[76px] items-center justify-center rounded-card text-5xl font-extrabold leading-none ${band.fill} ${band.ink}`}
+                className={`grade-chip font-display flex h-[92px] w-[92px] items-center justify-center rounded-card text-6xl font-extrabold leading-none ${band.fill} ${band.ink}`}
               >
                 {grade}
               </div>
-              <div className="font-mono text-[0.58rem] uppercase tracking-[0.16em] text-text-tertiary mt-2">
+              <div className="font-mono text-[0.72rem] uppercase tracking-[0.16em] text-text-tertiary mt-2">
                 Overall
               </div>
             </>
           ) : (
             <>
-              <div className="font-display flex h-[76px] w-[76px] items-center justify-center rounded-card border-2 border-dashed border-border-strong text-5xl font-extrabold leading-none text-text-tertiary">
+              <div className="font-display flex h-[92px] w-[92px] items-center justify-center rounded-card border-2 border-dashed border-border-strong text-6xl font-extrabold leading-none text-text-tertiary">
                 —
               </div>
-              <div className="font-mono text-[0.58rem] uppercase tracking-[0.16em] text-text-primary mt-2 font-medium">
+              <div className="font-mono text-[0.72rem] uppercase tracking-[0.16em] text-text-primary mt-2 font-medium">
                 Withheld
               </div>
             </>
@@ -95,11 +95,11 @@ export function GradeCard({ sections }: GradeCardProps) {
         <div className="w-px h-[60px] bg-border" />
 
         <div className="text-center">
-          <div className="text-2xl font-bold text-text-primary">
+          <div className="text-3xl font-bold text-text-primary">
             {completedCount}
             <span className="text-text-tertiary font-normal">/{totalCount}</span>
           </div>
-          <div className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-text-tertiary mt-1">
+          <div className="font-mono text-[0.72rem] uppercase tracking-[0.14em] text-text-tertiary mt-1">
             Frameworks
           </div>
         </div>
@@ -108,10 +108,10 @@ export function GradeCard({ sections }: GradeCardProps) {
       {/* Why the grade is missing — stated, not implied */}
       {!isComplete && (
         <div className="px-6 py-3.5 bg-minor-dim border border-minor border-l-[4px] border-t-0 rounded-b-card">
-          <div className="text-[13px] font-bold text-text-primary mb-1">
+          <div className="text-[16px] font-bold text-text-primary mb-1">
             No grade — this audit is incomplete
           </div>
-          <div className="text-xs text-text-secondary leading-relaxed">
+          <div className="text-[15px] text-text-secondary leading-relaxed">
             {withheldReason} Retry the affected sections to complete the audit.
           </div>
         </div>
@@ -131,7 +131,7 @@ function Tally({
 }) {
   return (
     <div className="text-center">
-      <div className="text-2xl font-bold text-text-primary leading-none">{count}</div>
+      <div className="text-3xl font-bold text-text-primary leading-none">{count}</div>
       <div className="flex items-center justify-center gap-1.5 mt-1.5">
         {/* Border as well as fill: a browser printing with background
             graphics off drops the fill, and the swatch would vanish. */}
@@ -139,7 +139,7 @@ function Tally({
           className={`h-2 w-2 rounded-[2px] border-2 ${swatch}`}
           aria-hidden="true"
         />
-        <span className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-text-tertiary">
+        <span className="font-mono text-[0.72rem] uppercase tracking-[0.14em] text-text-tertiary">
           {label}
         </span>
       </div>

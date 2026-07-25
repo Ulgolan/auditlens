@@ -27,16 +27,16 @@ export function FrameworkToggles({ selected, onChange }: FrameworkTogglesProps) 
               }
             `}
           >
-            <span className="text-lg">{fw.icon}</span>
+            <span className="text-2xl">{fw.icon}</span>
             <div>
               <div
-                className={`text-[13px] font-semibold transition-colors ${
+                className={`text-[16px] font-semibold transition-colors ${
                   isOn ? "text-navy" : "text-text-secondary"
                 }`}
               >
                 {fw.label}
               </div>
-              <div className="text-[10px] text-text-tertiary mt-0.5">{fw.description}</div>
+              <div className="text-[13px] text-text-tertiary mt-0.5">{fw.description}</div>
             </div>
           </button>
         );

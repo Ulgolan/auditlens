@@ -100,7 +100,7 @@ const DOCUMENT_CSS = `
     -webkit-font-smoothing: antialiased;
   }
   .doc {
-    max-width: 860px;
+    max-width: 1000px;
     margin: 0 auto;
     background: var(--card);
     border: 1px solid var(--border);
@@ -115,15 +115,15 @@ const DOCUMENT_CSS = `
   .doc-lockup { display: flex; align-items: center; gap: 12px; }
   .doc-logo { height: 38px; width: auto; display: block; }
   .doc-kicker {
-    font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.16em;
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.16em;
     color: var(--text-tertiary);
   }
   .doc-title {
-    font-size: 1.25rem; font-weight: 800; font-stretch: 125%;
+    font-size: 1.6rem; font-weight: 800; font-stretch: 125%;
     letter-spacing: -0.02em; color: var(--text-primary); line-height: 1.1;
   }
   .doc-date {
-    font-size: 0.66rem; letter-spacing: 0.08em; color: var(--text-tertiary);
+    font-size: 0.82rem; letter-spacing: 0.08em; color: var(--text-tertiary);
     white-space: nowrap; padding-top: 4px;
   }
 
@@ -138,26 +138,26 @@ const DOCUMENT_CSS = `
     background: var(--minor-dim);
   }
   .doc-partial-flag {
-    font-size: 0.72rem; font-weight: 500; text-transform: uppercase;
+    font-size: 0.9rem; font-weight: 500; text-transform: uppercase;
     letter-spacing: 0.16em; color: var(--text-primary); margin-bottom: 8px;
   }
   .doc-partial-lede {
-    margin: 0 0 8px; font-size: 1rem; font-weight: 700; line-height: 1.4;
+    margin: 0 0 8px; font-size: 1.28rem; font-weight: 700; line-height: 1.4;
     color: var(--text-primary);
   }
   .doc-partial-body {
-    margin: 0 0 10px; font-size: 0.82rem; line-height: 1.6;
+    margin: 0 0 10px; font-size: 1.02rem; line-height: 1.6;
     color: var(--text-secondary);
   }
   .doc-partial-list {
-    margin: 0; padding-left: 18px; font-size: 0.82rem; line-height: 1.7;
+    margin: 0; padding-left: 18px; font-size: 1.02rem; line-height: 1.7;
     color: var(--text-secondary);
   }
   .doc-partial-list strong { color: var(--text-primary); }
 
   .doc-brief { margin-bottom: 30px; }
   .doc-section-kicker {
-    font-size: 0.66rem; font-weight: 500; text-transform: uppercase;
+    font-size: 0.82rem; font-weight: 500; text-transform: uppercase;
     letter-spacing: 0.16em; color: var(--text-primary);
     margin: 0 0 12px; padding-bottom: 8px;
     border-bottom: 1px solid var(--line);
@@ -167,22 +167,34 @@ const DOCUMENT_CSS = `
     gap: 14px 26px; margin: 0;
   }
   .doc-brief-grid dt {
-    font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.14em;
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em;
     color: var(--text-tertiary); margin-bottom: 3px;
   }
   .doc-brief-grid dd {
-    margin: 0; font-size: 0.86rem; line-height: 1.45; color: var(--text-primary);
+    margin: 0; font-size: 1.07rem; line-height: 1.45; color: var(--text-primary);
+  }
+  .doc-task {
+    margin-top: 18px; padding: 14px 18px;
+    border: 1px solid var(--border); border-radius: 12px;
+  }
+  .doc-task-kicker {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.16em;
+    color: var(--text-tertiary); margin-bottom: 7px;
+  }
+  .doc-task p {
+    margin: 0; font-size: 1.05rem; line-height: 1.6;
+    color: var(--text-primary); white-space: pre-wrap;
   }
   .doc-concept {
-    margin-top: 18px; padding: 14px 16px;
+    margin-top: 18px; padding: 14px 18px;
     border: 1px solid var(--border); border-radius: 12px;
   }
   .doc-concept-kicker {
-    font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.16em;
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.16em;
     color: var(--text-tertiary); margin-bottom: 7px;
   }
   .doc-concept p {
-    margin: 0; font-size: 0.84rem; line-height: 1.6;
+    margin: 0; font-size: 1.05rem; line-height: 1.6;
     color: var(--text-secondary); white-space: pre-wrap;
   }
   .doc-shots {
@@ -194,7 +206,7 @@ const DOCUMENT_CSS = `
     border: 1px solid var(--border);
   }
   .doc-shots figcaption {
-    font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.14em;
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em;
     color: var(--text-tertiary); margin-top: 5px;
   }
 
@@ -204,12 +216,12 @@ const DOCUMENT_CSS = `
   }
   .doc-toc ol {
     margin: 0; padding-left: 20px;
-    font-size: 0.86rem; line-height: 1.9; color: var(--text-primary);
+    font-size: 1.07rem; line-height: 1.9; color: var(--text-primary);
   }
   .doc-toc a { color: var(--text-primary); text-decoration: none; }
   .doc-toc a:hover { text-decoration: underline; }
   .doc-toc-status {
-    font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em;
+    font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;
     color: var(--text-secondary); margin-left: 10px;
     border: 1px solid var(--minor); border-radius: 100px; padding: 1px 8px;
     white-space: nowrap;
@@ -221,7 +233,7 @@ const DOCUMENT_CSS = `
     display: flex; align-items: center; gap: 10px;
     margin-top: 30px; padding-top: 18px;
     border-top: 1px solid var(--border);
-    font-size: 0.62rem; letter-spacing: 0.06em; color: var(--text-tertiary);
+    font-size: 0.78rem; letter-spacing: 0.06em; color: var(--text-tertiary);
   }
   .doc-foot-mark { height: 16px; width: 16px; flex: none; }
 
