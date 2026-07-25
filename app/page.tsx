@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import type { Screenshot, EvalPhase, ReportSection, SectionStatus } from "@/lib/types";
 import { FRAMEWORKS, AUDIENCES, OVERALL_ID } from "@/lib/types";
+import { ContextPanel } from "@/components/context-panel";
 import { DropZone } from "@/components/drop-zone";
 import { FrameworkToggles } from "@/components/framework-toggles";
 import { AudienceSelector } from "@/components/audience-selector";
@@ -34,8 +35,9 @@ function assembleForOverall(sections: ReportSection[]): string {
 
 export default function Home() {
   const [screenshots, setScreenshots] = useState<Screenshot[]>([]);
+  const [conceptText, setConceptText] = useState("");
   const [taskScenario, setTaskScenario] = useState("");
-  const [audience, setAudience] = useState("consumer");
+  const [audience, setAudience] = useState(AUDIENCES[0].id);
   const [frameworks, setFrameworks] = useState<string[]>(
     FRAMEWORKS.filter((f) => f.default).map((f) => f.id)
   );
@@ -118,7 +120,17 @@ export default function Home() {
   };
 
   const isEvaluating = evalPhase === "processing" || evalPhase === "running";
-  const canEvaluate = screenshots.length > 0 && frameworks.length > 0 && !isEvaluating;
+
+  /**
+   * Material can be screenshots, a written concept, or both. There is no
+   * mode switch anywhere in this app on purpose — the mode is whatever
+   * the operator actually supplied, so the UI and the route can never
+   * disagree about which one is running.
+   */
+  const concept = conceptText.trim();
+  const hasVisuals = screenshots.length > 0;
+  const hasMaterial = hasVisuals || concept.length > 0;
+  const canEvaluate = hasMaterial && frameworks.length > 0 && !isEvaluating;
   const showInput = evalPhase === "idle";
   const showReport = evalPhase !== "idle";
 
@@ -156,6 +168,10 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           images: id === OVERALL_ID ? [] : images,
+          conceptText: id === OVERALL_ID ? "" : concept,
+          // The overall pass gets handed the assembled report and no
+          // material, so it cannot work the mode out for itself.
+          visualsPresent: images.length > 0,
           taskScenario,
           audience,
           framework: id,
@@ -306,9 +322,12 @@ export default function Home() {
    * the same class of dishonesty this phase exists to remove.
    */
   const retrySection = async (id: string) => {
+    // Concept-only audits store an empty array here, not null — the
+    // difference between "no images in this audit" and "material is gone"
+    // is what makes retry work in text mode.
     const images = imagesRef.current;
     if (!images) {
-      setError("Screenshots are no longer available for retry. Start a new audit.");
+      setError("The audit material is no longer available for retry. Start a new audit.");
       setEvalPhase("error");
       return;
     }
@@ -367,6 +386,7 @@ export default function Home() {
 
   const resetAll = () => {
     setScreenshots([]);
+    setConceptText("");
     setTaskScenario("");
     setSections([]);
     setError(null);
@@ -403,24 +423,56 @@ export default function Home() {
           <div className="animate-[fadeIn_0.3s_ease]">
             <div className="text-center mb-10">
               <h1 className="text-[28px] font-bold tracking-tight mb-2">
-                Upload. Evaluate. Ship better.
+                Show it or describe it. Then ship better.
               </h1>
-              <p className="text-sm text-text-tertiary max-w-[480px] mx-auto">
-                Drop your screenshots. Select your frameworks. Get a senior-grade UX audit with
-                actionable fixes and metrics.
+              <p className="text-sm text-text-tertiary max-w-[520px] mx-auto">
+                Drop screenshots, write out the concept, or both. Select your frameworks. Get a
+                senior-grade UX audit with actionable fixes and metrics.
               </p>
             </div>
 
             {/* Screenshots */}
-            <div className="mb-7">
+            <div className="mb-5">
               <label className="text-xs font-semibold text-text-tertiary tracking-wider mb-2 block">
-                SCREENSHOTS
+                SCREENSHOTS{" "}
+                <span className="font-normal text-white/20">
+                  · optional if you describe the concept below
+                </span>
               </label>
               <DropZone
                 screenshots={screenshots}
                 onAdd={(s) => setScreenshots((prev) => [...prev, s])}
                 onRemove={(id) => setScreenshots((prev) => prev.filter((s) => s.id !== id))}
               />
+            </div>
+
+            {/* Concept description */}
+            <div className="mb-7">
+              <label className="text-xs font-semibold text-text-tertiary tracking-wider mb-2 block">
+                CONCEPT DESCRIPTION{" "}
+                <span className="font-normal text-white/20">
+                  {hasVisuals
+                    ? "· optional — explains what happens between screens"
+                    : "· audit an idea with no visuals yet"}
+                </span>
+              </label>
+              <textarea
+                value={conceptText}
+                onChange={(e) => setConceptText(e.target.value)}
+                placeholder={
+                  "Describe the idea or flow in prose. The more concrete, the sharper the audit.\n\ne.g. 'A returning customer opens the app and lands on a saved-orders list. Tapping an order opens a detail view with a Reorder button. Reorder skips straight to payment using the stored card, showing a confirmation sheet with the total and a 5-second undo window before the order is placed.'"
+                }
+                rows={7}
+                className="w-full px-4 py-3 rounded-xl text-sm bg-white/[0.02] border border-border text-white/85 resize-y leading-relaxed outline-none transition-colors focus:border-accent-border"
+              />
+              {!hasVisuals && concept.length > 0 && (
+                <div className="mt-2 px-3.5 py-2.5 rounded-lg bg-minor-dim border border-minor/20 text-[11px] text-white/55 leading-relaxed">
+                  <span className="font-semibold text-minor">Concept mode.</span> With no
+                  visuals, anything measured — contrast, target sizes, text size, focus rings,
+                  visual hierarchy — cannot be assessed, and the report will say so rather than
+                  guess. Accessibility narrows to what the description itself commits to.
+                </div>
+              )}
             </div>
 
             {/* Task Scenario */}
@@ -468,7 +520,9 @@ export default function Home() {
             >
               {canEvaluate
                 ? `Run Audit · ${frameworks.length} framework${frameworks.length !== 1 ? "s" : ""}`
-                : "Upload at least one screenshot to begin"}
+                : !hasMaterial
+                ? "Add a screenshot or describe the concept to begin"
+                : "Select at least one framework to begin"}
             </button>
           </div>
         )}
@@ -476,46 +530,14 @@ export default function Home() {
         {/* ═══ REPORT PANEL ═══ */}
         {showReport && (
           <div className="animate-[fadeIn_0.3s_ease]">
-            {/* Context summary */}
-            <div className="flex gap-3 flex-wrap mb-5 px-4 py-3 bg-white/[0.02] rounded-xl border border-border text-xs text-text-tertiary">
-              <span>📸 {screenshots.length} screen{screenshots.length !== 1 ? "s" : ""}</span>
-              <span className="text-white/[0.08]">|</span>
-              <span>🎯 {AUDIENCES.find((a) => a.id === audience)?.label}</span>
-              <span className="text-white/[0.08]">|</span>
-              <span>
-                🔬{" "}
-                {frameworks
-                  .map((f) => FRAMEWORKS.find((fw) => fw.id === f)?.label)
-                  .join(" · ")}
-              </span>
-              {taskScenario && (
-                <>
-                  <span className="text-white/[0.08]">|</span>
-                  <span>
-                    📝 {taskScenario.length > 60 ? taskScenario.slice(0, 60) + "..." : taskScenario}
-                  </span>
-                </>
-              )}
-            </div>
-
-            {/* Screenshot thumbnails */}
-            <div className="flex gap-2 mb-5 flex-wrap">
-              {screenshots.map((s, i) => (
-                <div
-                  key={s.id}
-                  className="relative rounded-lg overflow-hidden border border-border/50"
-                >
-                  <img
-                    src={s.dataUrl}
-                    alt={`Screen ${i + 1}`}
-                    className="h-16 w-auto block opacity-70"
-                  />
-                  <div className="absolute bottom-0.5 left-1 bg-black/70 rounded px-1 py-px text-[9px] font-bold text-accent">
-                    {i + 1}
-                  </div>
-                </div>
-              ))}
-            </div>
+            {/* Request + material, pinned for the whole run */}
+            <ContextPanel
+              screenshots={screenshots}
+              conceptText={conceptText}
+              taskScenario={taskScenario}
+              audience={audience}
+              frameworks={frameworks}
+            />
 
             {/* Per-framework progress */}
             {(isEvaluating || sections.some((s) => s.status === "streaming")) && (

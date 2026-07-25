@@ -19,6 +19,19 @@ export const runtime = "nodejs";
 
 interface EvaluateBody {
   images: { data: string; mediaType: string }[];
+  /** Written description of an idea or flow, when there is no visual material. */
+  conceptText?: string;
+  /**
+   * Whether the audit as a whole had visual material.
+   *
+   * Read ONLY on the overall pass, and ignored everywhere else. Framework
+   * passes derive the mode from their own payload, which cannot lie. The
+   * overall pass is handed the assembled report and no material at all,
+   * so there is genuinely nothing there to derive from — a declaration is
+   * the only signal available, and with no content present it has nothing
+   * to contradict.
+   */
+  visualsPresent?: boolean;
   taskScenario: string;
   audience: string;
   framework: string;
@@ -36,7 +49,15 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = (await req.json()) as EvaluateBody;
-    const { images, taskScenario, audience, framework, priorReport } = body;
+    const {
+      images,
+      conceptText,
+      visualsPresent,
+      taskScenario,
+      audience,
+      framework,
+      priorReport,
+    } = body;
 
     if (!framework) {
       return new Response(JSON.stringify({ error: "No framework specified" }), {
@@ -47,11 +68,24 @@ export async function POST(req: NextRequest) {
 
     const isOverall = framework === "overall";
 
-    if (!isOverall && (!images || images.length === 0)) {
-      return new Response(JSON.stringify({ error: "No images provided" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+    // Mode is DERIVED, never declared. A `mode` field in the body would be
+    // a second source of truth that can contradict the payload it
+    // describes — `mode:"text"` arriving with images attached would put
+    // the model in concept mode while looking straight at screenshots,
+    // and nothing here could catch it. The content decides.
+    const hasVisuals = Array.isArray(images) && images.length > 0;
+    const concept = (conceptText || "").trim();
+
+    if (!isOverall && !hasVisuals && !concept) {
+      return new Response(
+        JSON.stringify({
+          error: "Provide screenshots or a written concept description.",
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
 
     // ─── Build system prompt ───
@@ -61,10 +95,13 @@ export async function POST(req: NextRequest) {
     let instruction: string | null = null;
     try {
       if (isOverall) {
-        system = buildOverallSystemPrompt(audience);
+        // See visualsPresent above: declared, because this pass has no
+        // material of its own to derive from. Defaults to true so an
+        // older client that never sends it keeps its v2.0 behaviour.
+        system = buildOverallSystemPrompt(audience, visualsPresent !== false);
       } else {
-        system = buildSharedSystemPrompt(audience);
-        instruction = buildFrameworkInstruction(framework);
+        system = buildSharedSystemPrompt(audience, hasVisuals);
+        instruction = buildFrameworkInstruction(framework, hasVisuals);
       }
     } catch {
       return new Response(JSON.stringify({ error: `Unknown framework: ${framework}` }), {
@@ -82,36 +119,55 @@ export async function POST(req: NextRequest) {
         text: `Here is the assembled audit report. Synthesise the final assessment from it.\n\n---\n\n${priorReport || "(No completed sections.)"}`,
       });
     } else {
-      const screenshotContext =
-        images.length > 1
-          ? `I've uploaded ${images.length} screenshots showing a sequential flow. Evaluate them as a unified experience, referencing specific screens by number (Screen 1, Screen 2, etc.).`
-          : "I've uploaded a screenshot for evaluation.";
+      // Stable prefix: material + shared context. Cached across every
+      // framework call in this audit, so calls 2..N read the material at
+      // roughly a tenth of the cost instead of re-sending it.
+      if (hasVisuals) {
+        images.forEach((img, i) => {
+          const block: Record<string, unknown> = {
+            type: "image",
+            source: {
+              type: "base64",
+              media_type: img.mediaType,
+              data: img.data,
+            },
+          };
+          if (i === images.length - 1) {
+            block.cache_control = { type: "ephemeral" };
+          }
+          content.push(block);
+        });
+      }
+
+      let materialContext: string;
+      if (hasVisuals) {
+        materialContext =
+          images.length > 1
+            ? `I've uploaded ${images.length} screenshots showing a sequential flow. Evaluate them as a unified experience, referencing specific screens by number (Screen 1, Screen 2, etc.).`
+            : "I've uploaded a screenshot for evaluation.";
+        // Mixed material: visuals plus a written description of what
+        // happens between or around them. The visuals still govern —
+        // concept-mode rules are NOT in force here, because there is real
+        // visual evidence to cite.
+        if (concept) {
+          materialContext += `\n\nThe designer has also provided a written description of the concept and flow. Use it to understand intent and to fill in what happens between screens. Where the description and the screenshots disagree, the screenshots are what exists — say so.\n\n--- CONCEPT DESCRIPTION ---\n${concept}\n--- END DESCRIPTION ---`;
+        }
+      } else {
+        // Concept-only. No visual evidence exists anywhere in this
+        // conversation; the system prompt carries the rules that keep the
+        // model from inventing some.
+        materialContext = `There are no screenshots in this conversation. The material for this audit is the written concept description below — evaluate the design decisions it commits to, and do not invent visual evidence.\n\n--- CONCEPT DESCRIPTION ---\n${concept}\n--- END DESCRIPTION ---`;
+      }
 
       const taskContext = taskScenario
         ? `\n\nTask scenario: ${taskScenario}`
-        : "\n\nNo specific task scenario provided — infer the most likely primary task from the UI and note that the walkthrough is based on inference.";
-
-      // Stable prefix: images + shared context. Cached across every
-      // framework call in this audit, so calls 2..N read the images at
-      // roughly a tenth of the cost instead of re-uploading them.
-      images.forEach((img, i) => {
-        const block: Record<string, unknown> = {
-          type: "image",
-          source: {
-            type: "base64",
-            media_type: img.mediaType,
-            data: img.data,
-          },
-        };
-        if (i === images.length - 1) {
-          block.cache_control = { type: "ephemeral" };
-        }
-        content.push(block);
-      });
+        : hasVisuals
+        ? "\n\nNo specific task scenario provided — infer the most likely primary task from the UI and note that the walkthrough is based on inference."
+        : "\n\nNo specific task scenario provided — infer the most likely primary task from the description and note that the walkthrough is based on inference.";
 
       content.push({
         type: "text",
-        text: `${screenshotContext}${taskContext}`,
+        text: `${materialContext}${taskContext}`,
         cache_control: { type: "ephemeral" },
       });
 
