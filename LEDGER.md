@@ -46,19 +46,43 @@ to explicit paths for the rest of the build). Commander relocated it to
 ../brand. Build verified green after. Also added *.tsbuildinfo and .DS_Store
 to .gitignore.
 
-OPEN / NOT CERTIFIED AT WRITE TIME:
-- Preview URL is behind Vercel Deployment Protection; could not be reached
-  without authenticating into ACP's Vercel account, which was declined.
-- No ANTHROPIC_API_KEY in .env.local, so no real audit ran locally either.
-- VERIFIED locally on the v2 build, real code paths, no key: grade WITHHELD
-  instead of a letter, "0 of 4 frameworks completed" tally, per-section failure
-  banner naming the cause, live retry button, honest 0/0/0 severity counts.
-- NOT YET VERIFIED: a successful end-to-end audit, the progress checklist
-  mid-run, a genuine max_tokens truncation, and a retry that succeeds and
-  recomputes the Overall.
+CERTIFIED — three runs, locally, on commit `d97a8b6`, against the live API:
 
-FLAGGED, NOT ACTED ON: two Vercel projects (`auditlens`, `auditlens-db1a`)
-deploy from this one repo on every push. Also — Polaris makes text-described
-concepts 2.0 CORE, and the build is still screenshot-only (`canEvaluate`
-requires a screenshot; the route 400s without images). Tower confirms that is
-the next phase.
+1. FULL AUDIT. Four frameworks + overall, all complete. Grade C+ rendered,
+   4/4 frameworks, 14 critical / 22 minor / 24 pass, ~25k chars. All five
+   section headings present. The a11y section produced its own output with 5
+   "verify in live product" tags alongside a full Nielsen section — the exact
+   combination v1 could never produce. Progress checklist verified live
+   mid-run (0/5, Nielsen "Evaluating...", remainder "Queued").
+
+2. TRUNCATION. Forced with a temporary local max_tokens=200, reverted without
+   committing (working tree confirmed identical to HEAD afterward, no markers
+   left). Amber banner rendered: "Nielsen's 10 is incomplete — this section
+   was cut off / The model hit its output limit before finishing this
+   section." Grade WITHHELD, 0/4 tally, severity counts reflecting only what
+   was evaluated. This is last night's exact failure, now declared instead of
+   hidden.
+
+3. RETRY + RECOMPUTE. Retry clicked on the truncated Nielsen section with the
+   32000 ceiling restored. The Overall was invalidated immediately and stayed
+   gone for the whole retry (polled, 8 consecutive samples), then recomputed.
+   Nielsen's banner cleared, tally advanced 0/4 -> 1/4, counts updated.
+   Critically the grade REMAINED withheld, because the other three frameworks
+   were still truncated — retry does not prematurely unlock a grade. The
+   invariant is now proven from both directions: grade appears only at 4/4
+   (run 1), and is withheld at anything less (runs 2 and 3).
+
+STILL NOT VERIFIED: nothing on the Vercel preview URL. It builds green
+(deployment status confirmed via GitHub API) but serves a Vercel login wall —
+Deployment Protection is on, and authenticating into ACP's account was
+declined. All certification above is local against the same commit.
+
+NEXT HOUSEKEEPING (Tower-parked, do not action mid-phase): two Vercel projects
+(`auditlens`, `auditlens-db1a`) deploy from this one repo on every push —
+double build minutes and two production URLs that can drift. Also consider
+whether Deployment Protection should stay on for previews, since it blocks
+automated verification.
+
+FLAGGED, NOT ACTED ON: Polaris makes text-described concepts 2.0 CORE, and the
+build is still screenshot-only (`canEvaluate` requires a screenshot; the route
+400s without images). Tower confirms that is the next phase.
