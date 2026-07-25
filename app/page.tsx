@@ -7,7 +7,7 @@ import { DropZone } from "@/components/drop-zone";
 import { FrameworkToggles } from "@/components/framework-toggles";
 import { AudienceSelector } from "@/components/audience-selector";
 import { GradeCard } from "@/components/grade-card";
-import { ReportRenderer } from "@/components/report-renderer";
+import { SectionCard } from "@/components/section-card";
 
 interface ProcessedImage {
   data: string;
@@ -298,8 +298,6 @@ export default function Home() {
     imagesRef.current = null;
   };
 
-  const fullReport = sections.map((s) => s.text).join("\n\n");
-
   return (
     <div className="min-h-screen bg-surface-0">
       {/* Header */}
@@ -472,19 +470,14 @@ export default function Home() {
               </div>
             )}
 
-            {/* Grade card */}
-            {evalPhase === "done" && fullReport && <GradeCard report={fullReport} />}
+            {/* Grade card — suppressed unless every section completed */}
+            {evalPhase === "done" && <GradeCard sections={sections} />}
 
             {/* Sections */}
             {sections
-              .filter((s) => s.text || s.status === "streaming" || s.status === "failed")
+              .filter((s) => s.status !== "pending")
               .map((s) => (
-                <div
-                  key={s.id}
-                  className="px-7 py-6 mb-4 bg-white/[0.015] border border-border rounded-2xl"
-                >
-                  <ReportRenderer content={s.text} />
-                </div>
+                <SectionCard key={s.id} section={s} />
               ))}
             <div ref={reportEndRef} />
           </div>
