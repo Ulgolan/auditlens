@@ -86,3 +86,92 @@ automated verification.
 FLAGGED, NOT ACTED ON: Polaris makes text-described concepts 2.0 CORE, and the
 build is still screenshot-only (`canEvaluate` requires a screenshot; the route
 400s without images). Tower confirms that is the next phase.
+
+### 2026-07-25 — Phase 2+3, branch `v2` (text-concept input + context panel)
+One commit, `4c0119a`. Polaris INPUT SCOPE "2.0 CORE: screenshots + text-described
+concepts" is now met — both halves ship.
+
+PREVIOUS PHASE'S GAP CLOSED FIRST. Deployment Protection is off on the
+`auditlens` project, so the preview is reachable (200) without auth. Ran a full
+image audit on the certified commit `da68db7` before touching anything: grade D,
+4/4 frameworks, 17 critical / 20 minor / 10 pass, thumbnails and counts all
+rendering. The Phase 0+1 grade card is now verified ON PREVIEW, not just locally.
+NOTE: the twin project `auditlens-db1a` still 302s to the Vercel SSO wall —
+protection was lifted on one of the two projects, not both. The two-project
+cleanup stays parked.
+
+GROUND TRUTH (answered from files before edits):
+- Zero-image flow had two hard guards (`canEvaluate` in page.tsx, a 400 in the
+  route) and one soft problem that mattered far more: the prompts themselves
+  hardcode "I've uploaded a screenshot" and "Screen 1, Screen 2", and a11y is
+  built on measurements (contrast, 44x44px, sub-12px text). Removing the guards
+  alone would have produced a confident, fabricated audit. The guards were ten
+  minutes; the honesty layer was the phase.
+- Audiences lived in TWO parallel id-keyed maps (`AUDIENCES` in types.ts for the
+  UI, `AUDIENCE_LABELS` in prompts.ts for the prompt) with a silent
+  `|| consumer` fallback — an audience added in one file and forgotten in the
+  other audited as General Consumer and never said so. Now one list; prompt
+  labels derive from it.
+
+ARCHITECTURE — MODE IS DERIVED, NOT DECLARED. No `mode` flag. The route computes
+`hasVisuals` from the payload it actually received, because a declared mode is a
+second source of truth that can contradict the content it describes
+(`mode:"text"` arriving with images attached) with nothing downstream able to
+catch it. Falls out for free: mixed material (screenshots PLUS a written
+description of what happens between them) works with no extra code, and the UI
+needs no mode switch — both surfaces are always visible and the operator's
+actual input decides.
+
+ACCEPTED TRADE (the one real exception): the overall pass is handed the
+assembled report and no material, so it genuinely cannot derive the mode. It
+takes an explicit `visualsPresent`, defaulting to true. Declaration is used only
+where there is no content present for it to contradict.
+
+RULINGS EXECUTED — audience pass approved by Tower as proposed, all six, no
+edits. Five product verticals replaced by six categories keyed on the user's
+relationship to the interface (expertise, frequency, cost of error). "SaaS" was
+a business model, not an audience; "Enterprise B2B" and "Developer Tool" both
+just meant *trained user*. Habitual Consumer and Regulated / High-Stakes had no
+home before and are the two that most change a severity rating.
+
+CERTIFIED — three runs on commit `4c0119a`, against the live API:
+
+1. TEXT-ONLY AUDIT, ON PREVIEW. Zero images. Banking "split a payment" concept,
+   Regulated / High-Stakes, all four frameworks + overall, 4/4 complete, grade D,
+   ~33.6k chars. THE HONESTY NUMBERS, which are the whole point of this phase:
+   0 "Screen N" references, 0 contrast ratios, 0 pixel measurements, 0 uses of
+   the words "screenshot" or "mockup" — no fabricated visual evidence anywhere.
+   8 [not assessable without visuals] tags, 4 confirmed [a11y] findings, 4
+   [a11y — verify once visuals exist], and 0 Gestalt tags (correctly suppressed).
+   a11y opened by declaring itself a concept-stage review and listed its five
+   unreachable criteria; State Stress Test declared it was auditing whether the
+   concept ACCOUNTS for each state, not its visual treatment; the Overall carried
+   the caveat under the grade. It also found a genuine design flaw from prose
+   alone — silent redistribution of a declined share without re-consent — flagged
+   independently by multiple frameworks.
+2. IMAGE AUDIT, ON PREVIEW — zero regression, and no cross-contamination in
+   either direction. 4/4, grade D, 19 critical / 20 minor / 15 pass, with 10
+   Gestalt tags and 10 contrast ratios intact, and 0 concept-mode disclaimers
+   leaking in. Concept mode does not blunt the visual audit; visual mode does not
+   inherit the concept caveats.
+3. TRUNCATION, BOTH MODES. Forced locally with a temporary `max_tokens=200`,
+   reverted without committing (working tree confirmed byte-identical to HEAD
+   afterward, no markers left). Concept mode: 4 amber "cut off" banners, 0/4,
+   grade WITHHELD. Image mode: same, 4 banners, 0/4, withheld. The banner is
+   mode-agnostic, as intended — it reads `stop_reason`, which knows nothing about
+   material type.
+
+VERIFIED ON PREVIEW BEYOND THE THREE RUNS: all six audience chips render and
+select; the run button enables with zero images; the concept-mode warning shows
+in text mode and is absent in image mode; the context panel stays pinned at
+top:0 after scrolling ~3.9k px mid-stream, carrying material, audience,
+frameworks and task.
+
+OBSERVED, NOT FIXED (model wording, not structure): the a11y section opened with
+"...not a WCAG conformance audit, since neither requires live product or rendered
+UI to evaluate" — that clause is garbled and says the opposite of what it means
+(both DO require them). The declaration still lands, but the sentence is sloppy.
+Worth a prompt tweak next pass; not worth a re-run.
+
+NOT TOUCHED, AS BRIEFED: no skin/branding, no save-query, no tabs, no framework
+rewrites beyond what text-mode honesty required. `main` untouched.
