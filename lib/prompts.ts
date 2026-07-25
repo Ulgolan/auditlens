@@ -222,7 +222,7 @@ List them plainly as a short block. Do not invent findings for them, and do not 
 
 Tag confirmed-from-description findings **[a11y]**. Tag anything the description merely leaves open — a risk you suspect but cannot confirm — **[a11y — verify once visuals exist]**. Keep the three tags distinct: confirmed, open risk, and not assessable are three different states and an operator must be able to tell them apart at a glance.
 
-Open this section with one sentence stating that this is a concept-stage accessibility review, not a visual or conformance audit.`,
+Open this section with one sentence that states both what this review is and why it is bounded: it is a concept-stage accessibility review rather than a visual inspection or a WCAG conformance audit, **because both of those require rendered UI that does not exist yet** — a visual inspection needs something to look at, and conformance testing needs a live product and assistive technology. State the reason explicitly and in that direction. Do not compress it into a claim that these *don't* require a live product or rendered UI; that is the opposite of the truth and it is the exact sentence that comes out garbled.`,
 };
 
 // ─── Public builders ───────────────────────────────────

@@ -44,6 +44,7 @@ export default function Home() {
   const [evalPhase, setEvalPhase] = useState<EvalPhase>("idle");
   const [sections, setSections] = useState<ReportSection[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
   const reportEndRef = useRef<HTMLDivElement>(null);
 
   /**
@@ -384,6 +385,42 @@ export default function Home() {
     }
   };
 
+  /**
+   * Export the report as a self-contained client document.
+   *
+   * Nothing is filtered or tidied on the way out — the document renders the
+   * same components, off the same sections, through the same completeness
+   * module. A partial audit exports as visibly partial, or this button is
+   * the biggest liability in the tool.
+   */
+  const exportReport = async () => {
+    setExporting(true);
+    setError(null);
+    try {
+      const { downloadReport } = await import("@/lib/export-document");
+      await downloadReport({
+        sections,
+        screenshotUrls: screenshots.map((s) => s.dataUrl),
+        conceptText,
+        taskScenario,
+        audienceLabel: AUDIENCES.find((a) => a.id === audience)?.label ?? audience,
+        frameworkLabels: frameworks
+          .map((id) => FRAMEWORKS.find((f) => f.id === id)?.label ?? id)
+          .join(" · "),
+      });
+    } catch (err) {
+      setError(
+        `The report could not be exported: ${
+          err instanceof Error ? err.message : "unknown error"
+        }`
+      );
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const canExport = sections.some((s) => s.text.trim().length > 0) && !isEvaluating;
+
   const resetAll = () => {
     setScreenshots([]);
     setConceptText("");
@@ -414,12 +451,25 @@ export default function Home() {
           </div>
         </div>
         {showReport && (
-          <button
-            onClick={resetAll}
-            className="font-mono rounded-pill border border-border-strong px-4 py-[0.7em] text-[0.68rem] font-medium uppercase tracking-[0.1em] text-text-primary cursor-pointer transition-transform duration-150 hover:-translate-y-[2px]"
-          >
-            ← New audit
-          </button>
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={exportReport}
+              disabled={!canExport || exporting}
+              className={`font-mono rounded-pill px-4 py-[0.7em] text-[0.68rem] font-medium uppercase tracking-[0.1em] transition-transform duration-150 ${
+                canExport && !exporting
+                  ? "bg-accent text-ivory cursor-pointer hover:-translate-y-[2px]"
+                  : "border border-border text-text-tertiary cursor-not-allowed"
+              }`}
+            >
+              {exporting ? "Preparing…" : "Export report ↓"}
+            </button>
+            <button
+              onClick={resetAll}
+              className="font-mono rounded-pill border border-border-strong px-4 py-[0.7em] text-[0.68rem] font-medium uppercase tracking-[0.1em] text-text-primary cursor-pointer transition-transform duration-150 hover:-translate-y-[2px]"
+            >
+              ← New audit
+            </button>
+          </div>
         )}
       </header>
 

@@ -1,0 +1,160 @@
+import type { ReportSection } from "@/lib/types";
+import { deriveCompleteness } from "@/lib/report-status";
+import { GradeCard } from "@/components/grade-card";
+import { SectionCard } from "@/components/section-card";
+
+export interface ExportMeta {
+  generatedAt: string;
+  audienceLabel: string;
+  frameworkLabels: string;
+  taskScenario: string;
+  conceptText: string;
+  /** Base64 data URLs — already self-contained, so they travel with the file. */
+  screenshotUrls: string[];
+  logoDataUri: string | null;
+  markDataUri: string | null;
+}
+
+/**
+ * The client-facing document.
+ *
+ * It renders the SAME GradeCard and SectionCard components the operator
+ * saw on screen — not a second implementation of them. That is the whole
+ * point of the export: a partial audit cannot be laundered into a clean
+ * one on the way out, because there is no separate code path in which the
+ * laundering could happen. SectionCard is simply handed no `onRetry`, so
+ * its retry control does not appear in a document going to a client.
+ */
+export function ExportDocument({
+  sections,
+  meta,
+}: {
+  sections: ReportSection[];
+  meta: ExportMeta;
+}) {
+  const { isComplete, completedCount, totalCount, incomplete, withheldReason } =
+    deriveCompleteness(sections);
+
+  return (
+    <div className="doc">
+      <header className="doc-head">
+        <div className="doc-lockup">
+          {meta.logoDataUri && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={meta.logoDataUri} alt="ACP" className="doc-logo" />
+          )}
+          <div>
+            <div className="font-mono doc-kicker">UX Evaluation</div>
+            <div className="font-display doc-title">AuditLens Report</div>
+          </div>
+        </div>
+        <div className="font-mono doc-date">{meta.generatedAt}</div>
+      </header>
+
+      {/*
+        The partial-audit declaration. First thing in the document, above
+        the grade, above the findings — before a reader can form any
+        impression of completeness. Text and borders only, so it survives a
+        browser printing this file to PDF with background graphics off.
+      */}
+      {!isComplete && (
+        <section className="doc-partial" role="note">
+          <div className="font-mono doc-partial-flag">⚠️ Partial audit</div>
+          <p className="doc-partial-lede">
+            This report is incomplete. {completedCount} of {totalCount} framework
+            {totalCount !== 1 ? "s" : ""} finished, and no overall grade has been
+            issued.
+          </p>
+          <p className="doc-partial-body">{withheldReason}</p>
+          <ul className="doc-partial-list">
+            {incomplete.map((s) => (
+              <li key={s.id}>
+                <strong>{s.label}</strong> —{" "}
+                {s.status === "failed"
+                  ? "did not complete"
+                  : s.status === "truncated"
+                  ? "was cut off before finishing"
+                  : "did not run"}
+                {s.detail ? `. ${s.detail}` : "."}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section className="doc-brief">
+        <h2 className="font-mono doc-section-kicker">Audit brief</h2>
+        <dl className="doc-brief-grid">
+          <div>
+            <dt className="font-mono">Material</dt>
+            <dd>
+              {meta.screenshotUrls.length > 0
+                ? `${meta.screenshotUrls.length} screen${
+                    meta.screenshotUrls.length !== 1 ? "s" : ""
+                  }${meta.conceptText.trim() ? " + written concept" : ""}`
+                : "Written concept — no visuals"}
+            </dd>
+          </div>
+          <div>
+            <dt className="font-mono">Audience</dt>
+            <dd>{meta.audienceLabel}</dd>
+          </div>
+          <div>
+            <dt className="font-mono">Frameworks</dt>
+            <dd>{meta.frameworkLabels}</dd>
+          </div>
+          {meta.taskScenario.trim() && (
+            <div>
+              <dt className="font-mono">Task</dt>
+              <dd>{meta.taskScenario}</dd>
+            </div>
+          )}
+        </dl>
+
+        {meta.conceptText.trim() && (
+          <div className="doc-concept">
+            <div className="font-mono doc-concept-kicker">
+              {meta.screenshotUrls.length > 0
+                ? "Concept description"
+                : "Concept description · no visuals"}
+            </div>
+            <p>{meta.conceptText}</p>
+          </div>
+        )}
+
+        {meta.screenshotUrls.length > 0 && (
+          <div className="doc-shots">
+            {meta.screenshotUrls.map((url, i) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <figure key={i}>
+                <img src={url} alt={`Screen ${i + 1}`} />
+                <figcaption className="font-mono">Screen {i + 1}</figcaption>
+              </figure>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <GradeCard sections={sections} />
+
+      {sections
+        .filter((s) => s.status !== "pending")
+        .map((s) => (
+          <SectionCard key={s.id} section={s} />
+        ))}
+
+      <footer className="doc-foot">
+        {meta.markDataUri && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={meta.markDataUri} alt="" className="doc-foot-mark" />
+        )}
+        <span className="font-mono">
+          Generated by AuditLens v2.0 · {meta.generatedAt} ·{" "}
+          {isComplete
+            ? "Complete audit — all sections finished"
+            : `Partial audit — ${completedCount}/${totalCount} frameworks, grade withheld`}
+        </span>
+      </footer>
+    </div>
+  );
+}
