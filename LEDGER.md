@@ -288,3 +288,80 @@ CARRIED FORWARD, STILL PARKED: two Vercel projects (`auditlens`,
 
 NOT TOUCHED, AS BRIEFED: engine, input logic, route architecture and all other
 prompts. No dark mode — the dark face is deleted, not toggled. `main` untouched.
+
+### 2026-07-25 — SHIPPED. AuditLens 2.0, merged to `main`
+Merge commit `3958808`, merging `v2` (`8d692af`) into `main` (was `ebbb2ff`).
+Twenty commits across four phases, plus the merge. The merge was the ship.
+
+WHAT 2.0 IS. A working audit tool that turns design material — screenshots,
+a written concept, or both — into a client-ready UX audit in one sitting.
+Four frameworks run as separate calls, each with its own duration budget
+and its own completion status, followed by an Overall synthesis. The
+operator reads it in Ivory Loom behind a per-framework tab bar and exports
+one self-contained .html a client can open anywhere.
+
+The four phases, in order: engine rearchitecture (silent truncation killed
+at the root); text-described concepts as first-class material with an
+honesty layer; the Ivory Loom re-skin plus the export; and the Commander's
+two design passes — tab navigation, collapsible Overall, reading measure,
+tab freedom, logo-home, and the type scale.
+
+PILLARS — POLARIS NON-NEGOTIABLES, VERDICT AT SHIP:
+1. NEVER A SILENT LIE — PASS. v1's cause is gone: the client reads
+   `stop_reason` off message_delta, which v1 parsed and dropped. No grade
+   is ever issued on a partial audit, and that is structural rather than
+   disciplined — `deriveCompleteness` returns `grade: null` unless every
+   section completed, so no consumer is ever handed one. The same module
+   feeds the screen and the exported document, and the export renders the
+   same components, so the two cannot disagree. Proven repeatedly under
+   forced truncation, forced failure, and real transport failures.
+2. ONE SITTING, END TO END — PASS. Material in, four frameworks, Overall,
+   client document downloaded, without leaving the tool. Demonstrated on
+   preview and again on production.
+3. CLIENT-EXPORTABLE WITHOUT SHAME — PASS, with the standing caveat that
+   it ships as HTML, not PDF. Self-contained: page stylesheet serialised,
+   woff2 inlined, logo, motif and screenshots as data URIs, zero external
+   references. Declarations ride on borders and text, verified to survive
+   a background-stripped print. Path C (true PDF) stays parked.
+
+PRODUCTION VERIFIED on `3958808`, live URL
+https://auditlens-8b3pzche8-popescu-alexandrus-projects.vercel.app —
+one concept audit, 3/3 frameworks complete, grade D issued in the vermilion
+chip, 11 critical / 12 minor / 6 pass. Ivory ground (#FFF3F0) confirmed
+computed, Archivo serving, north-star mark present, tab bar and collapsed
+Overall rendering. The a11y opener came out correct once more.
+
+SUCCESS CRITERIA — NOW ARMED, NOT YET MET. Both are post-ship clocks:
+1. LIVE-FIRE: within weeks, a real target (actual prospect, or a full
+   dry-run on one) goes material -> audit -> proposal-ready output in one
+   sitting, and at least one live-fire run must use TEXT-ONLY input so the
+   concept-audit claim is tested rather than trusted. Clock starts today.
+2. TRUST BATCH: ten consecutive full four-framework audits with zero
+   silent truncations — every report complete or self-declaring. Count
+   starts at 0/10 today. Note the bar is *silent* truncation: a declared
+   truncation or a declared failure does not break the streak, an
+   undeclared one does.
+
+PARKED, CARRIED FORWARD:
+- RETRY-ON-TRANSPORT-ERROR. Three genuine transport failures were seen on
+  ship day ("Failed to fetch" x2, "network error" x1) against freshly
+  deployed builds. Not a regression — route.ts and prompts.ts were byte-
+  identical to commits that had run clean. The honesty layer handled all
+  three correctly and unprompted. `runSection` has no retry on transport
+  errors; it should. Engine work, first candidate for 2.1.
+- THE db1a TWIN. `auditlens` and `auditlens-db1a` both build on every push
+  and both now hold a production deployment of `3958808`. Double build
+  minutes, two production URLs that can drift. Removal still parked.
+- PROBE DEPLOYMENT CLEANUP. Two throwaway QA branches (`v2-qa-probe`,
+  `v2-qa-probe2`) were deleted local and remote, but Vercel keeps their
+  deployments, which still answer 200 and serve deliberately broken builds
+  (max_tokens 200). Worth deleting from the Vercel dashboard.
+- PATH C, TRUE PDF. Parked at Tower ruling as post-ship. The self-contained
+  document is its foundation — a headless renderer would consume exactly
+  this file.
+- PORTFOLIO HOTFIX. The ALL WORK z-index ghost, graded critical back on
+  2026-07-25 in the v1 audit. Separate repo, never actioned here.
+
+NOT DONE, STATED PLAINLY: the ten-audit trust batch has not begun, and no
+live-fire run against a real target has happened. 2.0 is shipped, not
+proven in the field.
