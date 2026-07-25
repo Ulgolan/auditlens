@@ -72,8 +72,8 @@ export function DropZone({ screenshots, onAdd, onRemove }: DropZoneProps) {
         className={`
           border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-200
           ${isDragging
-            ? "border-accent/60 bg-accent-dim"
-            : "border-border bg-white/[0.01] hover:border-border-hover hover:bg-white/[0.02]"
+            ? "border-navy bg-navy-dim"
+            : "border-border bg-card hover:border-border-strong"
           }
           ${screenshots.length > 0 ? "p-4" : "py-12 px-6"}
         `}
@@ -81,10 +81,10 @@ export function DropZone({ screenshots, onAdd, onRemove }: DropZoneProps) {
         {screenshots.length === 0 ? (
           <div className="text-center">
             <div className="text-4xl mb-3 opacity-40">📸</div>
-            <div className="text-[15px] font-semibold text-text-secondary mb-1">
+            <div className="text-[19px] font-semibold text-text-secondary mb-1">
               Drop screenshots here
             </div>
-            <div className="text-xs text-text-tertiary">
+            <div className="text-[15px] text-text-tertiary">
               or click to browse · paste from clipboard · supports multiple files
             </div>
           </div>
@@ -100,7 +100,7 @@ export function DropZone({ screenshots, onAdd, onRemove }: DropZoneProps) {
                   alt={`Screen ${i + 1}`}
                   className="h-[120px] w-auto block object-cover"
                 />
-                <div className="absolute top-1 left-1 bg-black/70 rounded px-1.5 py-0.5 text-[10px] font-bold text-accent">
+                <div className="font-mono absolute top-1 left-1 bg-overlay rounded px-1.5 py-0.5 text-[10px] font-medium text-ivory">
                   {i + 1}
                 </div>
                 <button
@@ -108,13 +108,13 @@ export function DropZone({ screenshots, onAdd, onRemove }: DropZoneProps) {
                     e.stopPropagation();
                     onRemove(s.id);
                   }}
-                  className="absolute top-1 right-1 bg-black/70 border-none rounded px-1.5 py-0.5 text-xs text-white/60 cursor-pointer hover:text-white/90 transition-colors"
+                  className="absolute top-1 right-1 bg-overlay border-none rounded px-1.5 py-0.5 text-xs text-ivory cursor-pointer hover:opacity-80 transition-opacity"
                 >
                   ✕
                 </button>
               </div>
             ))}
-            <div className="flex items-center justify-center w-20 h-[120px] rounded-lg border border-dashed border-white/10 text-white/20 text-2xl hover:text-white/40 hover:border-white/20 transition-colors">
+            <div className="flex items-center justify-center w-20 h-[120px] rounded-lg border border-dashed border-border text-text-tertiary text-2xl hover:text-text-secondary hover:border-border-strong transition-colors">
               +
             </div>
           </div>

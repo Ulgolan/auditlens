@@ -12,7 +12,11 @@ export function ReportRenderer({ content }: ReportRendererProps) {
   const lines = content.split("\n");
 
   return (
-    <div className="text-sm leading-7 text-white/75">
+    // Body size drives the measure: the column is capped in ch, so raising
+    // the type raises the line length in pixels while the character count
+    // stays put. 19px here, up from 14px in v2.0 — the Commander's scale
+    // ruling — with the shell widened to match so nothing gets squeezed.
+    <div className="text-[19px] leading-[1.7] text-text-secondary">
       {lines.map((line, i) => {
         const trimmed = line.trim();
 
@@ -21,7 +25,7 @@ export function ReportRenderer({ content }: ReportRendererProps) {
           return (
             <h1
               key={i}
-              className="text-[22px] font-bold text-text-primary mt-8 mb-3 tracking-tight border-b border-border pb-2"
+              className="font-display text-[28px] font-extrabold text-text-primary mt-8 mb-3 border-b border-border pb-2"
             >
               {cleanMarkdown(trimmed.slice(2))}
             </h1>
@@ -29,21 +33,21 @@ export function ReportRenderer({ content }: ReportRendererProps) {
 
         if (trimmed.startsWith("## "))
           return (
-            <h2 key={i} className="text-[17px] font-bold text-white/90 mt-7 mb-2.5 tracking-tight">
+            <h2 key={i} className="font-display text-[21px] font-bold text-text-primary mt-7 mb-2.5">
               {cleanMarkdown(trimmed.slice(3))}
             </h2>
           );
 
         if (trimmed.startsWith("### "))
           return (
-            <h3 key={i} className="text-[15px] font-semibold text-white/80 mt-6 mb-2">
+            <h3 key={i} className="text-[19px] font-semibold text-text-primary mt-6 mb-2">
               {cleanMarkdown(trimmed.slice(4))}
             </h3>
           );
 
         if (trimmed.startsWith("#### "))
           return (
-            <h4 key={i} className="text-sm font-semibold text-white/70 mt-4 mb-1.5">
+            <h4 key={i} className="text-[17px] font-semibold text-text-secondary mt-4 mb-1.5">
               {cleanMarkdown(trimmed.slice(5))}
             </h4>
           );
@@ -53,7 +57,7 @@ export function ReportRenderer({ content }: ReportRendererProps) {
           return (
             <div
               key={i}
-              className="border-l-[3px] border-accent/40 pl-4 my-2 text-white/60 italic text-[13px]"
+              className="font-voice border-l-[3px] border-navy pl-4 my-2 text-text-secondary text-[17px]"
             >
               {formatInline(trimmed.slice(2))}
             </div>
@@ -63,7 +67,7 @@ export function ReportRenderer({ content }: ReportRendererProps) {
         if (trimmed.startsWith("- ") || trimmed.startsWith("* "))
           return (
             <div key={i} className="pl-5 my-0.5 relative">
-              <span className="absolute left-1.5 text-accent/50">·</span>
+              <span className="absolute left-1.5 text-text-tertiary">·</span>
               {formatInline(trimmed.replace(/^[-*] /, ""))}
             </div>
           );
@@ -113,7 +117,7 @@ function formatInline(text: string): React.ReactNode[] {
         );
       }
       parts.push(
-        <strong key={keyIdx++} className="text-white/95 font-bold">
+        <strong key={keyIdx++} className="text-text-primary font-bold">
           {highlightBadges(boldMatch[1])}
         </strong>
       );

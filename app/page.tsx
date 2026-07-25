@@ -1,27 +1,79 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import type { Screenshot, EvalPhase } from "@/lib/types";
-import { FRAMEWORKS, AUDIENCES } from "@/lib/types";
+import type { Screenshot, EvalPhase, ReportSection, SectionStatus } from "@/lib/types";
+import { FRAMEWORKS, AUDIENCES, OVERALL_ID } from "@/lib/types";
+import { ContextPanel } from "@/components/context-panel";
 import { DropZone } from "@/components/drop-zone";
 import { FrameworkToggles } from "@/components/framework-toggles";
 import { AudienceSelector } from "@/components/audience-selector";
-import { StreamingIndicator, GradeCard } from "@/components/grade-card";
-import { ReportRenderer } from "@/components/report-renderer";
+import { GradeCard } from "@/components/grade-card";
+import { SectionCard } from "@/components/section-card";
+import { SectionTabs } from "@/components/section-tabs";
+import { OverallPanel } from "@/components/overall-panel";
+import { FrameworkProgress } from "@/components/framework-progress";
+
+interface ProcessedImage {
+  data: string;
+  mediaType: string;
+}
+
+/**
+ * Assemble the report text handed to the final Overall pass.
+ * Incomplete sections are labelled explicitly so the model synthesises
+ * from what actually exists rather than inferring the gaps.
+ */
+function assembleForOverall(sections: ReportSection[]): string {
+  return sections
+    .map((s) => {
+      if (s.status === "complete") return s.text;
+      if (s.status === "truncated") {
+        return `${s.text}\n\n[SECTION INCOMPLETE — the ${s.label} evaluation was cut off before it finished. Do not infer what the rest would have said.]`;
+      }
+      return `## ${s.label}\n\n[SECTION MISSING — the ${s.label} evaluation did not produce a result.]`;
+    })
+    .join("\n\n");
+}
 
 export default function Home() {
   const [screenshots, setScreenshots] = useState<Screenshot[]>([]);
+  const [conceptText, setConceptText] = useState("");
   const [taskScenario, setTaskScenario] = useState("");
-  const [audience, setAudience] = useState("consumer");
+  const [audience, setAudience] = useState(AUDIENCES[0].id);
   const [frameworks, setFrameworks] = useState<string[]>(
     FRAMEWORKS.filter((f) => f.default).map((f) => f.id)
   );
   const [evalPhase, setEvalPhase] = useState<EvalPhase>("idle");
-  const [report, setReport] = useState("");
+  const [sections, setSections] = useState<ReportSection[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
+  /** Which framework tab is in focus. Empty until a run starts. */
+  const [activeTab, setActiveTab] = useState<string>("");
+  /**
+   * True once the operator has picked a tab by hand. Auto-follow drives
+   * until then and never again for that run — reading a finished section
+   * while the next one streams is the whole point of the tab bar, and an
+   * auto-follow that keeps yanking the view away makes it useless.
+   */
+  const [tabPinned, setTabPinned] = useState(false);
+  const [overallOpen, setOverallOpen] = useState(true);
+  const [confirmingHome, setConfirmingHome] = useState(false);
   const reportEndRef = useRef<HTMLDivElement>(null);
+  const sectionAnchorRef = useRef<HTMLDivElement>(null);
 
-  const processScreenshot = (s: Screenshot): Promise<{ data: string; mediaType: string }> => {
+  /**
+   * Screenshots are compressed once per audit and kept here so a
+   * per-section retry can reuse them instead of recompressing.
+   */
+  const imagesRef = useRef<ProcessedImage[] | null>(null);
+
+  /** Mirror of `sections` so retry can read the latest state synchronously. */
+  const sectionsRef = useRef<ReportSection[]>([]);
+  useEffect(() => {
+    sectionsRef.current = sections;
+  }, [sections]);
+
+  const processScreenshot = (s: Screenshot): Promise<ProcessedImage> => {
     const MAX_WIDTH = 1920;
     const MAX_HEIGHT = 1080;
 
@@ -29,8 +81,8 @@ export default function Home() {
       const img = new Image();
 
       img.onload = () => {
-        let width = img.width;
-        let height = img.height;
+        const width = img.width;
+        const height = img.height;
 
         const widthRatio = MAX_WIDTH / width;
         const heightRatio = MAX_HEIGHT / height;
@@ -67,10 +119,7 @@ export default function Home() {
               }
 
               const base64 = result.split(",")[1] || "";
-              resolve({
-                data: base64,
-                mediaType: "image/jpeg",
-              });
+              resolve({ data: base64, mediaType: "image/jpeg" });
             };
             reader.onerror = () => reject(new Error("Failed to read compressed image"));
             reader.readAsDataURL(blob);
@@ -85,38 +134,73 @@ export default function Home() {
     });
   };
 
-  const isEvaluating = evalPhase !== "idle" && evalPhase !== "done" && evalPhase !== "error";
-  const canEvaluate = screenshots.length > 0 && frameworks.length > 0 && !isEvaluating;
+  const isEvaluating = evalPhase === "processing" || evalPhase === "running";
+
+  /**
+   * Material can be screenshots, a written concept, or both. There is no
+   * mode switch anywhere in this app on purpose — the mode is whatever
+   * the operator actually supplied, so the UI and the route can never
+   * disagree about which one is running.
+   */
+  const concept = conceptText.trim();
+  const hasVisuals = screenshots.length > 0;
+  const hasMaterial = hasVisuals || concept.length > 0;
+  const canEvaluate = hasMaterial && frameworks.length > 0 && !isEvaluating;
   const showInput = evalPhase === "idle";
   const showReport = evalPhase !== "idle";
 
-  // Auto-scroll during streaming
+  /**
+   * While a run is in flight, follow whichever section is streaming.
+   *
+   * Replaces v2.0's scroll-to-bottom: with one section on screen at a
+   * time there is no bottom to chase, and an operator watching a run
+   * wants the tab to move with the work rather than having to click
+   * along behind it. Once the run stops, the tab stays where the
+   * operator last put it.
+   */
   useEffect(() => {
-    if (evalPhase === "streaming" && reportEndRef.current) {
-      reportEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
-    }
-  }, [report, evalPhase]);
+    if (evalPhase !== "running" || tabPinned) return;
+    const streaming = sections.find(
+      (s) => s.status === "streaming" && s.id !== OVERALL_ID
+    );
+    if (streaming && streaming.id !== activeTab) setActiveTab(streaming.id);
+  }, [sections, evalPhase, activeTab, tabPinned]);
 
-  const runEvaluation = async () => {
-    if (!canEvaluate) return;
+  /**
+   * Run a single section and stream it into state.
+   *
+   * The critical difference from v1: this reads `stop_reason` off the
+   * message_delta event. v1 parsed that event and dropped it on the
+   * floor, which is why a truncated report looked identical to a
+   * complete one.
+   */
+  const runSection = async (
+    index: number,
+    section: ReportSection,
+    images: ProcessedImage[],
+    priorReport?: string
+  ): Promise<ReportSection> => {
+    const { id, label } = section;
 
-    setEvalPhase("uploading");
-    setReport("");
-    setError(null);
+    const patch = (p: Partial<ReportSection>) =>
+      setSections((prev) => prev.map((s, i) => (i === index ? { ...s, ...p } : s)));
+
+    patch({ status: "streaming", text: "", detail: undefined });
 
     try {
-      const images = await Promise.all(screenshots.map((s) => processScreenshot(s)));
-
-      setEvalPhase("analyzing");
-
       const response = await fetch("/api/evaluate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          images,
+          images: id === OVERALL_ID ? [] : images,
+          conceptText: id === OVERALL_ID ? "" : concept,
+          // The overall pass gets handed the assembled report and no
+          // material, so it cannot work the mode out for itself.
+          visualsPresent: images.length > 0,
           taskScenario,
           audience,
-          frameworks,
+          framework: id,
+          priorReport,
         }),
       });
 
@@ -125,15 +209,13 @@ export default function Home() {
         throw new Error(errData.error || `API error: ${response.status}`);
       }
 
-      setEvalPhase("streaming");
-
-      // Stream the response
       const reader = response.body?.getReader();
       if (!reader) throw new Error("No response stream");
 
       const decoder = new TextDecoder();
       let buffer = "";
       let fullText = "";
+      let stopReason: string | null = null;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -144,23 +226,113 @@ export default function Home() {
         buffer = lines.pop() || "";
 
         for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const data = line.slice(6).trim();
-            if (data === "[DONE]") continue;
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.type === "content_block_delta" && parsed.delta?.type === "text_delta") {
-                fullText += parsed.delta.text;
-                setReport(fullText);
-              }
-            } catch {
-              // Skip unparseable chunks
+          if (!line.startsWith("data: ")) continue;
+          const data = line.slice(6).trim();
+          if (data === "[DONE]") continue;
+
+          try {
+            const parsed = JSON.parse(data);
+
+            if (
+              parsed.type === "content_block_delta" &&
+              parsed.delta?.type === "text_delta"
+            ) {
+              fullText += parsed.delta.text;
+              patch({ text: fullText });
             }
+
+            // THE fix for v1's silent truncation: this event carries
+            // why generation stopped. Capture it.
+            if (parsed.type === "message_delta" && parsed.delta?.stop_reason) {
+              stopReason = parsed.delta.stop_reason;
+            }
+          } catch {
+            // Skip unparseable chunks
           }
         }
       }
 
-      setReport(fullText);
+      let status: SectionStatus;
+      let detail: string | undefined;
+
+      if (stopReason === "end_turn") {
+        status = "complete";
+      } else if (stopReason === "max_tokens") {
+        status = "truncated";
+        detail = "The model hit its output limit before finishing this section.";
+      } else if (stopReason === "refusal") {
+        status = "failed";
+        detail = "The model declined to produce this section.";
+      } else if (stopReason === null) {
+        // Stream ended with no completion signal. In v1 this silently
+        // passed as success.
+        status = "truncated";
+        detail =
+          "The stream ended without a completion signal — the connection dropped or the request timed out.";
+      } else {
+        status = "truncated";
+        detail = `The model stopped unexpectedly (${stopReason}).`;
+      }
+
+      if (status !== "failed" && fullText.trim().length === 0) {
+        status = "failed";
+        detail = "The model returned no content for this section.";
+      }
+
+      patch({ text: fullText, status, detail });
+      return { id, label, text: fullText, status, detail };
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : "Unknown error";
+      patch({ status: "failed", detail });
+      return { id, label, text: "", status: "failed", detail };
+    }
+  };
+
+  const runEvaluation = async () => {
+    if (!canEvaluate) return;
+
+    setEvalPhase("processing");
+    setError(null);
+
+    const initial: ReportSection[] = frameworks.map((id) => ({
+      id,
+      label: FRAMEWORKS.find((f) => f.id === id)?.label ?? id,
+      text: "",
+      status: "pending" as SectionStatus,
+    }));
+    initial.push({
+      id: OVERALL_ID,
+      label: "Overall Assessment",
+      text: "",
+      status: "pending",
+    });
+    setSections(initial);
+    setActiveTab(initial[0]?.id ?? "");
+    setTabPinned(false);
+    setOverallOpen(true);
+
+    try {
+      const images = await Promise.all(screenshots.map((s) => processScreenshot(s)));
+      imagesRef.current = images;
+
+      setEvalPhase("running");
+
+      // Frameworks run sequentially. Each gets its own request, its own
+      // duration budget, and its own completion status.
+      const completed: ReportSection[] = [];
+      for (let i = 0; i < initial.length - 1; i++) {
+        completed.push(await runSection(i, initial[i], images));
+      }
+
+      // Final pass synthesises from whatever actually completed.
+      const overallIndex = initial.length - 1;
+      await runSection(
+        overallIndex,
+        initial[overallIndex],
+        images,
+        assembleForOverall(completed)
+      );
+
       setEvalPhase("done");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
@@ -168,55 +340,259 @@ export default function Home() {
     }
   };
 
+  /**
+   * Re-run one section, then recompute the Overall pass.
+   *
+   * The recompute is not optional. A retried section that succeeds
+   * changes what the audit says; leaving the old Overall in place would
+   * either strand a withheld grade over a now-complete audit, or show a
+   * letter grade derived from text that no longer exists. Either one is
+   * the same class of dishonesty this phase exists to remove.
+   */
+  const retrySection = async (id: string) => {
+    // Concept-only audits store an empty array here, not null — the
+    // difference between "no images in this audit" and "material is gone"
+    // is what makes retry work in text mode.
+    const images = imagesRef.current;
+    if (!images) {
+      setError("The audit material is no longer available for retry. Start a new audit.");
+      setEvalPhase("error");
+      return;
+    }
+
+    const current = sectionsRef.current;
+    const index = current.findIndex((s) => s.id === id);
+    const overallIndex = current.findIndex((s) => s.id === OVERALL_ID);
+    if (index < 0) return;
+
+    setError(null);
+    setEvalPhase("running");
+
+    try {
+      if (id === OVERALL_ID) {
+        const frameworkResults = current.filter((s) => s.id !== OVERALL_ID);
+        await runSection(
+          index,
+          current[index],
+          images,
+          assembleForOverall(frameworkResults)
+        );
+      } else {
+        // Invalidate the Overall immediately — the grade it produced is
+        // now stale, and it should visibly go away rather than linger.
+        if (overallIndex >= 0) {
+          setSections((prev) =>
+            prev.map((s, i) =>
+              i === overallIndex
+                ? { ...s, status: "pending", text: "", detail: undefined }
+                : s
+            )
+          );
+        }
+
+        const retried = await runSection(index, current[index], images);
+
+        if (overallIndex >= 0) {
+          const frameworkResults = current
+            .filter((s) => s.id !== OVERALL_ID)
+            .map((s) => (s.id === id ? retried : s));
+          await runSection(
+            overallIndex,
+            current[overallIndex],
+            images,
+            assembleForOverall(frameworkResults)
+          );
+        }
+      }
+
+      setEvalPhase("done");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+      setEvalPhase("error");
+    }
+  };
+
+  /**
+   * Export the report as a self-contained client document.
+   *
+   * Nothing is filtered or tidied on the way out — the document renders the
+   * same components, off the same sections, through the same completeness
+   * module. A partial audit exports as visibly partial, or this button is
+   * the biggest liability in the tool.
+   */
+  const exportReport = async () => {
+    setExporting(true);
+    setError(null);
+    try {
+      const { downloadReport } = await import("@/lib/export-document");
+      await downloadReport({
+        sections,
+        screenshotUrls: screenshots.map((s) => s.dataUrl),
+        conceptText,
+        taskScenario,
+        audienceLabel: AUDIENCES.find((a) => a.id === audience)?.label ?? audience,
+        frameworkLabels: frameworks
+          .map((id) => FRAMEWORKS.find((f) => f.id === id)?.label ?? id)
+          .join(" · "),
+      });
+    } catch (err) {
+      setError(
+        `The report could not be exported: ${
+          err instanceof Error ? err.message : "unknown error"
+        }`
+      );
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const canExport = sections.some((s) => s.text.trim().length > 0) && !isEvaluating;
+
+  const overallSection = sections.find((s) => s.id === OVERALL_ID);
+  // Queued frameworks stay out of the tab bar until they have started —
+  // a tab that opens onto nothing is worse than no tab.
+  const visibleFrameworkSections = sections.filter(
+    (s) => s.id !== OVERALL_ID && s.status !== "pending"
+  );
+  const activeSection =
+    visibleFrameworkSections.find((s) => s.id === activeTab) ??
+    visibleFrameworkSections[0];
+
+  /**
+   * Tabs double as anchors: selecting one brings the section into view.
+   * A manual pick also ends auto-follow for the rest of the run — the
+   * streaming tab keeps its pulsing ring, so rejoining the live section
+   * is one click away.
+   */
+  const selectTab = (id: string) => {
+    setActiveTab(id);
+    setTabPinned(true);
+    sectionAnchorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  /**
+   * The lockup is the way home. Mid-run it asks first: a reflex click on
+   * a logo should not be able to destroy an audit that is minutes into
+   * an irreversible sequence of API calls.
+   */
+  const goHome = () => {
+    if (isEvaluating) {
+      setConfirmingHome(true);
+      return;
+    }
+    resetAll();
+  };
+
   const resetAll = () => {
+    setConfirmingHome(false);
+    setTabPinned(false);
     setScreenshots([]);
+    setConceptText("");
     setTaskScenario("");
-    setReport("");
+    setSections([]);
     setError(null);
     setEvalPhase("idle");
+    imagesRef.current = null;
   };
 
   return (
-    <div className="min-h-screen bg-surface-0">
-      {/* Header */}
-      <header className="px-8 py-4 border-b border-border flex items-center justify-between bg-white/[0.01]">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent/20 to-accent/5 border border-accent/20 flex items-center justify-center text-base">
-            🔎
+    <div className="min-h-screen bg-ground">
+      {/* Header — north-star as the product mark, lockup per the brand kit. */}
+      <header className="px-6 py-4 border-b border-border bg-card">
+        <div className="max-w-[1040px] mx-auto flex items-center justify-between">
+        {/* The lockup is the way home. */}
+        <button
+          onClick={goHome}
+          aria-label="AuditLens — start a new audit"
+          className="flex items-center gap-[11px] text-left cursor-pointer transition-opacity hover:opacity-70"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/motifs/north-star.svg" alt="" className="h-9 w-9 flex-none" />
+          <div className="leading-[1.1]">
+            <div className="font-mono text-[0.75rem] uppercase tracking-[0.16em] text-text-tertiary">
+              UX Evaluation
+            </div>
+            <div className="font-display text-[1.2rem] font-extrabold text-text-primary">
+              AuditLens
+              <span className="font-mono text-[0.75rem] font-normal text-text-tertiary ml-2 tracking-[0.08em]">
+                v2.0
+              </span>
+            </div>
           </div>
-          <div>
-            <span className="text-base font-bold tracking-tight">AuditLens</span>
-            <span className="text-[11px] text-text-tertiary ml-2 font-mono">v1.0</span>
-          </div>
-        </div>
+        </button>
         {showReport && (
-          <button
-            onClick={resetAll}
-            className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-white/[0.04] border border-border text-text-secondary cursor-pointer hover:bg-white/[0.06] hover:text-text-primary transition-all"
-          >
-            ← New Audit
-          </button>
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={exportReport}
+              disabled={!canExport || exporting}
+              className={`font-mono rounded-pill px-4 py-[0.7em] text-[0.85rem] font-medium uppercase tracking-[0.1em] transition-transform duration-150 ${
+                canExport && !exporting
+                  ? "bg-accent text-ivory cursor-pointer hover:-translate-y-[2px]"
+                  : "border border-border text-text-tertiary cursor-not-allowed"
+              }`}
+            >
+              {exporting ? "Preparing…" : "Export report ↓"}
+            </button>
+            <button
+              onClick={resetAll}
+              className="font-mono rounded-pill border border-border-strong px-4 py-[0.7em] text-[0.85rem] font-medium uppercase tracking-[0.1em] text-text-primary cursor-pointer transition-transform duration-150 hover:-translate-y-[2px]"
+            >
+              ← New audit
+            </button>
+          </div>
+        )}
+        </div>
+
+        {/* Mid-run guard. Inline rather than a browser dialog so the
+            question is asked in the app's own voice, and so the running
+            audit stays visible behind it. */}
+        {confirmingHome && (
+          <div className="max-w-[1040px] mx-auto mt-3 flex items-center gap-3 flex-wrap px-4 py-3 rounded-card bg-minor-dim border border-minor border-l-[4px]">
+            <span className="text-[16px] font-bold text-text-primary">
+              An audit is still running.
+            </span>
+            <span className="text-[15px] text-text-secondary">
+              Starting over discards everything produced so far.
+            </span>
+            <div className="ml-auto flex gap-2.5">
+              <button
+                onClick={resetAll}
+                className="font-mono rounded-pill bg-accent text-ivory px-4 py-[0.6em] text-[0.82rem] font-medium uppercase tracking-[0.1em] cursor-pointer transition-transform duration-150 hover:-translate-y-[2px]"
+              >
+                Discard and start over
+              </button>
+              <button
+                onClick={() => setConfirmingHome(false)}
+                className="font-mono rounded-pill border border-border-strong px-4 py-[0.6em] text-[0.82rem] font-medium uppercase tracking-[0.1em] text-text-primary cursor-pointer transition-transform duration-150 hover:-translate-y-[2px]"
+              >
+                Keep auditing
+              </button>
+            </div>
+          </div>
         )}
       </header>
 
-      <main className="max-w-[860px] mx-auto px-6 py-8">
+      <main className="max-w-[1040px] mx-auto px-6 py-8">
         {/* ═══ INPUT PANEL ═══ */}
         {showInput && (
           <div className="animate-[fadeIn_0.3s_ease]">
             <div className="text-center mb-10">
-              <h1 className="text-[28px] font-bold tracking-tight mb-2">
-                Upload. Evaluate. Ship better.
+              <h1 className="font-display text-[38px] font-extrabold text-text-primary mb-2">
+                Show it or describe it. Then ship better.
               </h1>
-              <p className="text-sm text-text-tertiary max-w-[480px] mx-auto">
-                Drop your screenshots. Select your frameworks. Get a senior-grade UX audit with
-                actionable fixes and metrics.
+              <p className="font-voice text-[1.3rem] leading-[1.45] text-text-secondary max-w-[620px] mx-auto">
+                Drop screenshots, write out the concept, or both. Select your frameworks. Get a
+                senior-grade UX audit with actionable fixes and metrics.
               </p>
             </div>
 
             {/* Screenshots */}
-            <div className="mb-7">
-              <label className="text-xs font-semibold text-text-tertiary tracking-wider mb-2 block">
-                SCREENSHOTS
+            <div className="mb-5">
+              <label className="font-mono text-[0.85rem] font-medium uppercase tracking-[0.16em] text-text-primary mb-2 block">
+                SCREENSHOTS{" "}
+                <span className="font-normal normal-case tracking-normal text-text-tertiary">
+                  · optional if you describe the concept below
+                </span>
               </label>
               <DropZone
                 screenshots={screenshots}
@@ -225,24 +601,53 @@ export default function Home() {
               />
             </div>
 
+            {/* Concept description */}
+            <div className="mb-7">
+              <label className="font-mono text-[0.85rem] font-medium uppercase tracking-[0.16em] text-text-primary mb-2 block">
+                CONCEPT DESCRIPTION{" "}
+                <span className="font-normal normal-case tracking-normal text-text-tertiary">
+                  {hasVisuals
+                    ? "· optional — explains what happens between screens"
+                    : "· audit an idea with no visuals yet"}
+                </span>
+              </label>
+              <textarea
+                value={conceptText}
+                onChange={(e) => setConceptText(e.target.value)}
+                placeholder={
+                  "Describe the idea or flow in prose. The more concrete, the sharper the audit.\n\ne.g. 'A returning customer opens the app and lands on a saved-orders list. Tapping an order opens a detail view with a Reorder button. Reorder skips straight to payment using the stored card, showing a confirmation sheet with the total and a 5-second undo window before the order is placed.'"
+                }
+                rows={7}
+                className="w-full px-4 py-3 rounded-xl text-[17px] bg-field border border-border text-text-primary resize-y leading-relaxed outline-none transition-colors focus:border-navy"
+              />
+              {!hasVisuals && concept.length > 0 && (
+                <div className="mt-2 px-3.5 py-2.5 rounded-lg bg-minor-dim border-l-[3px] border border-minor text-[14px] text-text-secondary leading-relaxed">
+                  <span className="font-semibold text-text-primary">Concept mode.</span> With no
+                  visuals, anything measured — contrast, target sizes, text size, focus rings,
+                  visual hierarchy — cannot be assessed, and the report will say so rather than
+                  guess. Accessibility narrows to what the description itself commits to.
+                </div>
+              )}
+            </div>
+
             {/* Task Scenario */}
             <div className="mb-7">
-              <label className="text-xs font-semibold text-text-tertiary tracking-wider mb-2 block">
+              <label className="font-mono text-[0.85rem] font-medium uppercase tracking-[0.16em] text-text-primary mb-2 block">
                 TASK SCENARIO{" "}
-                <span className="font-normal text-white/20">· optional but recommended</span>
+                <span className="font-normal normal-case tracking-normal text-text-tertiary">· optional but recommended</span>
               </label>
               <textarea
                 value={taskScenario}
                 onChange={(e) => setTaskScenario(e.target.value)}
                 placeholder="What is the user trying to accomplish? e.g., 'First-time user trying to send their first message' or 'Returning user checking out with items in cart'"
                 rows={3}
-                className="w-full px-4 py-3 rounded-xl text-sm bg-white/[0.02] border border-border text-white/85 resize-y leading-relaxed outline-none transition-colors focus:border-accent-border"
+                className="w-full px-4 py-3 rounded-xl text-[17px] bg-field border border-border text-text-primary resize-y leading-relaxed outline-none transition-colors focus:border-navy"
               />
             </div>
 
             {/* Audience */}
             <div className="mb-7">
-              <label className="text-xs font-semibold text-text-tertiary tracking-wider mb-2 block">
+              <label className="font-mono text-[0.85rem] font-medium uppercase tracking-[0.16em] text-text-primary mb-2 block">
                 AUDIENCE CONTEXT
               </label>
               <AudienceSelector selected={audience} onChange={setAudience} />
@@ -250,7 +655,7 @@ export default function Home() {
 
             {/* Frameworks */}
             <div className="mb-9">
-              <label className="text-xs font-semibold text-text-tertiary tracking-wider mb-2 block">
+              <label className="font-mono text-[0.85rem] font-medium uppercase tracking-[0.16em] text-text-primary mb-2 block">
                 EVALUATION FRAMEWORKS
               </label>
               <FrameworkToggles selected={frameworks} onChange={setFrameworks} />
@@ -261,16 +666,18 @@ export default function Home() {
               onClick={runEvaluation}
               disabled={!canEvaluate}
               className={`
-                w-full py-3.5 px-6 rounded-xl text-[15px] font-bold tracking-tight transition-all duration-200
+                font-mono w-full py-[1.15em] px-6 rounded-pill text-[0.98rem] font-medium uppercase tracking-[0.12em] transition-transform duration-150
                 ${canEvaluate
-                  ? "bg-gradient-to-r from-accent/90 to-accent/70 text-surface-0 cursor-pointer shadow-[0_4px_24px_rgba(45,212,191,0.15)] hover:shadow-[0_4px_32px_rgba(45,212,191,0.25)]"
-                  : "bg-white/[0.04] text-white/15 cursor-not-allowed"
+                  ? "bg-accent text-ivory cursor-pointer hover:-translate-y-[2px]"
+                  : "border border-border text-text-tertiary cursor-not-allowed"
                 }
               `}
             >
               {canEvaluate
                 ? `Run Audit · ${frameworks.length} framework${frameworks.length !== 1 ? "s" : ""}`
-                : "Upload at least one screenshot to begin"}
+                : !hasMaterial
+                ? "Add a screenshot or describe the concept to begin"
+                : "Select at least one framework to begin"}
             </button>
           </div>
         )}
@@ -278,74 +685,67 @@ export default function Home() {
         {/* ═══ REPORT PANEL ═══ */}
         {showReport && (
           <div className="animate-[fadeIn_0.3s_ease]">
-            {/* Context summary */}
-            <div className="flex gap-3 flex-wrap mb-5 px-4 py-3 bg-white/[0.02] rounded-xl border border-border text-xs text-text-tertiary">
-              <span>📸 {screenshots.length} screen{screenshots.length !== 1 ? "s" : ""}</span>
-              <span className="text-white/[0.08]">|</span>
-              <span>🎯 {AUDIENCES.find((a) => a.id === audience)?.label}</span>
-              <span className="text-white/[0.08]">|</span>
-              <span>
-                🔬{" "}
-                {frameworks
-                  .map((f) => FRAMEWORKS.find((fw) => fw.id === f)?.label)
-                  .join(" · ")}
-              </span>
-              {taskScenario && (
-                <>
-                  <span className="text-white/[0.08]">|</span>
-                  <span>
-                    📝 {taskScenario.length > 60 ? taskScenario.slice(0, 60) + "..." : taskScenario}
-                  </span>
-                </>
-              )}
-            </div>
+            {/* Request + material, pinned for the whole run */}
+            <ContextPanel
+              screenshots={screenshots}
+              conceptText={conceptText}
+              taskScenario={taskScenario}
+              audience={audience}
+              frameworks={frameworks}
+            />
 
-            {/* Screenshot thumbnails */}
-            <div className="flex gap-2 mb-5 flex-wrap">
-              {screenshots.map((s, i) => (
-                <div
-                  key={s.id}
-                  className="relative rounded-lg overflow-hidden border border-border/50"
-                >
-                  <img
-                    src={s.dataUrl}
-                    alt={`Screen ${i + 1}`}
-                    className="h-16 w-auto block opacity-70"
-                  />
-                  <div className="absolute bottom-0.5 left-1 bg-black/70 rounded px-1 py-px text-[9px] font-bold text-accent">
-                    {i + 1}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Streaming indicator */}
-            {isEvaluating && <StreamingIndicator phase={evalPhase} />}
+            {/* Per-framework progress */}
+            {(isEvaluating || sections.some((s) => s.status === "streaming")) && (
+              <FrameworkProgress
+                sections={sections}
+                preparing={evalPhase === "processing"}
+              />
+            )}
 
             {/* Error */}
             {error && (
-              <div className="px-5 py-4 bg-critical-dim border border-critical/20 rounded-xl mb-5">
-                <div className="text-sm font-semibold text-critical mb-1">Evaluation failed</div>
-                <div className="text-[13px] text-white/60">{error}</div>
+              <div className="px-5 py-4 bg-critical-dim border border-critical border-l-[3px] rounded-xl mb-5">
+                <div className="text-[17px] font-bold text-critical mb-1">Evaluation failed</div>
+                <div className="text-[16px] text-text-secondary">{error}</div>
                 <button
                   onClick={resetAll}
-                  className="mt-3 px-4 py-1.5 rounded-lg text-xs font-semibold bg-white/[0.04] border border-border text-text-secondary cursor-pointer hover:bg-white/[0.06] transition-all"
+                  className="font-mono mt-3 rounded-pill border border-border-strong px-4 py-[0.6em] text-[0.82rem] font-medium uppercase tracking-[0.1em] text-text-primary cursor-pointer transition-transform duration-150 hover:-translate-y-[2px]"
                 >
                   Try again
                 </button>
               </div>
             )}
 
-            {/* Grade card — only after streaming done */}
-            {evalPhase === "done" && report && <GradeCard report={report} />}
+            {/* Grade card — suppressed unless every section completed */}
+            {evalPhase === "done" && <GradeCard sections={sections} />}
 
-            {/* Report content */}
-            {report && (
-              <div className="px-7 py-6 bg-white/[0.015] border border-border rounded-2xl">
-                <ReportRenderer content={report} />
-                <div ref={reportEndRef} />
-              </div>
+            {/* Overall, directly under the grade, open by default */}
+            {overallSection && overallSection.status !== "pending" && (
+              <OverallPanel
+                section={overallSection}
+                open={overallOpen}
+                onToggle={() => setOverallOpen((v) => !v)}
+                onRetry={() => retrySection(overallSection.id)}
+                busy={isEvaluating}
+              />
             )}
+
+            {/* One framework at a time, reached by the sticky tab bar */}
+            <div ref={sectionAnchorRef} className="scroll-mt-24" />
+            <SectionTabs
+              sections={visibleFrameworkSections}
+              activeId={activeSection?.id ?? ""}
+              onSelect={selectTab}
+            />
+            {activeSection && (
+              <SectionCard
+                key={activeSection.id}
+                section={activeSection}
+                onRetry={() => retrySection(activeSection.id)}
+                busy={isEvaluating}
+              />
+            )}
+            <div ref={reportEndRef} />
           </div>
         )}
       </main>

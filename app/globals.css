@@ -1,58 +1,163 @@
 @import "tailwindcss";
 
-@theme {
-  --color-surface-0: #08090d;
-  --color-surface-1: #0d0e14;
-  --color-surface-2: #12131a;
-  --color-surface-3: #1a1b24;
-  --color-border: rgba(255, 255, 255, 0.06);
-  --color-border-hover: rgba(255, 255, 255, 0.12);
-  --color-text-primary: rgba(255, 255, 255, 0.92);
-  --color-text-secondary: rgba(255, 255, 255, 0.55);
-  --color-text-tertiary: rgba(255, 255, 255, 0.3);
-  --color-accent: #2dd4bf;
-  --color-accent-dim: rgba(45, 212, 191, 0.15);
-  --color-accent-border: rgba(45, 212, 191, 0.25);
-  --color-critical: #ef4444;
-  --color-critical-dim: rgba(239, 68, 68, 0.1);
-  --color-minor: #f59e0b;
-  --color-minor-dim: rgba(245, 158, 11, 0.1);
-  --color-pass: #22c55e;
-  --color-pass-dim: rgba(34, 197, 94, 0.1);
-  --font-display: "DM Sans", system-ui, sans-serif;
-  --font-body: "DM Sans", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+/* ============================================================
+   AuditLens — Ivory Loom.
+   One white face, everywhere. Ported from ../brand-kit/globals.css.
+
+   :root holds the brand PRIMITIVES, unchanged from the kit. The
+   @theme block below maps them onto this app's semantics, so every
+   Tailwind utility in the components resolves back to a primitive
+   and nothing else. Adding a colour means adding a primitive first —
+   there is deliberately nowhere else to put one.
+
+   The one adaptation the kit does not make for us: this app has a
+   severity scale (critical / minor / pass) sitting next to an accent.
+   Vermilion cannot be both "the one moment per view" and "a critical
+   finding", so vermilion is spent ONLY on the primary CTA and on
+   critical severity — and every incidental accent the dark build used
+   (bullets, spinners, focus rings, quote rules) is re-voiced to navy.
+   ============================================================ */
+
+:root {
+  /* ---- Brand primitives (popescuportfolio) — do not add to this list ---- */
+  --navy:        #080B83;
+  --vermilion:   #FF4D00;
+  --pink:        #F487B6;
+  --yellow:      #FDE12D;
+  --peri:        #6F7BFF;
+  --ivory:       #FFF3F0;
+  --abyss:       #04051A;
+  --navy-soft:   #1B1C45;
+  --ink:         #3A3B5C;
+
+  /* ---- Ground & faces ---- */
+  --ground:      var(--ivory);   /* the page */
+  --card:        #FFFFFF;        /* the one white face */
+  --field:       #FFFFFF;        /* inputs sit on the ivory ground as white */
+  --overlay:     rgba(8, 11, 131, 0.72);  /* thumbnail scrims — navy, not black */
+
+  /* ---- The three voices ---- */
+  --text-primary:   var(--navy-soft);
+  --text-secondary: var(--ink);
+  /* 0.55, not the kit's 0.45: this app spends its tertiary voice on 10–11px
+     metadata, where 0.45 lands at ~4.0:1 on white. 0.55 clears 4.5:1 and is
+     still the navy primitive, just less diluted. */
+  --text-tertiary:  rgba(8, 11, 131, 0.55);
+
+  /* ---- Structure ---- */
+  --border:        rgba(8, 11, 131, 0.16);
+  --border-strong: rgba(8, 11, 131, 0.28);
+  --line:          rgba(8, 11, 131, 0.13);
+
+  /* ---- Accent: the CTA, and nothing else ---- */
+  --accent: var(--vermilion);
+
+  /* Selected / active states speak navy, not vermilion — a chosen chip is
+     structure, not a call to action. */
+  --navy-dim: color-mix(in srgb, var(--navy) 7%, #FFFFFF);
+
+  /* ---- Severity.
+     Marks and fills carry the colour; the words next to them stay navy.
+     Yellow and pink cannot carry text on white at any size, so they are
+     never asked to — severity is always spoken in words as well as hue,
+     which is the same rule this tool audits other people against. ---- */
+  --critical:     var(--vermilion);
+  --critical-dim: color-mix(in srgb, var(--vermilion) 9%, #FFFFFF);
+  --minor:        var(--yellow);
+  --minor-dim:    color-mix(in srgb, var(--yellow) 22%, #FFFFFF);
+  --pass:         var(--navy);
+  --pass-dim:     color-mix(in srgb, var(--navy) 7%, #FFFFFF);
+  --accent-dim:   color-mix(in srgb, var(--vermilion) 9%, #FFFFFF);
+
+  /* Grade bands. The letter always sits in a filled chip so it is legible
+     at every band — see grade-card.tsx for the fill/ink pairing. */
+  --grade-a: var(--navy);
+  --grade-b: var(--peri);
+  --grade-c: var(--yellow);
+  --grade-d: var(--vermilion);
+
+  /* ---- Radius (brand) ---- */
+  --radius-card: 18px;
+  --radius-pill: 100px;
 }
 
-@font-face {
-  font-family: "DM Sans";
-  font-style: normal;
-  font-weight: 300 800;
-  font-display: swap;
-  src: url("https://fonts.gstatic.com/s/dmsans/v15/rP2tp2ywxg089UriI5-g4vlH9VoD8CmcqZG40F9JadbnoEwA_opsOSer.woff2") format("woff2");
+@theme inline {
+  --color-ground:        var(--ground);
+  --color-card:          var(--card);
+  --color-field:         var(--field);
+  --color-overlay:       var(--overlay);
+
+  --color-text-primary:   var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary:  var(--text-tertiary);
+
+  --color-border:        var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-line:          var(--line);
+
+  --color-navy:      var(--navy);
+  --color-navy-dim:  var(--navy-dim);
+  --color-ivory:     var(--ivory);
+  --color-peri:      var(--peri);
+
+  --color-accent:     var(--accent);
+  --color-accent-dim: var(--accent-dim);
+
+  --color-critical:     var(--critical);
+  --color-critical-dim: var(--critical-dim);
+  --color-minor:        var(--minor);
+  --color-minor-dim:    var(--minor-dim);
+  --color-pass:         var(--pass);
+  --color-pass-dim:     var(--pass-dim);
+
+  --radius-card: var(--radius-card);
+  --radius-pill: var(--radius-pill);
+
+  /* Type stack — loaded via next/font in layout.tsx, never from a CDN.
+     RA-1: `Archivo Expanded` is not a separate family. Archivo is variable
+     on wdth 62..125; the expanded display cut is this same font pushed to
+     the top of that axis, selected with font-stretch below. */
+  --font-display: var(--font-archivo), "Archivo", system-ui, sans-serif;
+  --font-body:    var(--font-archivo), "Archivo", system-ui, sans-serif;
+  --font-mono:    var(--font-ibm-plex-mono), "IBM Plex Mono", ui-monospace, monospace;
+  --font-voice:   var(--font-source-serif), Georgia, serif;
 }
 
-@font-face {
-  font-family: "JetBrains Mono";
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url("https://fonts.gstatic.com/s/jetbrainsmono/v18/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxTOlOTk6OThhvA.woff2") format("woff2");
-}
+*,
+*::before,
+*::after { box-sizing: border-box; }
 
 html {
-  background: var(--color-surface-0);
-  color: var(--color-text-primary);
+  background: var(--ground);
+  color: var(--text-primary);
 }
 
 body {
-  font-family: var(--font-body);
+  font-family: var(--font-archivo), "Archivo", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* The display face — Archivo at the expanded end of its width axis. */
+.font-display {
+  font-family: var(--font-archivo), "Archivo", sans-serif;
+  font-stretch: 125%;
+  letter-spacing: -0.02em;
+}
+
+/* The kicker — mono, uppercase, wide-tracked. Labels and metadata. */
+.font-mono {
+  font-family: var(--font-ibm-plex-mono), "IBM Plex Mono", ui-monospace, monospace;
+}
+
+/* The voice — Source Serif italic. Recommendations and ledes. */
+.font-voice {
+  font-family: var(--font-source-serif), Georgia, serif;
+  font-style: italic;
+}
+
 ::selection {
-  background: rgba(45, 212, 191, 0.25);
+  background: color-mix(in srgb, var(--vermilion) 22%, transparent);
 }
 
 ::-webkit-scrollbar {
@@ -64,12 +169,16 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--border);
   border-radius: 3px;
 }
 
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}
+
 textarea::placeholder {
-  color: rgba(255, 255, 255, 0.2);
+  color: var(--text-tertiary);
 }
 
 @keyframes spin {
