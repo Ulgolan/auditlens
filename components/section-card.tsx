@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReportSection } from "@/lib/types";
+import { describeSection } from "@/lib/report-status";
 import { ReportRenderer } from "@/components/report-renderer";
 
 interface SectionCardProps {
@@ -18,56 +19,59 @@ interface SectionCardProps {
  * against the framework list to work out that something is missing.
  */
 export function SectionCard({ section, onRetry, busy }: SectionCardProps) {
-  const { status, detail, label, text } = section;
+  const { status, label, text } = section;
 
-  const isIncomplete = status === "truncated" || status === "failed";
+  // The wording lives in lib/report-status so the exported document
+  // declares an incomplete section in exactly these words.
+  const declaration = describeSection(section);
 
   return (
     <div
-      className={`px-7 py-6 mb-4 rounded-2xl border ${
+      className={`px-7 py-6 mb-4 rounded-card border bg-card ${
         status === "failed"
-          ? "bg-critical-dim/40 border-critical/25"
+          ? "border-critical border-l-[4px]"
           : status === "truncated"
-          ? "bg-minor-dim/40 border-minor/25"
-          : "bg-white/[0.015] border-border"
+          ? "border-minor border-l-[4px]"
+          : "border-border"
       }`}
     >
-      {/* Declaration banner — only when the section is not trustworthy */}
-      {isIncomplete && (
+      {/* Declaration banner — only when the section is not trustworthy.
+          Severity is carried by the fill, the left rule and the icon. The
+          words stay navy: vermilion at 13px is 3.6:1 on white and yellow
+          is worse, and this tool does not get to ship a contrast failure
+          on the one element that must always be read. */}
+      {declaration && (
         <div
-          className={`flex gap-3 px-4 py-3 mb-5 rounded-xl border ${
+          className={`flex gap-3 px-4 py-3 mb-5 rounded-xl border border-l-[4px] ${
             status === "failed"
-              ? "bg-critical-dim border-critical/20"
-              : "bg-minor-dim border-minor/20"
+              ? "bg-critical-dim border-critical"
+              : "bg-minor-dim border-minor"
           }`}
         >
           <span className="text-base leading-none mt-px">
             {status === "failed" ? "🔴" : "⚠️"}
           </span>
           <div>
-            <div
-              className={`text-[13px] font-semibold mb-0.5 ${
-                status === "failed" ? "text-critical" : "text-minor"
-              }`}
-            >
-              {status === "failed"
-                ? `${label} did not complete`
-                : `${label} is incomplete — this section was cut off`}
+            <div className="text-[13px] font-bold mb-0.5 text-text-primary">
+              {declaration.headline}
             </div>
-            {detail && <div className="text-xs text-white/50 leading-relaxed">{detail}</div>}
-            <div className="text-xs text-white/40 leading-relaxed mt-1">
-              Treat the findings below as partial. Nothing here should be read as a
-              full evaluation.
+            {declaration.detail && (
+              <div className="text-xs text-text-secondary leading-relaxed">
+                {declaration.detail}
+              </div>
+            )}
+            <div className="text-xs text-text-secondary leading-relaxed mt-1">
+              {declaration.caution}
             </div>
 
             {onRetry && (
               <button
                 onClick={onRetry}
                 disabled={busy}
-                className={`mt-3 px-3.5 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                className={`font-mono mt-3 rounded-pill border px-4 py-[0.6em] text-[0.66rem] font-medium uppercase tracking-[0.1em] transition-transform duration-150 ${
                   busy
-                    ? "bg-white/[0.02] border-border text-white/20 cursor-not-allowed"
-                    : "bg-white/[0.06] border-border-hover text-text-primary cursor-pointer hover:bg-white/[0.1]"
+                    ? "border-border text-text-tertiary cursor-not-allowed"
+                    : "border-border-strong text-text-primary cursor-pointer hover:-translate-y-[2px]"
                 }`}
               >
                 {busy ? "Audit running..." : `↻ Retry ${label}`}
@@ -80,15 +84,15 @@ export function SectionCard({ section, onRetry, busy }: SectionCardProps) {
       {text ? (
         <ReportRenderer content={text} />
       ) : (
-        <div className="text-[13px] text-text-tertiary italic">
+        <div className="font-voice text-[13px] text-text-tertiary">
           No content was produced for this section.
         </div>
       )}
 
       {status === "streaming" && (
-        <div className="flex items-center gap-2 mt-4 text-xs text-accent">
+        <div className="flex items-center gap-2 mt-4 text-xs text-text-secondary">
           <div
-            className="w-3 h-3 rounded-full border-2 border-accent/30 border-t-accent"
+            className="w-3 h-3 rounded-full border-2 border-border border-t-navy"
             style={{ animation: "spin 0.8s linear infinite" }}
           />
           Evaluating {label}...

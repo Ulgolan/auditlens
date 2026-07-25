@@ -46,7 +46,7 @@ export function ContextPanel({
   const conceptShown = expanded || !isLong ? concept : concept.slice(0, CLAMP) + "…";
 
   return (
-    <div className="sticky top-0 z-20 -mx-6 px-6 pt-3 pb-3 mb-5 bg-surface-0/95 backdrop-blur-md border-b border-border">
+    <div className="sticky top-0 z-20 -mx-6 px-6 pt-3 pb-3 mb-5 bg-ground/95 backdrop-blur-md border-b border-border">
       {/* Material */}
       <div className="mb-2.5">
         {hasVisuals && (
@@ -59,9 +59,9 @@ export function ContextPanel({
                 <img
                   src={s.dataUrl}
                   alt={`Screen ${i + 1}`}
-                  className="h-14 w-auto block opacity-70"
+                  className="h-14 w-auto block"
                 />
-                <div className="absolute bottom-0.5 left-1 bg-black/70 rounded px-1 py-px text-[9px] font-bold text-accent">
+                <div className="font-mono absolute bottom-0.5 left-1 bg-overlay rounded px-1 py-px text-[9px] font-medium text-ivory">
                   {i + 1}
                 </div>
               </div>
@@ -70,17 +70,17 @@ export function ContextPanel({
         )}
 
         {concept && (
-          <div className="px-3.5 py-2.5 rounded-lg bg-white/[0.02] border border-border">
-            <div className="text-[10px] font-semibold text-text-tertiary tracking-wider mb-1.5">
+          <div className="px-3.5 py-2.5 rounded-lg bg-card border border-border">
+            <div className="font-mono text-[0.6rem] font-medium uppercase tracking-[0.16em] text-text-tertiary mb-1.5">
               {hasVisuals ? "CONCEPT DESCRIPTION" : "CONCEPT DESCRIPTION · NO VISUALS"}
             </div>
-            <div className="text-[12px] text-white/65 leading-relaxed whitespace-pre-wrap">
+            <div className="text-[12px] text-text-secondary leading-relaxed whitespace-pre-wrap">
               {conceptShown}
             </div>
             {isLong && (
               <button
                 onClick={() => setExpanded((v) => !v)}
-                className="mt-1.5 text-[11px] font-semibold text-accent/80 hover:text-accent cursor-pointer transition-colors"
+                className="mt-1.5 text-[11px] font-semibold text-navy hover:opacity-70 cursor-pointer transition-opacity"
               >
                 {expanded ? "Show less" : "Show full description"}
               </button>
@@ -90,20 +90,20 @@ export function ContextPanel({
       </div>
 
       {/* The request */}
-      <div className="flex gap-2.5 flex-wrap items-center text-[11px] text-text-tertiary">
+      <div className="flex gap-2.5 flex-wrap items-center text-[11px] text-text-secondary">
         <span>
           {hasVisuals
             ? `📸 ${screenshots.length} screen${screenshots.length !== 1 ? "s" : ""}`
             : "📝 Concept only"}
         </span>
-        <span className="text-white/[0.08]">|</span>
+        <span className="text-border-strong">|</span>
         <span>🎯 {audienceLabel}</span>
-        <span className="text-white/[0.08]">|</span>
+        <span className="text-border-strong">|</span>
         <span>🔬 {frameworkLabels}</span>
       </div>
 
       {taskScenario && (
-        <div className="mt-2 text-[11px] text-white/50 leading-relaxed">
+        <div className="mt-2 text-[11px] text-text-secondary leading-relaxed">
           <span className="font-semibold text-text-tertiary">Task · </span>
           {taskScenario}
         </div>

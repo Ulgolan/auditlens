@@ -22,8 +22,8 @@ export function FrameworkToggles({ selected, onChange }: FrameworkTogglesProps) 
             className={`
               flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left transition-all duration-150 border cursor-pointer
               ${isOn
-                ? "bg-accent-dim border-accent-border"
-                : "bg-white/[0.02] border-border hover:border-border-hover"
+                ? "bg-navy-dim border-navy"
+                : "bg-card border-border hover:border-border-strong"
               }
             `}
           >
@@ -31,7 +31,7 @@ export function FrameworkToggles({ selected, onChange }: FrameworkTogglesProps) 
             <div>
               <div
                 className={`text-[13px] font-semibold transition-colors ${
-                  isOn ? "text-accent" : "text-text-secondary"
+                  isOn ? "text-navy" : "text-text-secondary"
                 }`}
               >
                 {fw.label}

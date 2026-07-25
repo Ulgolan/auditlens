@@ -1,83 +1,82 @@
 "use client";
 
 import type { ReportSection } from "@/lib/types";
-import { OVERALL_ID } from "@/lib/types";
+import type { GradeBand } from "@/lib/report-status";
+import { deriveCompleteness } from "@/lib/report-status";
 
 interface GradeCardProps {
   sections: ReportSection[];
 }
 
 /**
+ * Grade band styling.
+ *
+ * The letter always sits inside a filled chip rather than being coloured
+ * text, because two of the four brand bands (yellow, peri) cannot carry
+ * legible text on white at any size. Filling the chip and choosing the ink
+ * per band keeps every grade readable and keeps the palette to primitives.
+ */
+const BAND: Record<GradeBand, { fill: string; ink: string }> = {
+  a: { fill: "bg-navy", ink: "text-ivory" },
+  b: { fill: "bg-peri", ink: "text-ivory" },
+  c: { fill: "bg-minor", ink: "text-navy" },
+  d: { fill: "bg-critical", ink: "text-ivory" },
+};
+
+/**
  * The Overall card.
  *
  * Non-negotiable: a letter grade is only ever shown when every section
  * completed. v1 rendered a grade off a partial report, which is the
- * single most misleading thing this tool could do. If anything is
- * incomplete, the grade is withheld and the tally is shown instead.
+ * single most misleading thing this tool could do. The withholding is not
+ * enforced here — it is enforced in deriveCompleteness, which hands this
+ * component `grade: null` whenever anything is short, so there is no
+ * grade available to render even by mistake.
  */
 export function GradeCard({ sections }: GradeCardProps) {
   if (sections.length === 0) return null;
 
-  const frameworkSections = sections.filter((s) => s.id !== OVERALL_ID);
-  const overall = sections.find((s) => s.id === OVERALL_ID);
+  const {
+    completedCount,
+    totalCount,
+    isComplete,
+    criticalCount,
+    minorCount,
+    passCount,
+    grade,
+    gradeBand,
+    withheldReason,
+  } = deriveCompleteness(sections);
 
-  const completedCount = frameworkSections.filter((s) => s.status === "complete").length;
-  const totalCount = frameworkSections.length;
-
-  const everythingComplete =
-    sections.length > 0 && sections.every((s) => s.status === "complete");
-
-  // Severity counts come from the framework sections only. The overall
-  // pass restates findings, and counting it too would inflate the totals.
-  const frameworkText = frameworkSections.map((s) => s.text).join("\n\n");
-  const criticalCount = (frameworkText.match(/🔴/g) || []).length;
-  const minorCount = (frameworkText.match(/⚠️/g) || []).length;
-  const passCount = (frameworkText.match(/✅/g) || []).length;
-
-  const gradeMatch = overall?.text
-    ? overall.text.match(/(?:Overall|Letter)\s*Grade[:\s]*\*?\*?\s*([A-F][+-]?)/i) ||
-      overall.text.match(/Grade[:\s]*\*?\*?\s*([A-F][+-]?)\b/i) ||
-      overall.text.match(/\*\*([A-F][+-]?)\*\*/)
-    : null;
-  const grade = gradeMatch ? gradeMatch[1] : "—";
-
-  const gradeColor = grade.startsWith("A")
-    ? "text-pass"
-    : grade.startsWith("B")
-    ? "text-blue-400"
-    : grade.startsWith("C")
-    ? "text-minor"
-    : "text-critical";
+  const band = gradeBand ? BAND[gradeBand] : null;
 
   return (
     <div className="mb-6 animate-[fadeIn_0.4s_ease]">
       <div
-        className={`flex gap-5 px-6 py-5 border rounded-2xl items-center flex-wrap ${
-          everythingComplete
-            ? "bg-white/[0.02] border-border rounded-b-2xl"
-            : "bg-white/[0.02] border-minor/25 rounded-b-none border-b-0"
+        className={`flex gap-6 px-6 py-5 border bg-card items-center flex-wrap rounded-card ${
+          isComplete ? "border-border" : "border-minor border-l-[4px] rounded-b-none border-b-0"
         }`}
       >
         {/* Grade — or the withheld placeholder */}
-        <div className="text-center min-w-[80px]">
-          {everythingComplete ? (
+        <div className="text-center min-w-[92px]">
+          {grade && band ? (
             <>
               <div
-                className={`text-5xl font-extrabold leading-none font-display ${gradeColor}`}
+                className={`font-display flex h-[76px] w-[76px] items-center justify-center rounded-card text-5xl font-extrabold leading-none ${band.fill} ${band.ink}`}
               >
                 {grade}
               </div>
-              <div className="text-[10px] text-text-tertiary mt-1 font-semibold tracking-wider">
-                OVERALL
+              <div className="font-mono text-[0.58rem] uppercase tracking-[0.16em] text-text-tertiary mt-2">
+                Overall
               </div>
             </>
           ) : (
             <>
-              <div className="text-5xl font-extrabold leading-none font-display text-white/15">
+              <div className="font-display flex h-[76px] w-[76px] items-center justify-center rounded-card border-2 border-dashed border-border-strong text-5xl font-extrabold leading-none text-text-tertiary">
                 —
               </div>
-              <div className="text-[10px] text-minor mt-1 font-semibold tracking-wider">
-                WITHHELD
+              <div className="font-mono text-[0.58rem] uppercase tracking-[0.16em] text-text-primary mt-2 font-medium">
+                Withheld
               </div>
             </>
           )}
@@ -85,54 +84,60 @@ export function GradeCard({ sections }: GradeCardProps) {
 
         <div className="w-px h-[60px] bg-border" />
 
-        <div className="flex gap-5">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-critical">{criticalCount}</div>
-            <div className="text-[10px] text-text-tertiary font-medium">Critical</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-minor">{minorCount}</div>
-            <div className="text-[10px] text-text-tertiary font-medium">Minor</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-pass">{passCount}</div>
-            <div className="text-[10px] text-text-tertiary font-medium">Pass</div>
-          </div>
+        {/* Severity tallies. The numeral stays navy and a grid-locked swatch
+            carries the hue — the same rule the severity banners follow. */}
+        <div className="flex gap-6">
+          <Tally label="Critical" count={criticalCount} swatch="bg-critical" />
+          <Tally label="Minor" count={minorCount} swatch="bg-minor" />
+          <Tally label="Pass" count={passCount} swatch="bg-pass" />
         </div>
 
         <div className="w-px h-[60px] bg-border" />
 
         <div className="text-center">
-          <div
-            className={`text-2xl font-bold ${
-              everythingComplete ? "text-pass" : "text-minor"
-            }`}
-          >
+          <div className="text-2xl font-bold text-text-primary">
             {completedCount}
             <span className="text-text-tertiary font-normal">/{totalCount}</span>
           </div>
-          <div className="text-[10px] text-text-tertiary font-medium">Frameworks</div>
+          <div className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-text-tertiary mt-1">
+            Frameworks
+          </div>
         </div>
       </div>
 
       {/* Why the grade is missing — stated, not implied */}
-      {!everythingComplete && (
-        <div className="px-6 py-3.5 bg-minor-dim border border-minor/25 border-t-0 rounded-b-2xl">
-          <div className="text-[13px] font-semibold text-minor mb-1">
+      {!isComplete && (
+        <div className="px-6 py-3.5 bg-minor-dim border border-minor border-l-[4px] border-t-0 rounded-b-card">
+          <div className="text-[13px] font-bold text-text-primary mb-1">
             No grade — this audit is incomplete
           </div>
-          <div className="text-xs text-white/55 leading-relaxed">
-            {completedCount} of {totalCount} framework
-            {totalCount !== 1 ? "s" : ""} completed
-            {overall && overall.status !== "complete"
-              ? ", and the overall assessment did not finish"
-              : ""}
-            . Grading a partial audit would misrepresent it, so the grade is withheld.
-            The severity counts above cover only what was actually evaluated. Retry the
-            affected sections to complete the audit.
+          <div className="text-xs text-text-secondary leading-relaxed">
+            {withheldReason} Retry the affected sections to complete the audit.
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function Tally({
+  label,
+  count,
+  swatch,
+}: {
+  label: string;
+  count: number;
+  swatch: string;
+}) {
+  return (
+    <div className="text-center">
+      <div className="text-2xl font-bold text-text-primary leading-none">{count}</div>
+      <div className="flex items-center justify-center gap-1.5 mt-1.5">
+        <span className={`h-2 w-2 rounded-[2px] ${swatch}`} aria-hidden="true" />
+        <span className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-text-tertiary">
+          {label}
+        </span>
+      </div>
     </div>
   );
 }

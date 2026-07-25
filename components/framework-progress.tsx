@@ -20,7 +20,7 @@ function StatusIcon({ status }: { status: SectionStatus }) {
   if (status === "streaming") {
     return (
       <div
-        className="w-3.5 h-3.5 rounded-full border-2 border-accent/30 border-t-accent shrink-0"
+        className="w-3.5 h-3.5 rounded-full border-2 border-border border-t-navy shrink-0"
         style={{ animation: "spin 0.8s linear infinite" }}
       />
     );
@@ -30,7 +30,7 @@ function StatusIcon({ status }: { status: SectionStatus }) {
   if (status === "truncated") return <span className="text-[13px] leading-none">⚠️</span>;
   if (status === "failed") return <span className="text-[13px] leading-none">🔴</span>;
 
-  return <div className="w-3.5 h-3.5 rounded-full border border-white/15 shrink-0" />;
+  return <div className="w-3.5 h-3.5 rounded-full border border-border-strong shrink-0" />;
 }
 
 /**
@@ -42,12 +42,12 @@ export function FrameworkProgress({ sections, preparing }: FrameworkProgressProp
   const done = sections.filter((s) => s.status !== "pending" && s.status !== "streaming");
 
   return (
-    <div className="px-5 py-4 bg-accent-dim border border-accent-border/40 rounded-xl mb-5">
+    <div className="px-5 py-4 bg-card border border-border rounded-xl mb-5">
       <div className="flex items-center justify-between mb-3">
-        <div className="text-[11px] font-semibold text-accent tracking-wider">
-          {preparing ? "PROCESSING SCREENSHOTS" : "RUNNING AUDIT"}
+        <div className="font-mono text-[0.66rem] font-medium uppercase tracking-[0.16em] text-text-primary">
+          {preparing ? "Processing screenshots" : "Running audit"}
         </div>
-        <div className="text-[11px] text-white/35 font-mono">
+        <div className="font-mono text-[0.66rem] text-text-tertiary">
           {done.length}/{sections.length}
         </div>
       </div>
@@ -59,21 +59,22 @@ export function FrameworkProgress({ sections, preparing }: FrameworkProgressProp
             <span
               className={
                 s.status === "streaming"
-                  ? "font-semibold text-accent"
+                  ? "font-semibold text-text-primary"
                   : s.status === "pending"
-                  ? "text-white/25"
-                  : "text-white/60"
+                  ? "text-text-tertiary"
+                  : "text-text-secondary"
               }
             >
               {s.label}
             </span>
+            {/* The status word is never the only carrier of severity — the icon
+                carries hue, the word carries meaning, and the word stays navy
+                so it is legible at 11px on white. */}
             <span
-              className={`ml-auto text-[11px] ${
-                s.status === "truncated"
-                  ? "text-minor"
-                  : s.status === "failed"
-                  ? "text-critical"
-                  : "text-white/25"
+              className={`ml-auto font-mono text-[0.64rem] uppercase tracking-[0.08em] ${
+                s.status === "truncated" || s.status === "failed"
+                  ? "font-medium text-text-primary"
+                  : "text-text-tertiary"
               }`}
             >
               {STATUS_LABEL[s.status]}
