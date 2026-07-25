@@ -175,3 +175,116 @@ Worth a prompt tweak next pass; not worth a re-run.
 
 NOT TOUCHED, AS BRIEFED: no skin/branding, no save-query, no tabs, no framework
 rewrites beyond what text-mode honesty required. `main` untouched.
+
+### 2026-07-25 — Phase 4, branch `v2` (Ivory Loom + client export)
+Three commits, `b040022`, `b4f498f`, `b6aae73`. Polaris non-negotiable 3
+("client-exportable without shame") now has a mechanism behind it.
+
+CORRECTION TO A PRIOR ENTRY: the Phase 0+1 incident entry says the brand
+material was relocated to `../brand`. The actual path is `../brand-kit/`, and
+that is what this phase read. Nothing was imported from it at build time —
+`public/motifs/north-star.svg` and `public/pop-logo-color.png` are deliberate
+copies. `public/` did not exist before this phase.
+
+GROUND TRUTH (answered from files before edits):
+- Colour was ~2/3 remappable and 1/3 not. 112 utilities resolved through the
+  Tailwind v4 `@theme` block (`bg-surface-1`, `text-text-tertiary`), but 56
+  were raw `white`/`black` — a ten-step `text-white/NN` opacity ramp and five
+  `bg-white/[0.0NN]` card faces. Those are dark-face *lifts*; on ivory the
+  logic inverts to white cards on an ivory ground, so they were replaced, not
+  remapped. Plus 2 hardcoded rgba (the run button's teal glow) and one stock
+  `text-blue-400` on the B-grade branch.
+- Fonts were two hand-rolled `@font-face` blocks pointing at versioned
+  fonts.gstatic.com URLs; `layout.tsx` loaded nothing. Replaced with the kit's
+  next/font stack. RA-1 honoured: Archivo at `wdth 125`, not a second family.
+- Export: no print CSS, no download, nothing. Greenfield.
+
+EXPORT DECISION (Tower-approved path B). A print stylesheet was rejected for
+a mechanical reason, not an aesthetic one: browsers drop background colours
+unless the operator ticks "Background graphics", which would have silently
+erased the amber partial-audit banner. That puts this phase's own pass
+condition inside a print dialog checkbox. A standalone `.html` controls its
+own rendering; its declarations are borders and text, so they survive the
+client printing it to PDF afterwards. True PDF generation (path C) stays
+parked — B is its foundation, since a faithful document is what a headless
+renderer would consume.
+
+ARCHITECTURE — THE APP AND THE DOCUMENT CANNOT DISAGREE. `lib/report-status.ts`
+is the single source of completeness, severity tallies, grade and declaration
+wording. Its load-bearing choice: `grade` is `null` unless every section
+completed, so a consumer cannot print a grade on a partial audit — it is never
+handed one. The export goes further than sharing data: it renders the SAME
+`GradeCard` and `SectionCard` components via `renderToStaticMarkup`, so there
+is no second rendering path in which laundering could occur. `SectionCard` is
+handed no `onRetry`, which is the only difference in the client document.
+
+A partial audit is declared four times over, deliberately redundantly: a
+bordered notice above the grade naming every unfinished section and why; the
+withheld grade; the footer; and the `<title>` plus filename, which read PARTIAL
+and carry into the browser tab and any printed header.
+
+COLOUR RULINGS EXECUTED. Vermilion is spent only on the primary CTA and on
+critical severity — every incidental accent from the dark build (bullets,
+spinners, focus rings, quote rules) is re-voiced to navy, so "critical" and
+"brand accent" can never look like the same thing. Severity *words* stay navy
+and hue is carried by fills, left rules, icons and grid-locked swatches:
+vermilion is 3.6:1 on white at 13px and yellow is far worse, and an
+accessibility tool does not get to ship a contrast failure on the one element
+that must always be read. Grade bands map A navy · B peri · C yellow · D/F
+vermilion inside a filled chip with per-band ink, because two of the four
+cannot carry legible text at any size. No stock Tailwind colours survive.
+`--text-tertiary` was raised from the kit's 0.45 to 0.55 — this app spends it
+on 10-11px metadata, where 0.45 lands at ~4.0:1.
+
+NORTH-STAR: product mark in the header, favicon, and the exported document's
+footer. Grid-locked, unrotated, unrecoloured, no decorative use taken — "at
+most one" permits zero. The ACP colour logo carries the lockup on the export
+cover, which is where the studio's identity belongs; the app header carries
+the product mark.
+
+CERTIFIED — local, against the live API, on the working tree of `b6aae73`:
+
+1. FULL CONCEPT AUDIT, Nielsen + a11y + overall, all complete. Grade D
+   rendered in the vermilion chip, 2/2 frameworks, 6 critical / 7 minor /
+   3 pass. Streaming verified live: pinned context panel, per-framework
+   checklist (Evaluating/Queued), navy spinner, export button correctly
+   disabled mid-run.
+2. THE A11Y CLAUSE, from that same run. The reworded prompt produced: "…not a
+   visual inspection or a WCAG conformance audit — a visual inspection requires
+   rendered UI to look at, and conformance testing requires a live product plus
+   assistive technology, and neither exists yet for this description." The
+   "neither" now refers to the rendered UI and live product not existing, which
+   is true. The garbled inversion is gone.
+3. EXPORT, COMPLETE. 690 KB, zero external references, 23 woff2 files inlined.
+   Opened OUTSIDE the app from a plain static server on :4599 — no Next
+   runtime, different origin — and rendered identically, fonts included.
+   Title "AuditLens Report — UX Audit"; footer "Complete audit — all sections
+   finished"; no partial markers anywhere.
+4. TRUNCATION + EXPORT — THE SLEEPER. Forced with a temporary local
+   `max_tokens=200`, reverted without committing (working tree confirmed
+   byte-identical to HEAD afterward, no markers left). All four frameworks cut
+   off, grade WITHHELD, 0/4. The export was then opened in the second browser:
+   ⚠ PARTIAL AUDIT above everything, all four sections named with their reason,
+   withheld grade, "No grade — this audit is incomplete", per-section banners
+   intact, no retry controls, filename `auditlens-report-PARTIAL-2026-07-25.html`,
+   tab title "PARTIAL (0 of 4 frameworks)". Pillar 1 survives into the client
+   document.
+5. PRINT SIMULATION. Every background-color stripped to white — the worst case
+   for a client printing to PDF. Every declaration survived on borders and text
+   alone. Two things did not, and were fixed in `b6aae73`: fill-only severity
+   swatches now carry a border, and the grade chip prints outlined (navy on
+   white) rather than ivory-on-white.
+6. FAILED STATE. Forced locally with an invalid API key, restored immediately
+   after. Vermilion rules and fills, navy headlines, "Claude API error: 401",
+   retry pills on all five sections, grade withheld, export correctly disabled
+   because no section had content to export.
+
+STILL NOT VERIFIED: nothing in this phase ran on the Vercel preview — all six
+runs are local against the working tree. The re-skin and export are unverified
+on deployed infrastructure.
+
+CARRIED FORWARD, STILL PARKED: two Vercel projects (`auditlens`,
+`auditlens-db1a`) deploying from one repo; protection lifted on only one.
+
+NOT TOUCHED, AS BRIEFED: engine, input logic, route architecture and all other
+prompts. No dark mode — the dark face is deleted, not toggled. `main` untouched.
