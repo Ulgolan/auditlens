@@ -216,6 +216,13 @@ const DOCUMENT_CSS = `
     /* Best-effort: keep the fills if the browser will allow it. The
        declarations do not depend on this succeeding. */
     * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    /* If the fill is dropped, ivory ink on white would erase the grade
+       letter. Print it outlined instead — legible either way. */
+    .grade-chip {
+      background: transparent !important;
+      color: var(--navy) !important;
+      border-color: var(--navy) !important;
+    }
     .doc-partial { break-inside: avoid; break-after: avoid; }
     .doc-brief { break-inside: avoid; }
     .doc-shots img { height: 110px; }

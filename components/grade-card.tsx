@@ -17,10 +17,10 @@ interface GradeCardProps {
  * per band keeps every grade readable and keeps the palette to primitives.
  */
 const BAND: Record<GradeBand, { fill: string; ink: string }> = {
-  a: { fill: "bg-navy", ink: "text-ivory" },
-  b: { fill: "bg-peri", ink: "text-ivory" },
-  c: { fill: "bg-minor", ink: "text-navy" },
-  d: { fill: "bg-critical", ink: "text-ivory" },
+  a: { fill: "bg-navy border-2 border-navy", ink: "text-ivory" },
+  b: { fill: "bg-peri border-2 border-peri", ink: "text-ivory" },
+  c: { fill: "bg-minor border-2 border-minor", ink: "text-navy" },
+  d: { fill: "bg-critical border-2 border-critical", ink: "text-ivory" },
 };
 
 /**
@@ -62,7 +62,7 @@ export function GradeCard({ sections }: GradeCardProps) {
           {grade && band ? (
             <>
               <div
-                className={`font-display flex h-[76px] w-[76px] items-center justify-center rounded-card text-5xl font-extrabold leading-none ${band.fill} ${band.ink}`}
+                className={`grade-chip font-display flex h-[76px] w-[76px] items-center justify-center rounded-card text-5xl font-extrabold leading-none ${band.fill} ${band.ink}`}
               >
                 {grade}
               </div>
@@ -133,7 +133,12 @@ function Tally({
     <div className="text-center">
       <div className="text-2xl font-bold text-text-primary leading-none">{count}</div>
       <div className="flex items-center justify-center gap-1.5 mt-1.5">
-        <span className={`h-2 w-2 rounded-[2px] ${swatch}`} aria-hidden="true" />
+        {/* Border as well as fill: a browser printing with background
+            graphics off drops the fill, and the swatch would vanish. */}
+        <span
+          className={`h-2 w-2 rounded-[2px] border-2 ${swatch}`}
+          aria-hidden="true"
+        />
         <span className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-text-tertiary">
           {label}
         </span>
