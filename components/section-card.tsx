@@ -47,9 +47,17 @@ export function SectionCard({ section, onRetry, busy, flush }: SectionCardProps)
     >
       {/* The reading column. Capped at a measure rather than filling the
           card: the shell has to be wide enough for the thumbnails, grade
-          card and tab bar, but a 90ch line is a wall of text. The cap is
-          in ch so it tracks the font size instead of a pixel guess. */}
-      <div className="mx-auto max-w-[74ch]">
+          card and tab bar, but a 90ch line is a wall of text.
+
+          The `text-[19px]` here is load-bearing, not styling. `ch` resolves
+          against the font-size of the element carrying the max-width, so
+          with the wrapper left at the inherited 16px the cap was computed
+          at the wrong size — raising the report type to 19px silently
+          narrowed the column to ~62ch instead of holding it at 74. Setting
+          the wrapper to the reading size makes the cap mean what it says.
+          Children with explicit sizes (the declaration banner) are
+          unaffected. */}
+      <div className="mx-auto max-w-[74ch] text-[19px]">
       {/* Declaration banner — only when the section is not trustworthy.
           Severity is carried by the fill, the left rule and the icon. The
           words stay navy: vermilion at 13px is 3.6:1 on white and yellow
