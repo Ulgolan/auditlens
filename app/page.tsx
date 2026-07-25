@@ -50,6 +50,12 @@ export default function Home() {
    */
   const imagesRef = useRef<ProcessedImage[] | null>(null);
 
+  /** Mirror of `sections` so retry can read the latest state synchronously. */
+  const sectionsRef = useRef<ReportSection[]>([]);
+  useEffect(() => {
+    sectionsRef.current = sections;
+  }, [sections]);
+
   const processScreenshot = (s: Screenshot): Promise<ProcessedImage> => {
     const MAX_WIDTH = 1920;
     const MAX_HEIGHT = 1080;
@@ -290,6 +296,75 @@ export default function Home() {
     }
   };
 
+  /**
+   * Re-run one section, then recompute the Overall pass.
+   *
+   * The recompute is not optional. A retried section that succeeds
+   * changes what the audit says; leaving the old Overall in place would
+   * either strand a withheld grade over a now-complete audit, or show a
+   * letter grade derived from text that no longer exists. Either one is
+   * the same class of dishonesty this phase exists to remove.
+   */
+  const retrySection = async (id: string) => {
+    const images = imagesRef.current;
+    if (!images) {
+      setError("Screenshots are no longer available for retry. Start a new audit.");
+      setEvalPhase("error");
+      return;
+    }
+
+    const current = sectionsRef.current;
+    const index = current.findIndex((s) => s.id === id);
+    const overallIndex = current.findIndex((s) => s.id === OVERALL_ID);
+    if (index < 0) return;
+
+    setError(null);
+    setEvalPhase("running");
+
+    try {
+      if (id === OVERALL_ID) {
+        const frameworkResults = current.filter((s) => s.id !== OVERALL_ID);
+        await runSection(
+          index,
+          current[index],
+          images,
+          assembleForOverall(frameworkResults)
+        );
+      } else {
+        // Invalidate the Overall immediately — the grade it produced is
+        // now stale, and it should visibly go away rather than linger.
+        if (overallIndex >= 0) {
+          setSections((prev) =>
+            prev.map((s, i) =>
+              i === overallIndex
+                ? { ...s, status: "pending", text: "", detail: undefined }
+                : s
+            )
+          );
+        }
+
+        const retried = await runSection(index, current[index], images);
+
+        if (overallIndex >= 0) {
+          const frameworkResults = current
+            .filter((s) => s.id !== OVERALL_ID)
+            .map((s) => (s.id === id ? retried : s));
+          await runSection(
+            overallIndex,
+            current[overallIndex],
+            images,
+            assembleForOverall(frameworkResults)
+          );
+        }
+      }
+
+      setEvalPhase("done");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+      setEvalPhase("error");
+    }
+  };
+
   const resetAll = () => {
     setScreenshots([]);
     setTaskScenario("");
@@ -471,7 +546,12 @@ export default function Home() {
             {sections
               .filter((s) => s.status !== "pending")
               .map((s) => (
-                <SectionCard key={s.id} section={s} />
+                <SectionCard
+                  key={s.id}
+                  section={s}
+                  onRetry={() => retrySection(s.id)}
+                  busy={isEvaluating}
+                />
               ))}
             <div ref={reportEndRef} />
           </div>

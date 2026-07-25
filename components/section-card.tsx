@@ -5,6 +5,9 @@ import { ReportRenderer } from "@/components/report-renderer";
 
 interface SectionCardProps {
   section: ReportSection;
+  onRetry?: () => void;
+  /** True while any section is running — retry is disabled meanwhile. */
+  busy?: boolean;
 }
 
 /**
@@ -14,7 +17,7 @@ interface SectionCardProps {
  * own content. The operator should never have to compare the report
  * against the framework list to work out that something is missing.
  */
-export function SectionCard({ section }: SectionCardProps) {
+export function SectionCard({ section, onRetry, busy }: SectionCardProps) {
   const { status, detail, label, text } = section;
 
   const isIncomplete = status === "truncated" || status === "failed";
@@ -56,6 +59,20 @@ export function SectionCard({ section }: SectionCardProps) {
               Treat the findings below as partial. Nothing here should be read as a
               full evaluation.
             </div>
+
+            {onRetry && (
+              <button
+                onClick={onRetry}
+                disabled={busy}
+                className={`mt-3 px-3.5 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                  busy
+                    ? "bg-white/[0.02] border-border text-white/20 cursor-not-allowed"
+                    : "bg-white/[0.06] border-border-hover text-text-primary cursor-pointer hover:bg-white/[0.1]"
+                }`}
+              >
+                {busy ? "Audit running..." : `↻ Retry ${label}`}
+              </button>
+            )}
           </div>
         </div>
       )}
