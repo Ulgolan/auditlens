@@ -35,6 +35,8 @@ export function ExportDocument({
   const { isComplete, completedCount, totalCount, incomplete, withheldReason } =
     deriveCompleteness(sections);
 
+  const rendered = sections.filter((s) => s.status !== "pending");
+
   return (
     <div className="doc">
       <header className="doc-head">
@@ -137,11 +139,33 @@ export function ExportDocument({
 
       <GradeCard sections={sections} />
 
-      {sections
-        .filter((s) => s.status !== "pending")
-        .map((s) => (
-          <SectionCard key={s.id} section={s} />
-        ))}
+      {/* Anchor contents. The app answers the same navigation need with a
+          tab bar, but tabs are app furniture — a document a client scrolls
+          and prints needs anchors, not state. Statuses are repeated here
+          so the contents cannot read as a clean list of finished work. */}
+      {rendered.length > 1 && (
+        <nav className="doc-toc" aria-label="Contents">
+          <h2 className="font-mono doc-section-kicker">Contents</h2>
+          <ol>
+            {rendered.map((s) => (
+              <li key={s.id}>
+                <a href={`#section-${s.id}`}>{s.label}</a>
+                {s.status !== "complete" && (
+                  <span className="doc-toc-status">
+                    {s.status === "failed" ? "did not complete" : "cut off"}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )}
+
+      {rendered.map((s) => (
+        <div key={s.id} id={`section-${s.id}`}>
+          <SectionCard section={s} />
+        </div>
+      ))}
 
       <footer className="doc-foot">
         {meta.markDataUri && (

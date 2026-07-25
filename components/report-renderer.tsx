@@ -12,7 +12,10 @@ export function ReportRenderer({ content }: ReportRendererProps) {
   const lines = content.split("\n");
 
   return (
-    <div className="text-sm leading-7 text-text-secondary">
+    // 15px, not 14: at 14px the old 860px shell produced a 94ch line.
+    // Raising the body size and capping the column in ch lands the measure
+    // in the 70-80 range without shrinking the page to a strip.
+    <div className="text-[15px] leading-[1.75] text-text-secondary">
       {lines.map((line, i) => {
         const trimmed = line.trim();
 

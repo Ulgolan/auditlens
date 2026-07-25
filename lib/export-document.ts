@@ -198,6 +198,25 @@ const DOCUMENT_CSS = `
     color: var(--text-tertiary); margin-top: 5px;
   }
 
+  .doc-toc {
+    margin-bottom: 26px; padding: 16px 20px;
+    border: 1px solid var(--border); border-radius: 14px;
+  }
+  .doc-toc ol {
+    margin: 0; padding-left: 20px;
+    font-size: 0.86rem; line-height: 1.9; color: var(--text-primary);
+  }
+  .doc-toc a { color: var(--text-primary); text-decoration: none; }
+  .doc-toc a:hover { text-decoration: underline; }
+  .doc-toc-status {
+    font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--text-secondary); margin-left: 10px;
+    border: 1px solid var(--minor); border-radius: 100px; padding: 1px 8px;
+    white-space: nowrap;
+  }
+  /* Anchor targets clear the top edge when jumped to. */
+  [id^="section-"] { scroll-margin-top: 16px; }
+
   .doc-foot {
     display: flex; align-items: center; gap: 10px;
     margin-top: 30px; padding-top: 18px;
@@ -225,6 +244,7 @@ const DOCUMENT_CSS = `
     }
     .doc-partial { break-inside: avoid; break-after: avoid; }
     .doc-brief { break-inside: avoid; }
+    .doc-toc { break-inside: avoid; }
     .doc-shots img { height: 110px; }
   }
 `;

@@ -9,6 +9,12 @@ interface SectionCardProps {
   onRetry?: () => void;
   /** True while any section is running — retry is disabled meanwhile. */
   busy?: boolean;
+  /**
+   * Drop the card's own border, radius and bottom margin. Used when the
+   * card sits inside a container that already draws them — the Overall
+   * collapsible — so the two frames don't double up.
+   */
+  flush?: boolean;
 }
 
 /**
@@ -18,7 +24,7 @@ interface SectionCardProps {
  * own content. The operator should never have to compare the report
  * against the framework list to work out that something is missing.
  */
-export function SectionCard({ section, onRetry, busy }: SectionCardProps) {
+export function SectionCard({ section, onRetry, busy, flush }: SectionCardProps) {
   const { status, label, text } = section;
 
   // The wording lives in lib/report-status so the exported document
@@ -27,14 +33,23 @@ export function SectionCard({ section, onRetry, busy }: SectionCardProps) {
 
   return (
     <div
-      className={`px-7 py-6 mb-4 rounded-card border bg-card ${
-        status === "failed"
-          ? "border-critical border-l-[4px]"
-          : status === "truncated"
-          ? "border-minor border-l-[4px]"
-          : "border-border"
+      className={`px-10 py-8 bg-card ${
+        flush
+          ? ""
+          : `mb-4 rounded-card border ${
+              status === "failed"
+                ? "border-critical border-l-[4px]"
+                : status === "truncated"
+                ? "border-minor border-l-[4px]"
+                : "border-border"
+            }`
       }`}
     >
+      {/* The reading column. Capped at a measure rather than filling the
+          card: the shell has to be wide enough for the thumbnails, grade
+          card and tab bar, but a 90ch line is a wall of text. The cap is
+          in ch so it tracks the font size instead of a pixel guess. */}
+      <div className="mx-auto max-w-[74ch]">
       {/* Declaration banner — only when the section is not trustworthy.
           Severity is carried by the fill, the left rule and the icon. The
           words stay navy: vermilion at 13px is 3.6:1 on white and yellow
@@ -98,6 +113,7 @@ export function SectionCard({ section, onRetry, busy }: SectionCardProps) {
           Evaluating {label}...
         </div>
       )}
+      </div>
     </div>
   );
 }

@@ -9,6 +9,8 @@ import { FrameworkToggles } from "@/components/framework-toggles";
 import { AudienceSelector } from "@/components/audience-selector";
 import { GradeCard } from "@/components/grade-card";
 import { SectionCard } from "@/components/section-card";
+import { SectionTabs } from "@/components/section-tabs";
+import { OverallPanel } from "@/components/overall-panel";
 import { FrameworkProgress } from "@/components/framework-progress";
 
 interface ProcessedImage {
@@ -45,7 +47,11 @@ export default function Home() {
   const [sections, setSections] = useState<ReportSection[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
+  /** Which framework tab is in focus. Empty until a run starts. */
+  const [activeTab, setActiveTab] = useState<string>("");
+  const [overallOpen, setOverallOpen] = useState(true);
   const reportEndRef = useRef<HTMLDivElement>(null);
+  const sectionAnchorRef = useRef<HTMLDivElement>(null);
 
   /**
    * Screenshots are compressed once per audit and kept here so a
@@ -135,12 +141,22 @@ export default function Home() {
   const showInput = evalPhase === "idle";
   const showReport = evalPhase !== "idle";
 
-  // Auto-scroll while a section is streaming
+  /**
+   * While a run is in flight, follow whichever section is streaming.
+   *
+   * Replaces v2.0's scroll-to-bottom: with one section on screen at a
+   * time there is no bottom to chase, and an operator watching a run
+   * wants the tab to move with the work rather than having to click
+   * along behind it. Once the run stops, the tab stays where the
+   * operator last put it.
+   */
   useEffect(() => {
-    if (evalPhase === "running" && reportEndRef.current) {
-      reportEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
-    }
-  }, [sections, evalPhase]);
+    if (evalPhase !== "running") return;
+    const streaming = sections.find(
+      (s) => s.status === "streaming" && s.id !== OVERALL_ID
+    );
+    if (streaming && streaming.id !== activeTab) setActiveTab(streaming.id);
+  }, [sections, evalPhase, activeTab]);
 
   /**
    * Run a single section and stream it into state.
@@ -283,6 +299,8 @@ export default function Home() {
       status: "pending",
     });
     setSections(initial);
+    setActiveTab(initial[0]?.id ?? "");
+    setOverallOpen(true);
 
     try {
       const images = await Promise.all(screenshots.map((s) => processScreenshot(s)));
@@ -421,6 +439,22 @@ export default function Home() {
 
   const canExport = sections.some((s) => s.text.trim().length > 0) && !isEvaluating;
 
+  const overallSection = sections.find((s) => s.id === OVERALL_ID);
+  // Queued frameworks stay out of the tab bar until they have started —
+  // a tab that opens onto nothing is worse than no tab.
+  const visibleFrameworkSections = sections.filter(
+    (s) => s.id !== OVERALL_ID && s.status !== "pending"
+  );
+  const activeSection =
+    visibleFrameworkSections.find((s) => s.id === activeTab) ??
+    visibleFrameworkSections[0];
+
+  /** Tabs double as anchors: selecting one brings the section into view. */
+  const selectTab = (id: string) => {
+    setActiveTab(id);
+    sectionAnchorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   const resetAll = () => {
     setScreenshots([]);
     setConceptText("");
@@ -434,7 +468,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-ground">
       {/* Header — north-star as the product mark, lockup per the brand kit. */}
-      <header className="px-8 py-4 border-b border-border flex items-center justify-between bg-card">
+      <header className="px-6 py-4 border-b border-border bg-card">
+        <div className="max-w-[960px] mx-auto flex items-center justify-between">
         <div className="flex items-center gap-[11px]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/motifs/north-star.svg" alt="" className="h-7 w-7 flex-none" />
@@ -471,9 +506,10 @@ export default function Home() {
             </button>
           </div>
         )}
+        </div>
       </header>
 
-      <main className="max-w-[860px] mx-auto px-6 py-8">
+      <main className="max-w-[960px] mx-auto px-6 py-8">
         {/* ═══ INPUT PANEL ═══ */}
         {showInput && (
           <div className="animate-[fadeIn_0.3s_ease]">
@@ -620,17 +656,32 @@ export default function Home() {
             {/* Grade card — suppressed unless every section completed */}
             {evalPhase === "done" && <GradeCard sections={sections} />}
 
-            {/* Sections */}
-            {sections
-              .filter((s) => s.status !== "pending")
-              .map((s) => (
-                <SectionCard
-                  key={s.id}
-                  section={s}
-                  onRetry={() => retrySection(s.id)}
-                  busy={isEvaluating}
-                />
-              ))}
+            {/* Overall, directly under the grade, open by default */}
+            {overallSection && overallSection.status !== "pending" && (
+              <OverallPanel
+                section={overallSection}
+                open={overallOpen}
+                onToggle={() => setOverallOpen((v) => !v)}
+                onRetry={() => retrySection(overallSection.id)}
+                busy={isEvaluating}
+              />
+            )}
+
+            {/* One framework at a time, reached by the sticky tab bar */}
+            <div ref={sectionAnchorRef} className="scroll-mt-24" />
+            <SectionTabs
+              sections={visibleFrameworkSections}
+              activeId={activeSection?.id ?? ""}
+              onSelect={selectTab}
+            />
+            {activeSection && (
+              <SectionCard
+                key={activeSection.id}
+                section={activeSection}
+                onRetry={() => retrySection(activeSection.id)}
+                busy={isEvaluating}
+              />
+            )}
             <div ref={reportEndRef} />
           </div>
         )}

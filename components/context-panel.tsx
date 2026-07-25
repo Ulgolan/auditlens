@@ -46,7 +46,10 @@ export function ContextPanel({
   const conceptShown = expanded || !isLong ? concept : concept.slice(0, CLAMP) + "…";
 
   return (
-    <div className="sticky top-0 z-20 -mx-6 px-6 pt-3 pb-3 mb-5 bg-ground/95 backdrop-blur-md border-b border-border">
+    // Not sticky any more: the tab bar is what follows the operator down
+    // a long report, and two elements pinned to top:0 would stack on each
+    // other. Material and request now live above the fold and scroll away.
+    <div className="pt-1 pb-4 mb-5 border-b border-border">
       {/* Material */}
       <div className="mb-2.5">
         {hasVisuals && (
