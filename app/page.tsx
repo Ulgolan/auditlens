@@ -8,6 +8,7 @@ import { FrameworkToggles } from "@/components/framework-toggles";
 import { AudienceSelector } from "@/components/audience-selector";
 import { GradeCard } from "@/components/grade-card";
 import { SectionCard } from "@/components/section-card";
+import { FrameworkProgress } from "@/components/framework-progress";
 
 interface ProcessedImage {
   data: string;
@@ -441,19 +442,12 @@ export default function Home() {
               ))}
             </div>
 
-            {/* Running indicator (replaced by the per-framework checklist in the next step) */}
-            {isEvaluating && (
-              <div className="flex items-center gap-4 px-5 py-4 bg-accent-dim border border-accent-border/40 rounded-xl mb-5">
-                <div
-                  className="w-5 h-5 rounded-full border-2 border-accent/30 border-t-accent"
-                  style={{ animation: "spin 0.8s linear infinite" }}
-                />
-                <div className="text-[13px] font-semibold text-accent">
-                  {evalPhase === "processing"
-                    ? "Processing screenshots..."
-                    : "Running evaluation frameworks..."}
-                </div>
-              </div>
+            {/* Per-framework progress */}
+            {(isEvaluating || sections.some((s) => s.status === "streaming")) && (
+              <FrameworkProgress
+                sections={sections}
+                preparing={evalPhase === "processing"}
+              />
             )}
 
             {/* Error */}
