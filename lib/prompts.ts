@@ -136,10 +136,33 @@ Never present an unverifiable item as confirmed. A reviewer must be able to tell
 
 // ─── Public builders ───────────────────────────────────
 
-export function buildFrameworkSystemPrompt(
-  frameworkId: string,
-  audience: string
-): string {
+/**
+ * System prompt for every framework pass.
+ *
+ * Deliberately identical across all frameworks in an audit. Prompt
+ * caching is a prefix match rendered tools -> system -> messages, so a
+ * system prompt that varied per framework would invalidate the cache
+ * before reaching the screenshots and we'd re-pay for the images on
+ * every call. The framework-specific instruction goes in the user turn
+ * *after* the images instead — see buildFrameworkInstruction.
+ */
+export function buildSharedSystemPrompt(audience: string): string {
+  return `${preamble(audience)}
+
+## HOW THIS AUDIT RUNS
+
+This audit is executed one framework at a time. Each pass evaluates exactly one framework, named in the user message. Other frameworks are handled by separate passes, and a separate final pass produces the overall grade.
+
+In every pass: output **only** the section you are asked for. No introduction, no summary of other frameworks, no overall grade, no quick wins, no conclusion.
+
+${FORMAT_RULES}`;
+}
+
+/**
+ * Framework-specific instruction. Goes in the user turn, after the
+ * images, so everything ahead of it stays byte-identical and cacheable.
+ */
+export function buildFrameworkInstruction(frameworkId: string): string {
   const block = FRAMEWORK_BLOCKS[frameworkId];
   const heading = FRAMEWORK_HEADINGS[frameworkId];
 
@@ -147,13 +170,7 @@ export function buildFrameworkSystemPrompt(
     throw new Error(`Unknown framework: ${frameworkId}`);
   }
 
-  return `${preamble(audience)}
-
-## YOUR TASK — ONE FRAMEWORK ONLY
-
-You are running exactly one framework in this pass: **${heading}**. Other frameworks are handled by separate passes.
-
-Output **only** this framework's section. Do not write an introduction, do not summarise the other frameworks, and do not produce an overall grade, quick wins, or a conclusion — a separate final pass does that.
+  return `Run exactly one framework now: **${heading}**.
 
 Begin your response with this exact line and nothing before it:
 
@@ -161,9 +178,7 @@ Begin your response with this exact line and nothing before it:
 
 Then the evaluation:
 
-${block}
-
-${FORMAT_RULES}`;
+${block}`;
 }
 
 export function buildOverallSystemPrompt(audience: string): string {

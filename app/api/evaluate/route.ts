@@ -1,5 +1,9 @@
 import { NextRequest } from "next/server";
-import { buildFrameworkSystemPrompt, buildOverallSystemPrompt } from "@/lib/prompts";
+import {
+  buildSharedSystemPrompt,
+  buildFrameworkInstruction,
+  buildOverallSystemPrompt,
+} from "@/lib/prompts";
 
 export const maxDuration = 300;
 export const runtime = "nodejs";
@@ -51,11 +55,17 @@ export async function POST(req: NextRequest) {
     }
 
     // ─── Build system prompt ───
+    // For framework passes this is identical on every call, which is
+    // what lets the screenshots below it stay cached.
     let system: string;
+    let instruction: string | null = null;
     try {
-      system = isOverall
-        ? buildOverallSystemPrompt(audience)
-        : buildFrameworkSystemPrompt(framework, audience);
+      if (isOverall) {
+        system = buildOverallSystemPrompt(audience);
+      } else {
+        system = buildSharedSystemPrompt(audience);
+        instruction = buildFrameworkInstruction(framework);
+      }
     } catch {
       return new Response(JSON.stringify({ error: `Unknown framework: ${framework}` }), {
         status: 400,
@@ -72,17 +82,6 @@ export async function POST(req: NextRequest) {
         text: `Here is the assembled audit report. Synthesise the final assessment from it.\n\n---\n\n${priorReport || "(No completed sections.)"}`,
       });
     } else {
-      for (const img of images) {
-        content.push({
-          type: "image",
-          source: {
-            type: "base64",
-            media_type: img.mediaType,
-            data: img.data,
-          },
-        });
-      }
-
       const screenshotContext =
         images.length > 1
           ? `I've uploaded ${images.length} screenshots showing a sequential flow. Evaluate them as a unified experience, referencing specific screens by number (Screen 1, Screen 2, etc.).`
@@ -92,10 +91,32 @@ export async function POST(req: NextRequest) {
         ? `\n\nTask scenario: ${taskScenario}`
         : "\n\nNo specific task scenario provided — infer the most likely primary task from the UI and note that the walkthrough is based on inference.";
 
+      // Stable prefix: images + shared context. Cached across every
+      // framework call in this audit, so calls 2..N read the images at
+      // roughly a tenth of the cost instead of re-uploading them.
+      images.forEach((img, i) => {
+        const block: Record<string, unknown> = {
+          type: "image",
+          source: {
+            type: "base64",
+            media_type: img.mediaType,
+            data: img.data,
+          },
+        };
+        if (i === images.length - 1) {
+          block.cache_control = { type: "ephemeral" };
+        }
+        content.push(block);
+      });
+
       content.push({
         type: "text",
-        text: `${screenshotContext}${taskContext}\n\nRun your assigned framework now.`,
+        text: `${screenshotContext}${taskContext}`,
+        cache_control: { type: "ephemeral" },
       });
+
+      // Volatile suffix: the only part that differs per framework.
+      content.push({ type: "text", text: instruction as string });
     }
 
     // ─── Call Claude ───
@@ -108,7 +129,16 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         model: "claude-sonnet-5",
-        max_tokens: 16000,
+        // One framework per call now, and streaming is on, so there is
+        // room to be generous. max_tokens caps thinking + visible text
+        // together — v1's 16000 was shared across all four frameworks
+        // AND adaptive thinking, which is a direct cause of mid-report
+        // truncation. You are billed for tokens generated, not the cap.
+        max_tokens: isOverall ? 16000 : 32000,
+        // Explicit rather than implicit: Sonnet 5 runs adaptive thinking
+        // when `thinking` is omitted, so v1 was already spending part of
+        // its budget on invisible reasoning without saying so anywhere.
+        thinking: { type: "adaptive" },
         output_config: { effort: "medium" },
         stream: true,
         system,
