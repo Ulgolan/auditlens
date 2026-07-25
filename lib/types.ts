@@ -19,7 +19,33 @@ export interface Audience {
   description: string;
 }
 
-export type EvalPhase = "idle" | "uploading" | "analyzing" | "streaming" | "done" | "error";
+export type EvalPhase = "idle" | "processing" | "running" | "done" | "error";
+
+/**
+ * Why a section stopped.
+ * - complete  → the model signalled end_turn. Trustworthy.
+ * - truncated → hit max_tokens, OR the stream ended with no completion
+ *               signal at all (dropped connection / function timeout).
+ *               Either way the section is incomplete and must say so.
+ * - failed    → the request errored, or the model declined.
+ */
+export type SectionStatus =
+  | "pending"
+  | "streaming"
+  | "complete"
+  | "truncated"
+  | "failed";
+
+export interface ReportSection {
+  id: string; // framework id, or "overall"
+  label: string;
+  text: string;
+  status: SectionStatus;
+  /** Human-readable reason, shown to the operator when not complete. */
+  detail?: string;
+}
+
+export const OVERALL_ID = "overall";
 
 export const FRAMEWORKS: Framework[] = [
   { id: "nielsen", label: "Nielsen's 10", icon: "📐", description: "Heuristic evaluation with Gestalt principles", default: true },

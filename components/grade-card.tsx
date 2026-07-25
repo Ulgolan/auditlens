@@ -1,44 +1,5 @@
 "use client";
 
-import type { EvalPhase } from "@/lib/types";
-
-// ═══════════════════════════════════════════════════════
-// STREAMING INDICATOR
-// ═══════════════════════════════════════════════════════
-
-interface StreamingIndicatorProps {
-  phase: EvalPhase;
-}
-
-const PHASES = [
-  { id: "uploading", label: "Processing screenshots...", icon: "📸" },
-  { id: "analyzing", label: "Running evaluation frameworks...", icon: "🔬" },
-  { id: "streaming", label: "Writing audit report...", icon: "✍️" },
-] as const;
-
-export function StreamingIndicator({ phase }: StreamingIndicatorProps) {
-  return (
-    <div className="flex items-center gap-4 px-5 py-4 bg-accent-dim border border-accent-border/40 rounded-xl mb-5">
-      <div
-        className="w-5 h-5 rounded-full border-2 border-accent/30 border-t-accent"
-        style={{ animation: "spin 0.8s linear infinite" }}
-      />
-      <div>
-        {PHASES.map((p) => (
-          <div
-            key={p.id}
-            className={`text-[13px] flex items-center gap-1.5 mb-0.5 transition-all duration-300 ${
-              p.id === phase ? "font-semibold text-accent" : "font-normal text-white/20"
-            }`}
-          >
-            <span>{p.icon}</span> {p.label}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 // ═══════════════════════════════════════════════════════
 // GRADE CARD
 // ═══════════════════════════════════════════════════════

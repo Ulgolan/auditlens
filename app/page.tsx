@@ -1,13 +1,35 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import type { Screenshot, EvalPhase } from "@/lib/types";
-import { FRAMEWORKS, AUDIENCES } from "@/lib/types";
+import type { Screenshot, EvalPhase, ReportSection, SectionStatus } from "@/lib/types";
+import { FRAMEWORKS, AUDIENCES, OVERALL_ID } from "@/lib/types";
 import { DropZone } from "@/components/drop-zone";
 import { FrameworkToggles } from "@/components/framework-toggles";
 import { AudienceSelector } from "@/components/audience-selector";
-import { StreamingIndicator, GradeCard } from "@/components/grade-card";
+import { GradeCard } from "@/components/grade-card";
 import { ReportRenderer } from "@/components/report-renderer";
+
+interface ProcessedImage {
+  data: string;
+  mediaType: string;
+}
+
+/**
+ * Assemble the report text handed to the final Overall pass.
+ * Incomplete sections are labelled explicitly so the model synthesises
+ * from what actually exists rather than inferring the gaps.
+ */
+function assembleForOverall(sections: ReportSection[]): string {
+  return sections
+    .map((s) => {
+      if (s.status === "complete") return s.text;
+      if (s.status === "truncated") {
+        return `${s.text}\n\n[SECTION INCOMPLETE — the ${s.label} evaluation was cut off before it finished. Do not infer what the rest would have said.]`;
+      }
+      return `## ${s.label}\n\n[SECTION MISSING — the ${s.label} evaluation did not produce a result.]`;
+    })
+    .join("\n\n");
+}
 
 export default function Home() {
   const [screenshots, setScreenshots] = useState<Screenshot[]>([]);
@@ -17,11 +39,17 @@ export default function Home() {
     FRAMEWORKS.filter((f) => f.default).map((f) => f.id)
   );
   const [evalPhase, setEvalPhase] = useState<EvalPhase>("idle");
-  const [report, setReport] = useState("");
+  const [sections, setSections] = useState<ReportSection[]>([]);
   const [error, setError] = useState<string | null>(null);
   const reportEndRef = useRef<HTMLDivElement>(null);
 
-  const processScreenshot = (s: Screenshot): Promise<{ data: string; mediaType: string }> => {
+  /**
+   * Screenshots are compressed once per audit and kept here so a
+   * per-section retry can reuse them instead of recompressing.
+   */
+  const imagesRef = useRef<ProcessedImage[] | null>(null);
+
+  const processScreenshot = (s: Screenshot): Promise<ProcessedImage> => {
     const MAX_WIDTH = 1920;
     const MAX_HEIGHT = 1080;
 
@@ -29,8 +57,8 @@ export default function Home() {
       const img = new Image();
 
       img.onload = () => {
-        let width = img.width;
-        let height = img.height;
+        const width = img.width;
+        const height = img.height;
 
         const widthRatio = MAX_WIDTH / width;
         const heightRatio = MAX_HEIGHT / height;
@@ -67,10 +95,7 @@ export default function Home() {
               }
 
               const base64 = result.split(",")[1] || "";
-              resolve({
-                data: base64,
-                mediaType: "image/jpeg",
-              });
+              resolve({ data: base64, mediaType: "image/jpeg" });
             };
             reader.onerror = () => reject(new Error("Failed to read compressed image"));
             reader.readAsDataURL(blob);
@@ -85,38 +110,49 @@ export default function Home() {
     });
   };
 
-  const isEvaluating = evalPhase !== "idle" && evalPhase !== "done" && evalPhase !== "error";
+  const isEvaluating = evalPhase === "processing" || evalPhase === "running";
   const canEvaluate = screenshots.length > 0 && frameworks.length > 0 && !isEvaluating;
   const showInput = evalPhase === "idle";
   const showReport = evalPhase !== "idle";
 
-  // Auto-scroll during streaming
+  // Auto-scroll while a section is streaming
   useEffect(() => {
-    if (evalPhase === "streaming" && reportEndRef.current) {
+    if (evalPhase === "running" && reportEndRef.current) {
       reportEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
     }
-  }, [report, evalPhase]);
+  }, [sections, evalPhase]);
 
-  const runEvaluation = async () => {
-    if (!canEvaluate) return;
+  /**
+   * Run a single section and stream it into state.
+   *
+   * The critical difference from v1: this reads `stop_reason` off the
+   * message_delta event. v1 parsed that event and dropped it on the
+   * floor, which is why a truncated report looked identical to a
+   * complete one.
+   */
+  const runSection = async (
+    index: number,
+    section: ReportSection,
+    images: ProcessedImage[],
+    priorReport?: string
+  ): Promise<ReportSection> => {
+    const { id, label } = section;
 
-    setEvalPhase("uploading");
-    setReport("");
-    setError(null);
+    const patch = (p: Partial<ReportSection>) =>
+      setSections((prev) => prev.map((s, i) => (i === index ? { ...s, ...p } : s)));
+
+    patch({ status: "streaming", text: "", detail: undefined });
 
     try {
-      const images = await Promise.all(screenshots.map((s) => processScreenshot(s)));
-
-      setEvalPhase("analyzing");
-
       const response = await fetch("/api/evaluate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          images,
+          images: id === OVERALL_ID ? [] : images,
           taskScenario,
           audience,
-          frameworks,
+          framework: id,
+          priorReport,
         }),
       });
 
@@ -125,15 +161,13 @@ export default function Home() {
         throw new Error(errData.error || `API error: ${response.status}`);
       }
 
-      setEvalPhase("streaming");
-
-      // Stream the response
       const reader = response.body?.getReader();
       if (!reader) throw new Error("No response stream");
 
       const decoder = new TextDecoder();
       let buffer = "";
       let fullText = "";
+      let stopReason: string | null = null;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -144,23 +178,110 @@ export default function Home() {
         buffer = lines.pop() || "";
 
         for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const data = line.slice(6).trim();
-            if (data === "[DONE]") continue;
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.type === "content_block_delta" && parsed.delta?.type === "text_delta") {
-                fullText += parsed.delta.text;
-                setReport(fullText);
-              }
-            } catch {
-              // Skip unparseable chunks
+          if (!line.startsWith("data: ")) continue;
+          const data = line.slice(6).trim();
+          if (data === "[DONE]") continue;
+
+          try {
+            const parsed = JSON.parse(data);
+
+            if (
+              parsed.type === "content_block_delta" &&
+              parsed.delta?.type === "text_delta"
+            ) {
+              fullText += parsed.delta.text;
+              patch({ text: fullText });
             }
+
+            // THE fix for v1's silent truncation: this event carries
+            // why generation stopped. Capture it.
+            if (parsed.type === "message_delta" && parsed.delta?.stop_reason) {
+              stopReason = parsed.delta.stop_reason;
+            }
+          } catch {
+            // Skip unparseable chunks
           }
         }
       }
 
-      setReport(fullText);
+      let status: SectionStatus;
+      let detail: string | undefined;
+
+      if (stopReason === "end_turn") {
+        status = "complete";
+      } else if (stopReason === "max_tokens") {
+        status = "truncated";
+        detail = "The model hit its output limit before finishing this section.";
+      } else if (stopReason === "refusal") {
+        status = "failed";
+        detail = "The model declined to produce this section.";
+      } else if (stopReason === null) {
+        // Stream ended with no completion signal. In v1 this silently
+        // passed as success.
+        status = "truncated";
+        detail =
+          "The stream ended without a completion signal — the connection dropped or the request timed out.";
+      } else {
+        status = "truncated";
+        detail = `The model stopped unexpectedly (${stopReason}).`;
+      }
+
+      if (status !== "failed" && fullText.trim().length === 0) {
+        status = "failed";
+        detail = "The model returned no content for this section.";
+      }
+
+      patch({ text: fullText, status, detail });
+      return { id, label, text: fullText, status, detail };
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : "Unknown error";
+      patch({ status: "failed", detail });
+      return { id, label, text: "", status: "failed", detail };
+    }
+  };
+
+  const runEvaluation = async () => {
+    if (!canEvaluate) return;
+
+    setEvalPhase("processing");
+    setError(null);
+
+    const initial: ReportSection[] = frameworks.map((id) => ({
+      id,
+      label: FRAMEWORKS.find((f) => f.id === id)?.label ?? id,
+      text: "",
+      status: "pending" as SectionStatus,
+    }));
+    initial.push({
+      id: OVERALL_ID,
+      label: "Overall Assessment",
+      text: "",
+      status: "pending",
+    });
+    setSections(initial);
+
+    try {
+      const images = await Promise.all(screenshots.map((s) => processScreenshot(s)));
+      imagesRef.current = images;
+
+      setEvalPhase("running");
+
+      // Frameworks run sequentially. Each gets its own request, its own
+      // duration budget, and its own completion status.
+      const completed: ReportSection[] = [];
+      for (let i = 0; i < initial.length - 1; i++) {
+        completed.push(await runSection(i, initial[i], images));
+      }
+
+      // Final pass synthesises from whatever actually completed.
+      const overallIndex = initial.length - 1;
+      await runSection(
+        overallIndex,
+        initial[overallIndex],
+        images,
+        assembleForOverall(completed)
+      );
+
       setEvalPhase("done");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
@@ -171,10 +292,13 @@ export default function Home() {
   const resetAll = () => {
     setScreenshots([]);
     setTaskScenario("");
-    setReport("");
+    setSections([]);
     setError(null);
     setEvalPhase("idle");
+    imagesRef.current = null;
   };
+
+  const fullReport = sections.map((s) => s.text).join("\n\n");
 
   return (
     <div className="min-h-screen bg-surface-0">
@@ -186,7 +310,7 @@ export default function Home() {
           </div>
           <div>
             <span className="text-base font-bold tracking-tight">AuditLens</span>
-            <span className="text-[11px] text-text-tertiary ml-2 font-mono">v1.0</span>
+            <span className="text-[11px] text-text-tertiary ml-2 font-mono">v2.0</span>
           </div>
         </div>
         {showReport && (
@@ -319,8 +443,20 @@ export default function Home() {
               ))}
             </div>
 
-            {/* Streaming indicator */}
-            {isEvaluating && <StreamingIndicator phase={evalPhase} />}
+            {/* Running indicator (replaced by the per-framework checklist in the next step) */}
+            {isEvaluating && (
+              <div className="flex items-center gap-4 px-5 py-4 bg-accent-dim border border-accent-border/40 rounded-xl mb-5">
+                <div
+                  className="w-5 h-5 rounded-full border-2 border-accent/30 border-t-accent"
+                  style={{ animation: "spin 0.8s linear infinite" }}
+                />
+                <div className="text-[13px] font-semibold text-accent">
+                  {evalPhase === "processing"
+                    ? "Processing screenshots..."
+                    : "Running evaluation frameworks..."}
+                </div>
+              </div>
+            )}
 
             {/* Error */}
             {error && (
@@ -336,16 +472,21 @@ export default function Home() {
               </div>
             )}
 
-            {/* Grade card — only after streaming done */}
-            {evalPhase === "done" && report && <GradeCard report={report} />}
+            {/* Grade card */}
+            {evalPhase === "done" && fullReport && <GradeCard report={fullReport} />}
 
-            {/* Report content */}
-            {report && (
-              <div className="px-7 py-6 bg-white/[0.015] border border-border rounded-2xl">
-                <ReportRenderer content={report} />
-                <div ref={reportEndRef} />
-              </div>
-            )}
+            {/* Sections */}
+            {sections
+              .filter((s) => s.text || s.status === "streaming" || s.status === "failed")
+              .map((s) => (
+                <div
+                  key={s.id}
+                  className="px-7 py-6 mb-4 bg-white/[0.015] border border-border rounded-2xl"
+                >
+                  <ReportRenderer content={s.text} />
+                </div>
+              ))}
+            <div ref={reportEndRef} />
           </div>
         )}
       </main>
