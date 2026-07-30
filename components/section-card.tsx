@@ -3,6 +3,7 @@
 import type { ReportSection } from "@/lib/types";
 import { describeSection } from "@/lib/report-status";
 import { ReportRenderer } from "@/components/report-renderer";
+import { IconCritical, IconMinor } from "@/components/icons";
 
 interface SectionCardProps {
   section: ReportSection;
@@ -71,9 +72,11 @@ export function SectionCard({ section, onRetry, busy, flush }: SectionCardProps)
               : "bg-minor-dim border-minor"
           }`}
         >
-          <span className="text-base leading-none mt-px">
-            {status === "failed" ? "🔴" : "⚠️"}
-          </span>
+          {status === "failed" ? (
+            <IconCritical className="w-4 h-4 mt-px shrink-0" />
+          ) : (
+            <IconMinor className="w-4 h-4 mt-px shrink-0" />
+          )}
           <div>
             <div className="text-[16px] font-bold mb-0.5 text-text-primary">
               {declaration.headline}

@@ -36,7 +36,7 @@ Calibrate all severity ratings to this audience. The same issue can be Minor for
 const FORMAT_RULES = `## FORMAT
 Write in markdown. Use:
 - \`###\` for heuristics/steps within your section
-- Severity badges inline: ✅ ⚠️ 🔴
+- Severity badges inline: [PASS] [MINOR] [CRITICAL]
 - Metric tags inline: (P) (B) (A)
 - Gestalt principle tags in brackets: [Proximity] [Similarity] etc.
 - Recommendations in blockquotes (> )
@@ -55,7 +55,7 @@ export const FRAMEWORK_HEADINGS: Record<string, string> = {
 
 const FRAMEWORK_BLOCKS: Record<string, string> = {
   nielsen: `Evaluate against ALL 10 heuristics in order. For each:
-- **Severity**: ✅ Pass / ⚠️ Minor / 🔴 Critical
+- **Severity**: [PASS] / [MINOR] / [CRITICAL]
 - **Finding**: Reference exact UI elements, labels, positions. Be specific — "The blue 'Submit' button in the bottom-right corner" not "the button."
 - **Recommendation** (Minor/Critical only): Specific, actionable fix a developer could ship tomorrow. Think Jira ticket, not design critique.
 - **Metrics to track** (Minor/Critical only): 2-3 metrics tagged as:
@@ -95,9 +95,9 @@ Accessibility is evaluated separately by a dedicated pass — do not duplicate i
 4. **If performed correctly, will the user see progress?** — Adequate feedback after the action?
 
 ### Step Verdicts:
-- ✅ **Smooth** — All 4 questions positive. No friction.
-- ⚠️ **Friction** — User can proceed but with hesitation. At least one question is Partial or Uncertain.
-- 🔴 **Blocked** — User cannot reasonably proceed. At least one question is No.
+- [PASS] **Smooth** — All 4 questions positive. No friction.
+- [MINOR] **Friction** — User can proceed but with hesitation. At least one question is Partial or Uncertain.
+- [CRITICAL] **Blocked** — User cannot reasonably proceed. At least one question is No.
 
 ### Rules:
 - Think like a first-time user, not a UX professional.
@@ -127,7 +127,7 @@ If the material shows only the ideal state, flag the other 4 as requiring verifi
 7. **Semantic structure** — Heading hierarchy, competing H1s. WCAG 1.3.1.
 8. **Alt text patterns** — Icons without text labels. WCAG 1.1.1.
 
-Use the same severity badges (✅ ⚠️ 🔴), recommendations, and metric tags as the other frameworks.
+Use the same severity badges ([PASS] [MINOR] [CRITICAL]), recommendations, and metric tags as the other frameworks.
 
 **Honesty requirement — this is not optional.** Distinguish what you actually confirmed from what you could not assess:
 - Tag confirmed findings **[a11y]**.

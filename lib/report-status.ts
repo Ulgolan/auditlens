@@ -63,9 +63,13 @@ export function deriveCompleteness(sections: ReportSection[]): AuditCompleteness
   // Severity counts come from the framework sections only. The overall pass
   // restates findings, and counting it too would inflate the totals.
   const frameworkText = frameworkSections.map((s) => s.text).join("\n\n");
-  const criticalCount = (frameworkText.match(/🔴/g) || []).length;
-  const minorCount = (frameworkText.match(/⚠️/g) || []).length;
-  const passCount = (frameworkText.match(/✅/g) || []).length;
+  // Tokens are the contract going forward ([PASS] [MINOR] [CRITICAL]). The
+  // emoji alternation stays only in case a request already in flight when
+  // this shipped returns the old badges — there is no stored report this
+  // app ever re-parses, so nothing older than that needs covering.
+  const criticalCount = (frameworkText.match(/\[CRITICAL\]|🔴/g) || []).length;
+  const minorCount = (frameworkText.match(/\[MINOR\]|⚠️/g) || []).length;
+  const passCount = (frameworkText.match(/\[PASS\]|✅/g) || []).length;
 
   const parsedGrade = parseGrade(overall?.text);
 
