@@ -365,3 +365,10 @@ PARKED, CARRIED FORWARD:
 NOT DONE, STATED PLAINLY: the ten-audit trust batch has not begun, and no
 live-fire run against a real target has happened. 2.0 is shipped, not
 proven in the field.
+
+### 2026-07-27 — Commander ruling: trust batch starts fresh at 0/10; the 25 Jul portfolio report does not count (testing run, known contrast-calibration false positives).
+
+### 2026-07-30 — MERGED PR #1 (fix/emoji-excision): Ivory Loom icon set v1
+live on main. Severity contract migrated ✅⚠️🔴 → [PASS]/[MINOR]/[CRITICAL],
+parser tolerant of legacy. 🔬 retained in context-panel per Commander
+override. Tower certified (raw pull + live preview), Commander eye passed.
