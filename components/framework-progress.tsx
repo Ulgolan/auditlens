@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReportSection, SectionStatus } from "@/lib/types";
+import { IconPass, IconMinor, IconCritical } from "@/components/icons";
 
 interface FrameworkProgressProps {
   sections: ReportSection[];
@@ -26,9 +27,9 @@ function StatusIcon({ status }: { status: SectionStatus }) {
     );
   }
 
-  if (status === "complete") return <span className="text-[13px] leading-none">✅</span>;
-  if (status === "truncated") return <span className="text-[13px] leading-none">⚠️</span>;
-  if (status === "failed") return <span className="text-[13px] leading-none">🔴</span>;
+  if (status === "complete") return <IconPass className="w-3.5 h-3.5 shrink-0" />;
+  if (status === "truncated") return <IconMinor className="w-3.5 h-3.5 shrink-0" />;
+  if (status === "failed") return <IconCritical className="w-3.5 h-3.5 shrink-0" />;
 
   return <div className="w-3.5 h-3.5 rounded-full border border-border-strong shrink-0" />;
 }

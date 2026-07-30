@@ -8,7 +8,6 @@ export interface Screenshot {
 export interface Framework {
   id: string;
   label: string;
-  icon: string;
   description: string;
   default: boolean;
 }
@@ -57,10 +56,10 @@ export interface ReportSection {
 export const OVERALL_ID = "overall";
 
 export const FRAMEWORKS: Framework[] = [
-  { id: "nielsen", label: "Nielsen's 10", icon: "📐", description: "Heuristic evaluation with Gestalt principles", default: true },
-  { id: "cw", label: "Cognitive Walkthrough", icon: "🧠", description: "Task-journey evaluation with mental model tracking", default: true },
-  { id: "state", label: "State Stress Test", icon: "⚡", description: "5 UI states: Empty, Loading, Partial, Error, Ideal", default: true },
-  { id: "a11y", label: "Accessibility", icon: "♿", description: "WCAG-based visual accessibility review", default: true },
+  { id: "nielsen", label: "Nielsen's 10", description: "Heuristic evaluation with Gestalt principles", default: true },
+  { id: "cw", label: "Cognitive Walkthrough", description: "Task-journey evaluation with mental model tracking", default: true },
+  { id: "state", label: "State Stress Test", description: "5 UI states: Empty, Loading, Partial, Error, Ideal", default: true },
+  { id: "a11y", label: "Accessibility", description: "WCAG-based visual accessibility review", default: true },
 ];
 
 /**

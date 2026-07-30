@@ -2,6 +2,7 @@
 
 import { useRef, useState, useCallback, useEffect } from "react";
 import type { Screenshot } from "@/lib/types";
+import { IconDropzone } from "@/components/icons";
 
 interface DropZoneProps {
   screenshots: Screenshot[];
@@ -80,7 +81,7 @@ export function DropZone({ screenshots, onAdd, onRemove }: DropZoneProps) {
       >
         {screenshots.length === 0 ? (
           <div className="text-center">
-            <div className="text-4xl mb-3 opacity-40">📸</div>
+            <IconDropzone className="w-9 h-9 mb-3 mx-auto opacity-40 text-text-secondary" />
             <div className="text-[19px] font-semibold text-text-secondary mb-1">
               Drop screenshots here
             </div>

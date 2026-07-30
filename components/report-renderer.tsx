@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { IconPass, IconMinor, IconCritical } from "@/components/icons";
 
 interface ReportRendererProps {
   content: string;
@@ -112,18 +113,16 @@ function formatInline(text: string): React.ReactNode[] {
     const boldMatch = remaining.match(/\*\*(.+?)\*\*/);
     if (boldMatch && boldMatch.index !== undefined) {
       if (boldMatch.index > 0) {
-        parts.push(
-          <span key={keyIdx++}>{highlightBadges(remaining.slice(0, boldMatch.index))}</span>
-        );
+        parts.push(...renderWithSeverityBadges(remaining.slice(0, boldMatch.index), `s${keyIdx++}`));
       }
       parts.push(
         <strong key={keyIdx++} className="text-text-primary font-bold">
-          {highlightBadges(boldMatch[1])}
+          {renderWithSeverityBadges(boldMatch[1], `s${keyIdx++}`)}
         </strong>
       );
       remaining = remaining.slice(boldMatch.index + boldMatch[0].length);
     } else {
-      parts.push(<span key={keyIdx++}>{highlightBadges(remaining)}</span>);
+      parts.push(...renderWithSeverityBadges(remaining, `s${keyIdx++}`));
       break;
     }
   }
@@ -136,4 +135,63 @@ function highlightBadges(text: string): string {
     .replace(/\(P\)/g, "⟨P⟩")
     .replace(/\(B\)/g, "⟨B⟩")
     .replace(/\(A\)/g, "⟨A⟩");
+}
+
+type Severity = "pass" | "minor" | "critical";
+
+const SEVERITY_TOKEN = /\[PASS\]|\[MINOR\]|\[CRITICAL\]|✅|⚠️|🔴/g;
+const SEVERITY_ICON: Record<Severity, typeof IconPass> = {
+  pass: IconPass,
+  minor: IconMinor,
+  critical: IconCritical,
+};
+const SEVERITY_LABEL: Record<Severity, string> = {
+  pass: "Pass",
+  minor: "Minor",
+  critical: "Critical",
+};
+
+function severityOf(token: string): Severity {
+  if (token === "[PASS]" || token === "✅") return "pass";
+  if (token === "[MINOR]" || token === "⚠️") return "minor";
+  return "critical";
+}
+
+// Renders the [PASS]/[MINOR]/[CRITICAL] contract tokens as the severity
+// icon set instead of leaking raw bracket text into the report prose. The
+// legacy emoji are matched too, purely so a request already in flight
+// when this shipped still renders correctly — see lib/report-status.ts.
+function renderWithSeverityBadges(text: string, keyPrefix: string): React.ReactNode[] {
+  const nodes: React.ReactNode[] = [];
+  const pattern = new RegExp(SEVERITY_TOKEN);
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let i = 0;
+
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      nodes.push(
+        <span key={`${keyPrefix}-t${i++}`}>
+          {highlightBadges(text.slice(lastIndex, match.index))}
+        </span>
+      );
+    }
+    const kind = severityOf(match[0]);
+    const Icon = SEVERITY_ICON[kind];
+    nodes.push(
+      <span key={`${keyPrefix}-b${i++}`} className="inline-flex items-center align-text-bottom mx-0.5">
+        <Icon className="w-4 h-4 inline-block" />
+        <span className="sr-only">{SEVERITY_LABEL[kind]}</span>
+      </span>
+    );
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < text.length) {
+    nodes.push(
+      <span key={`${keyPrefix}-t${i++}`}>{highlightBadges(text.slice(lastIndex))}</span>
+    );
+  }
+
+  return nodes;
 }

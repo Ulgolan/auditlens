@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Screenshot } from "@/lib/types";
 import { AUDIENCES, FRAMEWORKS } from "@/lib/types";
+import { IconScreenshot, IconNotes, IconTarget } from "@/components/icons";
 
 interface ContextPanelProps {
   screenshots: Screenshot[];
@@ -94,14 +95,27 @@ export function ContextPanel({
 
       {/* The request */}
       <div className="flex gap-2.5 flex-wrap items-center text-[14px] text-text-secondary">
-        <span>
-          {hasVisuals
-            ? `📸 ${screenshots.length} screen${screenshots.length !== 1 ? "s" : ""}`
-            : "📝 Concept only"}
+        <span className="inline-flex items-center gap-1.5">
+          {hasVisuals ? (
+            <>
+              <IconScreenshot className="w-3.5 h-3.5 shrink-0" />
+              {screenshots.length} screen{screenshots.length !== 1 ? "s" : ""}
+            </>
+          ) : (
+            <>
+              <IconNotes className="w-3.5 h-3.5 shrink-0" />
+              Concept only
+            </>
+          )}
         </span>
         <span className="text-border-strong">|</span>
-        <span>🎯 {audienceLabel}</span>
+        <span className="inline-flex items-center gap-1.5">
+          <IconTarget className="w-3.5 h-3.5 shrink-0" />
+          {audienceLabel}
+        </span>
         <span className="text-border-strong">|</span>
+        {/* 🔬 left as-is: no matching asset in the 11-icon Ivory Loom set for
+            "frameworks" — flagged per ignition key rather than invented. */}
         <span>🔬 {frameworkLabels}</span>
       </div>
 
