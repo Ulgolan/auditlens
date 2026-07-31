@@ -372,3 +372,24 @@ proven in the field.
 live on main. Severity contract migrated ✅⚠️🔴 → [PASS]/[MINOR]/[CRITICAL],
 parser tolerant of legacy. 🔬 retained in context-panel per Commander
 override. Tower certified (raw pull + live preview), Commander eye passed.
+
+### 2026-07-31 — IA Canon v1.0 retrofit, branch `feat/ia-canon`
+Vocabulary extracted from the shipped codebase, four conflicts surfaced,
+Commander ruled on all four. `IA_CANON.md` committed at repo root — see
+that file for the controlled vocabulary, content types, and structure map.
+
+GAP-LIST 2.0 — renames the rulings imply, logged not executed:
+1. Screenshot/screen: rename numbering-system uses of "screen" to
+   "Screenshot" — alt text in `components/drop-zone.tsx:101`,
+   `components/context-panel.tsx:65`, `components/export-document.tsx:140`;
+   figcaption `components/export-document.tsx:141`; counters
+   `components/context-panel.tsx:102`, `components/export-document.tsx:94-95`;
+   model instruction `app/api/evaluate/route.ts:146`.
+2. Finding/issue: rewrite authored prompt copy in `lib/prompts.ts` —
+   "issue" (lines 25, 323, 325), "problems" (lines 29, 326), "criticism"
+   (line 31) → `finding`/`findings`. `lib/prompts.ts:335` ("observations")
+   stays as-is — canon-exempt, not a rename.
+3. "document" — no current UI-facing violation found (only code comments);
+   standing ban only, nothing to rename tonight.
+4. Framework register (chip label ↔ report heading) — canonized as
+   designed intent, no rename.
