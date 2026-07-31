@@ -393,3 +393,6 @@ GAP-LIST 2.0 — renames the rulings imply, logged not executed:
    standing ban only, nothing to rename tonight.
 4. Framework register (chip label ↔ report heading) — canonized as
    designed intent, no rename.
+
+PARKED: auditlens has no per-repo CLAUDE.md — reconcile with the
+constitution's trinity claim in a future session.
