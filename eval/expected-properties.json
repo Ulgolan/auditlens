@@ -1,0 +1,7 @@
+{
+  "_note": "Loose, non-brittle properties for a smoke check — this asserts the pipeline produces a well-formed section, not any specific finding or verdict.",
+  "minTextLength": 400,
+  "forbiddenStopReasons": ["refusal"],
+  "mustContainHeading": true,
+  "severityBadgePattern": "\\[(PASS|MINOR|CRITICAL)\\]"
+}

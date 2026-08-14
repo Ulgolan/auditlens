@@ -38,7 +38,9 @@ export function OverallPanel({
         onClick={onToggle}
         aria-expanded={open}
         className="font-mono w-full flex items-center gap-3 px-5 py-3.5 rounded-card bg-navy text-ivory text-[0.9rem] font-medium uppercase tracking-[0.16em] cursor-pointer transition-opacity hover:opacity-90"
-        style={open ? { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 } : undefined}
+        style={
+          open ? { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 } : undefined
+        }
       >
         <span
           aria-hidden="true"

@@ -20,54 +20,54 @@
 
 :root {
   /* ---- Brand primitives (popescuportfolio) — do not add to this list ---- */
-  --navy:        #080B83;
-  --vermilion:   #FF4D00;
-  --pink:        #F487B6;
-  --yellow:      #FDE12D;
-  --peri:        #6F7BFF;
-  --ivory:       #FFF3F0;
-  --abyss:       #04051A;
-  --navy-soft:   #1B1C45;
-  --ink:         #3A3B5C;
+  --navy: #080b83;
+  --vermilion: #ff4d00;
+  --pink: #f487b6;
+  --yellow: #fde12d;
+  --peri: #6f7bff;
+  --ivory: #fff3f0;
+  --abyss: #04051a;
+  --navy-soft: #1b1c45;
+  --ink: #3a3b5c;
 
   /* ---- Ground & faces ---- */
-  --ground:      var(--ivory);   /* the page */
-  --card:        #FFFFFF;        /* the one white face */
-  --field:       #FFFFFF;        /* inputs sit on the ivory ground as white */
-  --overlay:     rgba(8, 11, 131, 0.72);  /* thumbnail scrims — navy, not black */
+  --ground: var(--ivory); /* the page */
+  --card: #ffffff; /* the one white face */
+  --field: #ffffff; /* inputs sit on the ivory ground as white */
+  --overlay: rgba(8, 11, 131, 0.72); /* thumbnail scrims — navy, not black */
 
   /* ---- The three voices ---- */
-  --text-primary:   var(--navy-soft);
+  --text-primary: var(--navy-soft);
   --text-secondary: var(--ink);
   /* 0.55, not the kit's 0.45: this app spends its tertiary voice on 10–11px
      metadata, where 0.45 lands at ~4.0:1 on white. 0.55 clears 4.5:1 and is
      still the navy primitive, just less diluted. */
-  --text-tertiary:  rgba(8, 11, 131, 0.55);
+  --text-tertiary: rgba(8, 11, 131, 0.55);
 
   /* ---- Structure ---- */
-  --border:        rgba(8, 11, 131, 0.16);
+  --border: rgba(8, 11, 131, 0.16);
   --border-strong: rgba(8, 11, 131, 0.28);
-  --line:          rgba(8, 11, 131, 0.13);
+  --line: rgba(8, 11, 131, 0.13);
 
   /* ---- Accent: the CTA, and nothing else ---- */
   --accent: var(--vermilion);
 
   /* Selected / active states speak navy, not vermilion — a chosen chip is
      structure, not a call to action. */
-  --navy-dim: color-mix(in srgb, var(--navy) 7%, #FFFFFF);
+  --navy-dim: color-mix(in srgb, var(--navy) 7%, #ffffff);
 
   /* ---- Severity.
      Marks and fills carry the colour; the words next to them stay navy.
      Yellow and pink cannot carry text on white at any size, so they are
      never asked to — severity is always spoken in words as well as hue,
      which is the same rule this tool audits other people against. ---- */
-  --critical:     var(--vermilion);
-  --critical-dim: color-mix(in srgb, var(--vermilion) 9%, #FFFFFF);
-  --minor:        var(--yellow);
-  --minor-dim:    color-mix(in srgb, var(--yellow) 22%, #FFFFFF);
-  --pass:         var(--navy);
-  --pass-dim:     color-mix(in srgb, var(--navy) 7%, #FFFFFF);
-  --accent-dim:   color-mix(in srgb, var(--vermilion) 9%, #FFFFFF);
+  --critical: var(--vermilion);
+  --critical-dim: color-mix(in srgb, var(--vermilion) 9%, #ffffff);
+  --minor: var(--yellow);
+  --minor-dim: color-mix(in srgb, var(--yellow) 22%, #ffffff);
+  --pass: var(--navy);
+  --pass-dim: color-mix(in srgb, var(--navy) 7%, #ffffff);
+  --accent-dim: color-mix(in srgb, var(--vermilion) 9%, #ffffff);
 
   /* Grade bands. The letter always sits in a filled chip so it is legible
      at every band — see grade-card.tsx for the fill/ink pairing. */
@@ -82,33 +82,33 @@
 }
 
 @theme inline {
-  --color-ground:        var(--ground);
-  --color-card:          var(--card);
-  --color-field:         var(--field);
-  --color-overlay:       var(--overlay);
+  --color-ground: var(--ground);
+  --color-card: var(--card);
+  --color-field: var(--field);
+  --color-overlay: var(--overlay);
 
-  --color-text-primary:   var(--text-primary);
+  --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
-  --color-text-tertiary:  var(--text-tertiary);
+  --color-text-tertiary: var(--text-tertiary);
 
-  --color-border:        var(--border);
+  --color-border: var(--border);
   --color-border-strong: var(--border-strong);
-  --color-line:          var(--line);
+  --color-line: var(--line);
 
-  --color-navy:      var(--navy);
-  --color-navy-dim:  var(--navy-dim);
-  --color-ivory:     var(--ivory);
-  --color-peri:      var(--peri);
+  --color-navy: var(--navy);
+  --color-navy-dim: var(--navy-dim);
+  --color-ivory: var(--ivory);
+  --color-peri: var(--peri);
 
-  --color-accent:     var(--accent);
+  --color-accent: var(--accent);
   --color-accent-dim: var(--accent-dim);
 
-  --color-critical:     var(--critical);
+  --color-critical: var(--critical);
   --color-critical-dim: var(--critical-dim);
-  --color-minor:        var(--minor);
-  --color-minor-dim:    var(--minor-dim);
-  --color-pass:         var(--pass);
-  --color-pass-dim:     var(--pass-dim);
+  --color-minor: var(--minor);
+  --color-minor-dim: var(--minor-dim);
+  --color-pass: var(--pass);
+  --color-pass-dim: var(--pass-dim);
 
   --radius-card: var(--radius-card);
   --radius-pill: var(--radius-pill);
@@ -118,14 +118,16 @@
      on wdth 62..125; the expanded display cut is this same font pushed to
      the top of that axis, selected with font-stretch below. */
   --font-display: var(--font-archivo), "Archivo", system-ui, sans-serif;
-  --font-body:    var(--font-archivo), "Archivo", system-ui, sans-serif;
-  --font-mono:    var(--font-ibm-plex-mono), "IBM Plex Mono", ui-monospace, monospace;
-  --font-voice:   var(--font-source-serif), Georgia, serif;
+  --font-body: var(--font-archivo), "Archivo", system-ui, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), "IBM Plex Mono", ui-monospace, monospace;
+  --font-voice: var(--font-source-serif), Georgia, serif;
 }
 
 *,
 *::before,
-*::after { box-sizing: border-box; }
+*::after {
+  box-sizing: border-box;
+}
 
 html {
   background: var(--ground);
@@ -182,15 +184,28 @@ textarea::placeholder {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }

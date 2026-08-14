@@ -1,0 +1,8 @@
+node_modules
+.next
+out
+*.tsbuildinfo
+package-lock.json
+
+# Doctrine/canon docs — not app code, out of scope for the formatter
+*.md

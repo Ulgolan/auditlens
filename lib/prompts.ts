@@ -237,10 +237,7 @@ Open this section with one sentence that states both what this review is and why
  * every call. The framework-specific instruction goes in the user turn
  * *after* the images instead — see buildFrameworkInstruction.
  */
-export function buildSharedSystemPrompt(
-  audience: string,
-  hasVisuals: boolean
-): string {
+export function buildSharedSystemPrompt(audience: string, hasVisuals: boolean): string {
   return `${preamble(audience)}
 
 ## HOW THIS AUDIT RUNS
@@ -284,10 +281,7 @@ Then the evaluation:
 ${block}${addendum ? `\n\n${addendum}` : ""}`;
 }
 
-export function buildOverallSystemPrompt(
-  audience: string,
-  hasVisuals: boolean
-): string {
+export function buildOverallSystemPrompt(audience: string, hasVisuals: boolean): string {
   return `${preamble(audience)}
 
 ## YOUR TASK — FINAL ASSESSMENT ONLY

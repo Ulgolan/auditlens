@@ -4,6 +4,7 @@ import {
   buildFrameworkInstruction,
   buildOverallSystemPrompt,
 } from "@/lib/prompts";
+import { CLAUDE_MODEL } from "@/lib/ai-config";
 
 export const maxDuration = 300;
 export const runtime = "nodejs";
@@ -162,8 +163,8 @@ export async function POST(req: NextRequest) {
       const taskContext = taskScenario
         ? `\n\nTask scenario: ${taskScenario}`
         : hasVisuals
-        ? "\n\nNo specific task scenario provided — infer the most likely primary task from the UI and note that the walkthrough is based on inference."
-        : "\n\nNo specific task scenario provided — infer the most likely primary task from the description and note that the walkthrough is based on inference.";
+          ? "\n\nNo specific task scenario provided — infer the most likely primary task from the UI and note that the walkthrough is based on inference."
+          : "\n\nNo specific task scenario provided — infer the most likely primary task from the description and note that the walkthrough is based on inference.";
 
       content.push({
         type: "text",
@@ -184,7 +185,7 @@ export async function POST(req: NextRequest) {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-5",
+        model: CLAUDE_MODEL,
         // One framework per call now, and streaming is on, so there is
         // room to be generous. max_tokens caps thinking + visible text
         // together — v1's 16000 was shared across all four frameworks

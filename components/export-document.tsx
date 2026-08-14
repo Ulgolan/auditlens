@@ -64,8 +64,7 @@ export function ExportDocument({
           <div className="font-mono doc-partial-flag">⚠️ Partial audit</div>
           <p className="doc-partial-lede">
             This report is incomplete. {completedCount} of {totalCount} framework
-            {totalCount !== 1 ? "s" : ""} finished, and no overall grade has been
-            issued.
+            {totalCount !== 1 ? "s" : ""} finished, and no overall grade has been issued.
           </p>
           <p className="doc-partial-body">{withheldReason}</p>
           <ul className="doc-partial-list">
@@ -75,8 +74,8 @@ export function ExportDocument({
                 {s.status === "failed"
                   ? "did not complete"
                   : s.status === "truncated"
-                  ? "was cut off before finishing"
-                  : "did not run"}
+                    ? "was cut off before finishing"
+                    : "did not run"}
                 {s.detail ? `. ${s.detail}` : "."}
               </li>
             ))}
@@ -135,7 +134,6 @@ export function ExportDocument({
         {meta.screenshotUrls.length > 0 && (
           <div className="doc-shots">
             {meta.screenshotUrls.map((url, i) => (
-              // eslint-disable-next-line @next/next/no-img-element
               <figure key={i}>
                 <img src={url} alt={`Screen ${i + 1}`} />
                 <figcaption className="font-mono">Screen {i + 1}</figcaption>

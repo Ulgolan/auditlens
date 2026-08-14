@@ -31,7 +31,9 @@ function StatusIcon({ status }: { status: SectionStatus }) {
   if (status === "truncated") return <IconMinor className="w-3.5 h-3.5 shrink-0" />;
   if (status === "failed") return <IconCritical className="w-3.5 h-3.5 shrink-0" />;
 
-  return <div className="w-3.5 h-3.5 rounded-full border border-border-strong shrink-0" />;
+  return (
+    <div className="w-3.5 h-3.5 rounded-full border border-border-strong shrink-0" />
+  );
 }
 
 /**
@@ -62,8 +64,8 @@ export function FrameworkProgress({ sections, preparing }: FrameworkProgressProp
                 s.status === "streaming"
                   ? "font-semibold text-text-primary"
                   : s.status === "pending"
-                  ? "text-text-tertiary"
-                  : "text-text-secondary"
+                    ? "text-text-tertiary"
+                    : "text-text-secondary"
               }
             >
               {s.label}

@@ -35,9 +35,10 @@ export function FrameworkToggles({ selected, onChange }: FrameworkTogglesProps) 
             }}
             className={`
               flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left transition-all duration-150 border cursor-pointer
-              ${isOn
-                ? "bg-navy-dim border-navy"
-                : "bg-card border-border hover:border-border-strong"
+              ${
+                isOn
+                  ? "bg-navy-dim border-navy"
+                  : "bg-card border-border hover:border-border-strong"
               }
             `}
           >
@@ -54,7 +55,9 @@ export function FrameworkToggles({ selected, onChange }: FrameworkTogglesProps) 
               >
                 {fw.label}
               </div>
-              <div className="text-[13px] text-text-tertiary mt-0.5">{fw.description}</div>
+              <div className="text-[13px] text-text-tertiary mt-0.5">
+                {fw.description}
+              </div>
             </div>
           </button>
         );

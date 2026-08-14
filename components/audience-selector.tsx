@@ -17,9 +17,10 @@ export function AudienceSelector({ selected, onChange }: AudienceSelectorProps) 
           title={a.description}
           className={`
             px-4 py-2 rounded-pill text-[15px] font-medium cursor-pointer transition-all duration-150 border
-            ${selected === a.id
-              ? "bg-navy-dim border-navy text-navy font-semibold"
-              : "bg-card border-border text-text-secondary hover:text-text-primary hover:border-border-strong"
+            ${
+              selected === a.id
+                ? "bg-navy-dim border-navy text-navy font-semibold"
+                : "bg-card border-border text-text-secondary hover:text-text-primary hover:border-border-strong"
             }
           `}
         >
