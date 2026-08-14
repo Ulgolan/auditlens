@@ -415,3 +415,24 @@ Read-only review pass. Scope: full repo tree at `~/projects/acp-command-center/a
 Noted in passing (not part of the checklist): `npm audit` still reports 4 high-severity vulnerabilities (Next.js, postcss, sharp) — first flagged 2026-07-24, still unresolved; this session's Mission 1 confirmed the only remaining fix path requires a semver-major Next.js bump and stopped rather than force it.
 
 Branch: `review/estate-walk`. Ritual verdict pending Tower synthesis.
+
+### 2026-08-14 — Activation Lap shipped — harness live: format + lint + flub rule (hardcoded-model tripwire) + 5 tests + smoke eval (dormant until secret) + PR-gating Action
+
+Branch `harness/activation-lap`, PR [#2](https://github.com/Ulgolan/auditlens/pull/2), commits `1d076dc`..`e605b56`. Not merged — waits for Tower certification + Commander eye, per mandate.
+
+- **Formatter**: Prettier, run once (17 code files reflowed, mechanical only — markdown/doctrine files excluded from scope). `format:check` script.
+- **Linter**: ESLint 9 flat config, `next/core-web-vitals` + `next/typescript`. `lint` script switched from the now-deprecated `next lint` wrapper to plain `eslint .` (Next 15 itself recommends this migration; identical output, no behavior change). One stale `eslint-disable` comment auto-removed by `--fix` (not a logic change).
+- **Flub rule (March 404 tripwire)**: `no-restricted-syntax` errors on any hardcoded `claude-*` literal outside `lib/ai-config.ts`. Verified firing on a throwaway test file. The one permitted app-code change this lap: model id moved from an inline literal at old `app/api/evaluate/route.ts:187` into `lib/ai-config.ts`'s `CLAUDE_MODEL` constant; the route now imports it.
+- **Tests** (Vitest, 5/5 green): route module loads + exports `POST`; completed fixture carries all 4 framework sections (nielsen/cw/state/a11y) and grades complete; `app/page.tsx`'s stop_reason handling maps `max_tokens` and a missing stop_reason to `truncated` (never a silent `complete`) — a source-shape assertion, since the logic is a closure inside a client component with no exported pure function, and extracting one was out of scope; model string imported from config (tripwire redundancy); a partial audit (1/4 sections truncated) never gets a letter grade.
+- **Smoke eval**: `eval/smoke.ts`, placeholder concept-mode fixture (no screenshot available in-session), calls Anthropic directly with the same model constant + prompt builders as the real route. Verified locally end-to-end against the live API: `stop_reason: end_turn`, 8233 chars, badge pattern matched.
+- **Action**: `.github/workflows/harness.yml`, `pull_request` trigger, `format:check → lint → test → eval:smoke`. Ran on PR #2: **green** — format/lint/test all passed; `ANTHROPIC_API_KEY` secret is not configured on this repo, so eval:smoke skipped with a visible `::warning::` annotation, exactly as designed.
+
+**Lint backlog (WARN, not fixed — needs a real logic change, auto-fix policy only this lap):**
+1. `components/context-panel.tsx:63` — `<img>` → `next/image`
+2. `components/drop-zone.tsx:100` — `<img>` → `next/image`
+3. `components/export-document.tsx:138` — `<img>` → `next/image`
+
+Noted in passing, unchanged by this lap: `npm audit` still reports 4 high-severity vulnerabilities (Next.js, postcss, sharp) — same set flagged 2026-07-24 and re-confirmed 2026-08-06, fix path still requires a semver-major Next.js bump. Out of scope — "one variable: the harness."
+
+>> BATON
+HARNESS: 5 tests green · last full eval 2026-08-14 (local, manual) · signals n/a
