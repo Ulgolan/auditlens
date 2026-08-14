@@ -1,0 +1,7 @@
+{
+  "_note": "Placeholder fixture, added 2026-08-14 during the harness install lap. No screenshot was provided in-session, so this exercises concept mode (no visuals) instead. Swap for a real screenshot-based fixture when one becomes available — see IA_CANON.md for material conventions.",
+  "framework": "nielsen",
+  "audience": "public",
+  "taskScenario": "A first-time user tries to reset a forgotten password from the login screen.",
+  "conceptText": "The login screen has an email field, a password field, a 'Forgot password?' link, and a primary 'Log in' button. Clicking 'Forgot password?' opens a modal asking for an email address, with a 'Send reset link' button and a 'Cancel' link. After clicking 'Send reset link', the modal simply closes with no confirmation message shown."
+}
