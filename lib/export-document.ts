@@ -293,21 +293,20 @@ function formatStamp(d: Date): string {
  * Returns the filename written.
  */
 export async function downloadReport(input: ExportInput): Promise<string> {
-  const [{ renderToStaticMarkup }, pageCss, logoDataUri, markDataUri] =
-    await Promise.all([
+  const [{ renderToStaticMarkup }, pageCss, logoDataUri, markDataUri] = await Promise.all(
+    [
       import("react-dom/server"),
       inlineCssAssets(collectPageCss()),
       toDataUri("/pop-logo-color.png"),
       toDataUri("/motifs/north-star.svg"),
-    ]);
+    ]
+  );
 
   const { ExportDocument } = await import("@/components/export-document");
   const { createElement } = await import("react");
 
   const now = new Date();
-  const { isComplete, completedCount, totalCount } = deriveCompleteness(
-    input.sections
-  );
+  const { isComplete, completedCount, totalCount } = deriveCompleteness(input.sections);
 
   const body = renderToStaticMarkup(
     createElement(ExportDocument, {

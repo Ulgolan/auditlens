@@ -2,7 +2,15 @@ import type { SVGProps } from "react";
 
 export function IconNielsen(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" role="img" aria-label="Nielsen&#39;s 10 heuristics" fill="currentColor" color="#080B83" {...props}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 88 88"
+      role="img"
+      aria-label="Nielsen&#39;s 10 heuristics"
+      fill="currentColor"
+      color="#080B83"
+      {...props}
+    >
       <rect x="17" y="17" width="6" height="6" rx="1.4" fill="currentColor" />
       <rect x="33" y="17" width="6" height="6" rx="1.4" fill="currentColor" />
       <rect x="41" y="17" width="6" height="6" rx="1.4" fill="currentColor" />
@@ -27,7 +35,15 @@ export function IconNielsen(props: SVGProps<SVGSVGElement>) {
 
 export function IconCognitive(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" role="img" aria-label="Cognitive walkthrough" fill="currentColor" color="#080B83" {...props}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 88 88"
+      role="img"
+      aria-label="Cognitive walkthrough"
+      fill="currentColor"
+      color="#080B83"
+      {...props}
+    >
       <rect x="57" y="17" width="6" height="6" rx="1.4" fill="currentColor" />
       <rect x="65" y="17" width="6" height="6" rx="1.4" fill="currentColor" />
       <rect x="73" y="17" width="6" height="6" rx="1.4" fill="currentColor" />
@@ -49,7 +65,15 @@ export function IconCognitive(props: SVGProps<SVGSVGElement>) {
 
 export function IconStress(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" role="img" aria-label="State stress test" fill="currentColor" color="#080B83" {...props}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 88 88"
+      role="img"
+      aria-label="State stress test"
+      fill="currentColor"
+      color="#080B83"
+      {...props}
+    >
       <rect x="41" y="25" width="6" height="6" rx="1.4" fill="currentColor" />
       <rect x="33" y="33" width="6" height="6" rx="1.4" fill="currentColor" />
       <rect x="49" y="33" width="6" height="6" rx="1.4" fill="currentColor" />
@@ -67,7 +91,15 @@ export function IconStress(props: SVGProps<SVGSVGElement>) {
 
 export function IconAccessibility(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" role="img" aria-label="Accessibility" fill="currentColor" color="#080B83" {...props}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 88 88"
+      role="img"
+      aria-label="Accessibility"
+      fill="currentColor"
+      color="#080B83"
+      {...props}
+    >
       <rect x="33" y="17" width="6" height="6" rx="1.4" fill="currentColor" />
       <rect x="41" y="17" width="6" height="6" rx="1.4" fill="currentColor" />
       <rect x="49" y="17" width="6" height="6" rx="1.4" fill="currentColor" />
@@ -94,7 +126,14 @@ export function IconAccessibility(props: SVGProps<SVGSVGElement>) {
 
 export function IconCritical(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" role="img" aria-label="Critical finding" fill="currentColor" {...props}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 88 88"
+      role="img"
+      aria-label="Critical finding"
+      fill="currentColor"
+      {...props}
+    >
       <rect x="41" y="1" width="6" height="6" rx="1.4" fill="#FF4D00" />
       <rect x="33" y="9" width="6" height="6" rx="1.4" fill="#FF4D00" />
       <rect x="41" y="9" width="6" height="6" rx="1.4" fill="#FF4D00" />
@@ -162,7 +201,14 @@ export function IconCritical(props: SVGProps<SVGSVGElement>) {
 
 export function IconMinor(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" role="img" aria-label="Minor finding" fill="currentColor" {...props}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 88 88"
+      role="img"
+      aria-label="Minor finding"
+      fill="currentColor"
+      {...props}
+    >
       <rect x="41" y="1" width="6" height="6" rx="1.4" fill="#080B83" />
       <rect x="33" y="9" width="6" height="6" rx="1.4" fill="#080B83" />
       <rect x="41" y="9" width="6" height="6" rx="1.4" fill="#FDE12D" />
@@ -230,7 +276,14 @@ export function IconMinor(props: SVGProps<SVGSVGElement>) {
 
 export function IconPass(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" role="img" aria-label="Pass" fill="currentColor" {...props}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 88 88"
+      role="img"
+      aria-label="Pass"
+      fill="currentColor"
+      {...props}
+    >
       <rect x="41" y="1" width="6" height="6" rx="1.4" fill="#080B83" />
       <rect x="33" y="9" width="6" height="6" rx="1.4" fill="#080B83" />
       <rect x="41" y="9" width="6" height="6" rx="1.4" fill="#080B83" />
@@ -298,7 +351,15 @@ export function IconPass(props: SVGProps<SVGSVGElement>) {
 
 export function IconDropzone(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" role="img" aria-label="Drop a screenshot" fill="currentColor" color="#080B83" {...props}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 88 88"
+      role="img"
+      aria-label="Drop a screenshot"
+      fill="currentColor"
+      color="#080B83"
+      {...props}
+    >
       <rect x="1" y="1" width="6" height="6" rx="1.4" fill="currentColor" />
       <rect x="17" y="1" width="6" height="6" rx="1.4" fill="currentColor" />
       <rect x="33" y="1" width="6" height="6" rx="1.4" fill="currentColor" />
@@ -336,7 +397,15 @@ export function IconDropzone(props: SVGProps<SVGSVGElement>) {
 
 export function IconScreenshot(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" role="img" aria-label="Screenshot" fill="currentColor" color="#080B83" {...props}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 88 88"
+      role="img"
+      aria-label="Screenshot"
+      fill="currentColor"
+      color="#080B83"
+      {...props}
+    >
       <rect x="17" y="17" width="6" height="6" rx="1.4" fill="currentColor" />
       <rect x="25" y="17" width="6" height="6" rx="1.4" fill="currentColor" />
       <rect x="33" y="17" width="6" height="6" rx="1.4" fill="currentColor" />
@@ -371,7 +440,15 @@ export function IconScreenshot(props: SVGProps<SVGSVGElement>) {
 
 export function IconNotes(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" role="img" aria-label="Notes" fill="currentColor" color="#080B83" {...props}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 88 88"
+      role="img"
+      aria-label="Notes"
+      fill="currentColor"
+      color="#080B83"
+      {...props}
+    >
       <rect x="17" y="9" width="6" height="6" rx="1.4" fill="currentColor" />
       <rect x="25" y="9" width="6" height="6" rx="1.4" fill="currentColor" />
       <rect x="33" y="9" width="6" height="6" rx="1.4" fill="currentColor" />
@@ -410,7 +487,15 @@ export function IconNotes(props: SVGProps<SVGSVGElement>) {
 
 export function IconTarget(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" role="img" aria-label="Scenario target" fill="currentColor" color="#080B83" {...props}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 88 88"
+      role="img"
+      aria-label="Scenario target"
+      fill="currentColor"
+      color="#080B83"
+      {...props}
+    >
       <rect x="41" y="1" width="6" height="6" rx="1.4" fill="currentColor" />
       <rect x="33" y="9" width="6" height="6" rx="1.4" fill="currentColor" />
       <rect x="49" y="9" width="6" height="6" rx="1.4" fill="currentColor" />
@@ -443,4 +528,3 @@ export function IconTarget(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
-

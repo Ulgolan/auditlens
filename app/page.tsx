@@ -500,47 +500,47 @@ export default function Home() {
       {/* Header — north-star as the product mark, lockup per the brand kit. */}
       <header className="px-6 py-4 border-b border-border bg-card">
         <div className="max-w-[1040px] mx-auto flex items-center justify-between">
-        {/* The lockup is the way home. */}
-        <button
-          onClick={goHome}
-          aria-label="AuditLens — start a new audit"
-          className="flex items-center gap-[11px] text-left cursor-pointer transition-opacity hover:opacity-70"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/motifs/north-star.svg" alt="" className="h-9 w-9 flex-none" />
-          <div className="leading-[1.1]">
-            <div className="font-mono text-[0.75rem] uppercase tracking-[0.16em] text-text-tertiary">
-              UX Evaluation
+          {/* The lockup is the way home. */}
+          <button
+            onClick={goHome}
+            aria-label="AuditLens — start a new audit"
+            className="flex items-center gap-[11px] text-left cursor-pointer transition-opacity hover:opacity-70"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/motifs/north-star.svg" alt="" className="h-9 w-9 flex-none" />
+            <div className="leading-[1.1]">
+              <div className="font-mono text-[0.75rem] uppercase tracking-[0.16em] text-text-tertiary">
+                UX Evaluation
+              </div>
+              <div className="font-display text-[1.2rem] font-extrabold text-text-primary">
+                AuditLens
+                <span className="font-mono text-[0.75rem] font-normal text-text-tertiary ml-2 tracking-[0.08em]">
+                  v2.0
+                </span>
+              </div>
             </div>
-            <div className="font-display text-[1.2rem] font-extrabold text-text-primary">
-              AuditLens
-              <span className="font-mono text-[0.75rem] font-normal text-text-tertiary ml-2 tracking-[0.08em]">
-                v2.0
-              </span>
+          </button>
+          {showReport && (
+            <div className="flex items-center gap-2.5">
+              <button
+                onClick={exportReport}
+                disabled={!canExport || exporting}
+                className={`font-mono rounded-pill px-4 py-[0.7em] text-[0.85rem] font-medium uppercase tracking-[0.1em] transition-transform duration-150 ${
+                  canExport && !exporting
+                    ? "bg-accent text-ivory cursor-pointer hover:-translate-y-[2px]"
+                    : "border border-border text-text-tertiary cursor-not-allowed"
+                }`}
+              >
+                {exporting ? "Preparing…" : "Export report ↓"}
+              </button>
+              <button
+                onClick={resetAll}
+                className="font-mono rounded-pill border border-border-strong px-4 py-[0.7em] text-[0.85rem] font-medium uppercase tracking-[0.1em] text-text-primary cursor-pointer transition-transform duration-150 hover:-translate-y-[2px]"
+              >
+                ← New audit
+              </button>
             </div>
-          </div>
-        </button>
-        {showReport && (
-          <div className="flex items-center gap-2.5">
-            <button
-              onClick={exportReport}
-              disabled={!canExport || exporting}
-              className={`font-mono rounded-pill px-4 py-[0.7em] text-[0.85rem] font-medium uppercase tracking-[0.1em] transition-transform duration-150 ${
-                canExport && !exporting
-                  ? "bg-accent text-ivory cursor-pointer hover:-translate-y-[2px]"
-                  : "border border-border text-text-tertiary cursor-not-allowed"
-              }`}
-            >
-              {exporting ? "Preparing…" : "Export report ↓"}
-            </button>
-            <button
-              onClick={resetAll}
-              className="font-mono rounded-pill border border-border-strong px-4 py-[0.7em] text-[0.85rem] font-medium uppercase tracking-[0.1em] text-text-primary cursor-pointer transition-transform duration-150 hover:-translate-y-[2px]"
-            >
-              ← New audit
-            </button>
-          </div>
-        )}
+          )}
         </div>
 
         {/* Mid-run guard. Inline rather than a browser dialog so the
@@ -581,8 +581,8 @@ export default function Home() {
                 Show it or describe it. Then ship better.
               </h1>
               <p className="font-voice text-[1.3rem] leading-[1.45] text-text-secondary max-w-[620px] mx-auto">
-                Drop screenshots, write out the concept, or both. Select your frameworks. Get a
-                senior-grade UX audit with actionable fixes and metrics.
+                Drop screenshots, write out the concept, or both. Select your frameworks.
+                Get a senior-grade UX audit with actionable fixes and metrics.
               </p>
             </div>
 
@@ -597,7 +597,9 @@ export default function Home() {
               <DropZone
                 screenshots={screenshots}
                 onAdd={(s) => setScreenshots((prev) => [...prev, s])}
-                onRemove={(id) => setScreenshots((prev) => prev.filter((s) => s.id !== id))}
+                onRemove={(id) =>
+                  setScreenshots((prev) => prev.filter((s) => s.id !== id))
+                }
               />
             </div>
 
@@ -622,10 +624,11 @@ export default function Home() {
               />
               {!hasVisuals && concept.length > 0 && (
                 <div className="mt-2 px-3.5 py-2.5 rounded-lg bg-minor-dim border-l-[3px] border border-minor text-[14px] text-text-secondary leading-relaxed">
-                  <span className="font-semibold text-text-primary">Concept mode.</span> With no
-                  visuals, anything measured — contrast, target sizes, text size, focus rings,
-                  visual hierarchy — cannot be assessed, and the report will say so rather than
-                  guess. Accessibility narrows to what the description itself commits to.
+                  <span className="font-semibold text-text-primary">Concept mode.</span>{" "}
+                  With no visuals, anything measured — contrast, target sizes, text size,
+                  focus rings, visual hierarchy — cannot be assessed, and the report will
+                  say so rather than guess. Accessibility narrows to what the description
+                  itself commits to.
                 </div>
               )}
             </div>
@@ -634,7 +637,9 @@ export default function Home() {
             <div className="mb-7">
               <label className="font-mono text-[0.85rem] font-medium uppercase tracking-[0.16em] text-text-primary mb-2 block">
                 TASK SCENARIO{" "}
-                <span className="font-normal normal-case tracking-normal text-text-tertiary">· optional but recommended</span>
+                <span className="font-normal normal-case tracking-normal text-text-tertiary">
+                  · optional but recommended
+                </span>
               </label>
               <textarea
                 value={taskScenario}
@@ -667,17 +672,18 @@ export default function Home() {
               disabled={!canEvaluate}
               className={`
                 font-mono w-full py-[1.15em] px-6 rounded-pill text-[0.98rem] font-medium uppercase tracking-[0.12em] transition-transform duration-150
-                ${canEvaluate
-                  ? "bg-accent text-ivory cursor-pointer hover:-translate-y-[2px]"
-                  : "border border-border text-text-tertiary cursor-not-allowed"
+                ${
+                  canEvaluate
+                    ? "bg-accent text-ivory cursor-pointer hover:-translate-y-[2px]"
+                    : "border border-border text-text-tertiary cursor-not-allowed"
                 }
               `}
             >
               {canEvaluate
                 ? `Run Audit · ${frameworks.length} framework${frameworks.length !== 1 ? "s" : ""}`
                 : !hasMaterial
-                ? "Add a screenshot or describe the concept to begin"
-                : "Select at least one framework to begin"}
+                  ? "Add a screenshot or describe the concept to begin"
+                  : "Select at least one framework to begin"}
             </button>
           </div>
         )}
@@ -705,7 +711,9 @@ export default function Home() {
             {/* Error */}
             {error && (
               <div className="px-5 py-4 bg-critical-dim border border-critical border-l-[3px] rounded-xl mb-5">
-                <div className="text-[17px] font-bold text-critical mb-1">Evaluation failed</div>
+                <div className="text-[17px] font-bold text-critical mb-1">
+                  Evaluation failed
+                </div>
                 <div className="text-[16px] text-text-secondary">{error}</div>
                 <button
                   onClick={resetAll}

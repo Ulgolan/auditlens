@@ -37,12 +37,7 @@ export type EvalPhase = "idle" | "processing" | "running" | "done" | "error";
  *               Either way the section is incomplete and must say so.
  * - failed    → the request errored, or the model declined.
  */
-export type SectionStatus =
-  | "pending"
-  | "streaming"
-  | "complete"
-  | "truncated"
-  | "failed";
+export type SectionStatus = "pending" | "streaming" | "complete" | "truncated" | "failed";
 
 export interface ReportSection {
   id: string; // framework id, or "overall"
@@ -56,10 +51,30 @@ export interface ReportSection {
 export const OVERALL_ID = "overall";
 
 export const FRAMEWORKS: Framework[] = [
-  { id: "nielsen", label: "Nielsen's 10", description: "Heuristic evaluation with Gestalt principles", default: true },
-  { id: "cw", label: "Cognitive Walkthrough", description: "Task-journey evaluation with mental model tracking", default: true },
-  { id: "state", label: "State Stress Test", description: "5 UI states: Empty, Loading, Partial, Error, Ideal", default: true },
-  { id: "a11y", label: "Accessibility", description: "WCAG-based visual accessibility review", default: true },
+  {
+    id: "nielsen",
+    label: "Nielsen's 10",
+    description: "Heuristic evaluation with Gestalt principles",
+    default: true,
+  },
+  {
+    id: "cw",
+    label: "Cognitive Walkthrough",
+    description: "Task-journey evaluation with mental model tracking",
+    default: true,
+  },
+  {
+    id: "state",
+    label: "State Stress Test",
+    description: "5 UI states: Empty, Loading, Partial, Error, Ideal",
+    default: true,
+  },
+  {
+    id: "a11y",
+    label: "Accessibility",
+    description: "WCAG-based visual accessibility review",
+    default: true,
+  },
 ];
 
 /**
@@ -74,14 +89,16 @@ export const AUDIENCES: Audience[] = [
   {
     id: "public",
     label: "General Public",
-    description: "Infrequent, untrained, no motivation to persist — most conservative calibration",
+    description:
+      "Infrequent, untrained, no motivation to persist — most conservative calibration",
     promptLabel:
       "General Public (infrequent, untrained users with no motivation to persist through friction — the most conservative severity calibration. Assume no prior exposure to the product, no tolerance for jargon, and abandonment as the default response to confusion.)",
   },
   {
     id: "habitual",
     label: "Habitual Consumer",
-    description: "Uses it often by choice — tolerates density for power. Games, social, media",
+    description:
+      "Uses it often by choice — tolerates density for power. Games, social, media",
     promptLabel:
       "Habitual Consumer (uses the product frequently and by choice — games, social, media. Tolerates information density, learned shortcuts, and non-standard patterns in exchange for speed and expressive power. Do not penalise density or a learning curve on its own; penalise anything that punishes returning users or breaks a learned habit.)",
   },
@@ -102,7 +119,8 @@ export const AUDIENCES: Audience[] = [
   {
     id: "transactional",
     label: "Transactional Visitor",
-    description: "One-shot intent to buy, book, or apply — abandonment is the failure mode",
+    description:
+      "One-shot intent to buy, book, or apply — abandonment is the failure mode",
     promptLabel:
       "Transactional Visitor (arrives with a specific one-shot intent — buy, book, or apply — and will not return to retry. Abandonment is the primary failure mode, so weight anything that introduces doubt, hidden cost, or an unnecessary step at the point of commitment as more severe than its usability impact alone suggests.)",
   },

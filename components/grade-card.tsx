@@ -54,7 +54,9 @@ export function GradeCard({ sections }: GradeCardProps) {
     <div className="mb-6 animate-[fadeIn_0.4s_ease]">
       <div
         className={`flex gap-6 px-6 py-5 border bg-card items-center flex-wrap rounded-card ${
-          isComplete ? "border-border" : "border-minor border-l-[4px] rounded-b-none border-b-0"
+          isComplete
+            ? "border-border"
+            : "border-minor border-l-[4px] rounded-b-none border-b-0"
         }`}
       >
         {/* Grade — or the withheld placeholder */}
@@ -135,10 +137,7 @@ function Tally({
       <div className="flex items-center justify-center gap-1.5 mt-1.5">
         {/* Border as well as fill: a browser printing with background
             graphics off drops the fill, and the swatch would vanish. */}
-        <span
-          className={`h-2 w-2 rounded-[2px] border-2 ${swatch}`}
-          aria-hidden="true"
-        />
+        <span className={`h-2 w-2 rounded-[2px] border-2 ${swatch}`} aria-hidden="true" />
         <span className="font-mono text-[0.72rem] uppercase tracking-[0.14em] text-text-tertiary">
           {label}
         </span>

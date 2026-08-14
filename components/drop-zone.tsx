@@ -72,9 +72,10 @@ export function DropZone({ screenshots, onAdd, onRemove }: DropZoneProps) {
         onClick={() => fileInputRef.current?.click()}
         className={`
           border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-200
-          ${isDragging
-            ? "border-navy bg-navy-dim"
-            : "border-border bg-card hover:border-border-strong"
+          ${
+            isDragging
+              ? "border-navy bg-navy-dim"
+              : "border-border bg-card hover:border-border-strong"
           }
           ${screenshots.length > 0 ? "p-4" : "py-12 px-6"}
         `}

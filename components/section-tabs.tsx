@@ -60,13 +60,7 @@ export function SectionTabs({ sections, activeId, onSelect }: SectionTabsProps) 
  * problem in words, and the tab keeps a title attribute for the same
  * reason. Colour here is a locator, not the message.
  */
-function StatusDot({
-  status,
-  onNavy,
-}: {
-  status: SectionStatus;
-  onNavy: boolean;
-}) {
+function StatusDot({ status, onNavy }: { status: SectionStatus; onNavy: boolean }) {
   if (status === "complete") return null;
 
   if (status === "streaming") {

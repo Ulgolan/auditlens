@@ -34,7 +34,10 @@ export function ReportRenderer({ content }: ReportRendererProps) {
 
         if (trimmed.startsWith("## "))
           return (
-            <h2 key={i} className="font-display text-[21px] font-bold text-text-primary mt-7 mb-2.5">
+            <h2
+              key={i}
+              className="font-display text-[21px] font-bold text-text-primary mt-7 mb-2.5"
+            >
               {cleanMarkdown(trimmed.slice(3))}
             </h2>
           );
@@ -48,7 +51,10 @@ export function ReportRenderer({ content }: ReportRendererProps) {
 
         if (trimmed.startsWith("#### "))
           return (
-            <h4 key={i} className="text-[17px] font-semibold text-text-secondary mt-4 mb-1.5">
+            <h4
+              key={i}
+              className="text-[17px] font-semibold text-text-secondary mt-4 mb-1.5"
+            >
               {cleanMarkdown(trimmed.slice(5))}
             </h4>
           );
@@ -113,7 +119,9 @@ function formatInline(text: string): React.ReactNode[] {
     const boldMatch = remaining.match(/\*\*(.+?)\*\*/);
     if (boldMatch && boldMatch.index !== undefined) {
       if (boldMatch.index > 0) {
-        parts.push(...renderWithSeverityBadges(remaining.slice(0, boldMatch.index), `s${keyIdx++}`));
+        parts.push(
+          ...renderWithSeverityBadges(remaining.slice(0, boldMatch.index), `s${keyIdx++}`)
+        );
       }
       parts.push(
         <strong key={keyIdx++} className="text-text-primary font-bold">
@@ -131,10 +139,7 @@ function formatInline(text: string): React.ReactNode[] {
 }
 
 function highlightBadges(text: string): string {
-  return text
-    .replace(/\(P\)/g, "⟨P⟩")
-    .replace(/\(B\)/g, "⟨B⟩")
-    .replace(/\(A\)/g, "⟨A⟩");
+  return text.replace(/\(P\)/g, "⟨P⟩").replace(/\(B\)/g, "⟨B⟩").replace(/\(A\)/g, "⟨A⟩");
 }
 
 type Severity = "pass" | "minor" | "critical";
@@ -179,7 +184,10 @@ function renderWithSeverityBadges(text: string, keyPrefix: string): React.ReactN
     const kind = severityOf(match[0]);
     const Icon = SEVERITY_ICON[kind];
     nodes.push(
-      <span key={`${keyPrefix}-b${i++}`} className="inline-flex items-center align-text-bottom mx-0.5">
+      <span
+        key={`${keyPrefix}-b${i++}`}
+        className="inline-flex items-center align-text-bottom mx-0.5"
+      >
         <Icon className="w-4 h-4 inline-block" />
         <span className="sr-only">{SEVERITY_LABEL[kind]}</span>
       </span>
