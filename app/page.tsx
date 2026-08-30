@@ -805,7 +805,10 @@ export default function Home() {
             )}
 
             {/* One framework at a time, reached by the sticky tab bar */}
-            <div ref={sectionAnchorRef} className="scroll-mt-24" />
+            {/* id is a capture hook for the gauntlet instruments' "scrolled"
+                state (see gauntlet/README.md) — purely additive, nothing
+                reads it at runtime. */}
+            <div ref={sectionAnchorRef} id="gauntlet-tabbar-anchor" className="scroll-mt-24" />
             <SectionTabs
               sections={visibleFrameworkSections}
               activeId={activeSection?.id ?? ""}

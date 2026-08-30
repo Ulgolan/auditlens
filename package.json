@@ -9,7 +9,15 @@
     "lint": "eslint .",
     "format:check": "prettier --check .",
     "test": "vitest run",
-    "eval:smoke": "tsx eval/smoke.ts"
+    "eval:smoke": "tsx eval/smoke.ts",
+    "gauntlet:shots": "node gauntlet/scripts/shots.mjs",
+    "gauntlet:diff": "node gauntlet/scripts/diff.mjs",
+    "gauntlet:styles": "node gauntlet/scripts/styles.mjs",
+    "gauntlet:a11y": "node gauntlet/scripts/a11y.mjs",
+    "gauntlet:layout": "node gauntlet/scripts/layout.mjs",
+    "gauntlet:vocab": "node gauntlet/scripts/vocab.mjs",
+    "gauntlet:perf": "node gauntlet/scripts/perf.mjs",
+    "gauntlet:all": "node gauntlet/scripts/all.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
