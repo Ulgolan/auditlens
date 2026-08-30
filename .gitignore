@@ -2,10 +2,14 @@ node_modules/
 .next/
 .env.local
 .env*.local
-out/
+/out/
 
 # Build artifacts
 *.tsbuildinfo
 
 # OS
 .DS_Store
+
+# Gauntlet instrument output — regenerated on every run, never committed.
+gauntlet/out/*
+!gauntlet/out/.gitkeep

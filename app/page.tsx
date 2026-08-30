@@ -12,6 +12,9 @@ import { SectionCard } from "@/components/section-card";
 import { SectionTabs } from "@/components/section-tabs";
 import { OverallPanel } from "@/components/overall-panel";
 import { FrameworkProgress } from "@/components/framework-progress";
+import { ExportDocument } from "@/components/export-document";
+import { DOCUMENT_CSS } from "@/lib/export-document";
+import gauntletFixture from "@/gauntlet/fixtures/report-fixture.json";
 
 interface ProcessedImage {
   data: string;
@@ -60,6 +63,42 @@ export default function Home() {
   const [confirmingHome, setConfirmingHome] = useState(false);
   const reportEndRef = useRef<HTMLDivElement>(null);
   const sectionAnchorRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * Gauntlet fixture mode — `?fixture=gauntlet` (optionally `&view=export`).
+   *
+   * Loads a stored, scrubbed report so the report screen and the export
+   * document can be screenshotted offline, with no live API call and no
+   * real client material. `gauntletView` stays `null` — and the rest of
+   * this component behaves exactly as it does in production — unless the
+   * query param is present. See gauntlet/README.md.
+   */
+  const [gauntletView, setGauntletView] = useState<"app" | "export" | null>(null);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("fixture") !== "gauntlet") return;
+
+    setScreenshots(
+      gauntletFixture.screenshots.map((s) => ({
+        id: s.id,
+        file: new File([], s.name, { type: "image/svg+xml" }),
+        dataUrl: s.dataUrl,
+        name: s.name,
+      }))
+    );
+    setConceptText(gauntletFixture.conceptText);
+    setTaskScenario(gauntletFixture.taskScenario);
+    setAudience(gauntletFixture.audience);
+    setFrameworks(gauntletFixture.frameworks);
+    setSections(gauntletFixture.sections as unknown as ReportSection[]);
+    setActiveTab(gauntletFixture.sections[0]?.id ?? "");
+    setOverallOpen(true);
+    setEvalPhase("done");
+    // Retry is never exercised in fixture mode — an empty array (not null)
+    // matches what a real concept-only or completed audit leaves behind.
+    imagesRef.current = [];
+    setGauntletView(params.get("view") === "export" ? "export" : "app");
+  }, []);
 
   /**
    * Screenshots are compressed once per audit and kept here so a
@@ -494,6 +533,33 @@ export default function Home() {
     setEvalPhase("idle");
     imagesRef.current = null;
   };
+
+  // Gauntlet fixture, export surface: the real export has no URL (it is a
+  // browser download, see lib/export-document.ts) — this renders the exact
+  // same ExportDocument component in-page, with the export's own CSS, so it
+  // can be screenshotted directly. Production behaviour (gauntletView stays
+  // null) is untouched.
+  if (gauntletView === "export") {
+    const exportMeta = {
+      generatedAt: "01 Jan 2026, 00:00",
+      audienceLabel: AUDIENCES.find((a) => a.id === audience)?.label ?? audience,
+      frameworkLabels: frameworks
+        .map((id) => FRAMEWORKS.find((f) => f.id === id)?.label ?? id)
+        .join(" · "),
+      taskScenario,
+      conceptText,
+      screenshotUrls: screenshots.map((s) => s.dataUrl),
+      logoDataUri: "/pop-logo-color.png",
+      markDataUri: "/motifs/north-star.svg",
+    };
+
+    return (
+      <div className="min-h-screen bg-ground">
+        <style>{DOCUMENT_CSS}</style>
+        <ExportDocument sections={sections} meta={exportMeta} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-ground">

@@ -1,0 +1,56 @@
+{
+  "_comment": "Gauntlet fixture — synthetic, scrubbed audit state. No real client material. Loaded by app/page.tsx only when ?fixture=gauntlet is present in the URL; see gauntlet/README.md.",
+  "screenshots": [
+    {
+      "id": "gauntlet-fixture-1",
+      "name": "fixture-screenshot-1.svg",
+      "dataUrl": "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20800%20500'%3E%3Crect%20width='800'%20height='500'%20fill='%23FFF3F0'/%3E%3Crect%20x='6'%20y='6'%20width='788'%20height='488'%20fill='none'%20stroke='%23080B83'%20stroke-width='4'/%3E%3Ctext%20x='400'%20y='230'%20font-family='monospace'%20font-size='34'%20fill='%23080B83'%20text-anchor='middle'%3EFIXTURE%20SCREENSHOT%201%3C/text%3E%3Ctext%20x='400'%20y='270'%20font-family='monospace'%20font-size='16'%20fill='%233A3B5C'%20text-anchor='middle'%3Egauntlet%20placeholder%20%E2%80%94%20not%20real%20client%20material%3C/text%3E%3C/svg%3E"
+    },
+    {
+      "id": "gauntlet-fixture-2",
+      "name": "fixture-screenshot-2.svg",
+      "dataUrl": "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20800%20500'%3E%3Crect%20width='800'%20height='500'%20fill='%23FFF3F0'/%3E%3Crect%20x='6'%20y='6'%20width='788'%20height='488'%20fill='none'%20stroke='%23080B83'%20stroke-width='4'/%3E%3Ctext%20x='400'%20y='230'%20font-family='monospace'%20font-size='34'%20fill='%23080B83'%20text-anchor='middle'%3EFIXTURE%20SCREENSHOT%202%3C/text%3E%3Ctext%20x='400'%20y='270'%20font-family='monospace'%20font-size='16'%20fill='%233A3B5C'%20text-anchor='middle'%3Egauntlet%20placeholder%20%E2%80%94%20not%20real%20client%20material%3C/text%3E%3C/svg%3E"
+    }
+  ],
+  "conceptText": "A returning customer opens the app and lands on a saved-orders list. Tapping an order opens a detail view with a Reorder button. Reorder skips straight to payment using the stored card, showing a confirmation sheet with the total and a 5-second undo window before the order is placed.",
+  "taskScenario": "Returning user reordering a previous purchase in under three taps.",
+  "audience": "habitual",
+  "frameworks": ["nielsen", "cw", "state", "a11y"],
+  "sections": [
+    {
+      "id": "nielsen",
+      "label": "Nielsen's 10",
+      "status": "complete",
+      "text": "## NIELSEN'S 10 USABILITY HEURISTICS\n\n### 1. Visibility of System Status\n\n[PASS] The saved-orders list clearly marks which order was most recent, and the Reorder confirmation sheet shows a live countdown during the undo window.\n\n### 2. Match Between System and the Real World\n\n[MINOR] \"Reorder\" implies an exact repeat of the prior purchase, but quantities are not shown on the confirmation sheet. A returning user who changed their mind about quantity has no cue to check.\n\n> Show the line-item quantities on the confirmation sheet, not just the total.\n\n### 3. User Control and Freedom\n\n[PASS] The 5-second undo window gives the user a real way out of an accidental tap before the order is placed.\n\n### 4. Consistency and Standards\n\n[PASS] Reorder uses the same stored-card iconography as the rest of the checkout flow described in the concept.\n",
+      "detail": null
+    },
+    {
+      "id": "cw",
+      "label": "Cognitive Walkthrough",
+      "status": "complete",
+      "text": "## COGNITIVE WALKTHROUGH\n\n### Step 1 — Open saved orders\n\n[PASS] A habitual user returning to reorder will look for a list of past purchases first; this is a well-worn pattern from the audience's other apps.\n\n### Step 2 — Tap an order\n\n[PASS] The detail view surfaces the Reorder action without requiring a second navigation step.\n\n### Step 3 — Confirm and pay\n\n[MINOR] The concept does not describe what happens if the stored card has expired. A habitual user hitting this edge case mid-flow has no described recovery path.\n\n> Define a fallback state for an expired or declined stored card before this ships.\n",
+      "detail": null
+    },
+    {
+      "id": "state",
+      "label": "State Stress Test",
+      "status": "complete",
+      "text": "## STATE STRESS TEST (5 UI States)\n\n### Empty\n\n[MINOR] No empty state is described for a user with no saved orders yet. First-time reorder flows need a described empty state, not just an absence of screens.\n\n### Loading\n\n[PASS] The confirmation sheet's undo countdown implies a loading/committing state is already part of the design.\n\n### Partial\n\n[PASS] No partial-data condition applies to this concept — a single order detail view has no partial-load case.\n\n### Error\n\n[MINOR] No described state for a failed reorder (e.g., item out of stock). Concept mode narrows what can be assessed here; the description commits to a happy path only.\n\n### Ideal\n\n[PASS] The described ideal path — list, detail, reorder, undo window, confirm — is a short, low-friction sequence appropriate for a habitual audience.\n",
+      "detail": null
+    },
+    {
+      "id": "a11y",
+      "label": "Accessibility",
+      "status": "complete",
+      "text": "## ACCESSIBILITY AUDIT\n\n[MINOR] Concept mode narrows this section: with no visuals, contrast, target size, and focus-ring behaviour cannot be assessed and are not scored below.\n\n### Time-based interaction\n\n[MINOR] A 5-second undo window is a fixed timer with no described way to extend it. A user who needs more time — including many users who rely on assistive technology — cannot get it as described.\n\n> Either lengthen the window or make it extendable, per WCAG 2.2.1 (Timing Adjustable).\n\n### Confirmation semantics\n\n[PASS] A confirmation sheet before an irreversible purchase action is a sound pattern for error prevention, assuming it is announced to screen readers when it appears.\n",
+      "detail": null
+    },
+    {
+      "id": "overall",
+      "label": "Overall Assessment",
+      "status": "complete",
+      "text": "## OVERALL ASSESSMENT\n\n### Letter Grade\n\n**Letter Grade: B**\n\n### Top 3 Quick Wins\n\n1. Show line-item quantities on the Reorder confirmation sheet, not just the total.\n2. Define a fallback state for an expired or declined stored card.\n3. Make the 5-second undo window extendable per WCAG 2.2.1.\n\n### What's Working Well\n\nThe reorder path itself is short and well-matched to a habitual, returning audience — list, detail, reorder, undo, confirm is a low-friction sequence with a real escape hatch built in.\n",
+      "detail": null
+    }
+  ]
+}

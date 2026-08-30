@@ -88,8 +88,13 @@ async function inlineCssAssets(css: string): Promise<string> {
   });
 }
 
-/** Layout, page setup and print rules that exist only in the document. */
-const DOCUMENT_CSS = `
+/**
+ * Layout, page setup and print rules that exist only in the document.
+ * Exported so the gauntlet fixture view (app/page.tsx, ?fixture=gauntlet)
+ * can render the exact same ExportDocument component in-page for
+ * screenshotting, since the real export has no URL — see gauntlet/README.md.
+ */
+export const DOCUMENT_CSS = `
   html { background: var(--ground); }
   body {
     margin: 0;
