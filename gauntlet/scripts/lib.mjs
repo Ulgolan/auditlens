@@ -7,7 +7,11 @@ import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 
-export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
+export const ROOT = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+  ".."
+);
 export const OUT_DIR = path.join(ROOT, "gauntlet", "out");
 export const SHOTS_DIR = path.join(OUT_DIR, "shots");
 export const BASELINE_DIR = path.join(ROOT, "gauntlet", "baseline");

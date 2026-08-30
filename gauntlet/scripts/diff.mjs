@@ -3,7 +3,14 @@ import fs from "node:fs";
 import path from "node:path";
 import { PNG } from "pngjs";
 import pixelmatch from "pixelmatch";
-import { SHOTS_DIR, BASELINE_DIR, MASKS_DIR, OUT_DIR, ensureDir, allShotNames } from "./lib.mjs";
+import {
+  SHOTS_DIR,
+  BASELINE_DIR,
+  MASKS_DIR,
+  OUT_DIR,
+  ensureDir,
+  allShotNames,
+} from "./lib.mjs";
 
 // pixelmatch's own default — how different a pixel's colour must be (0..1)
 // before it counts as a mismatch. Sub-pixel antialiasing jitter in font
@@ -42,11 +49,14 @@ function main() {
   const existingShots = names.filter((n) => fs.existsSync(path.join(SHOTS_DIR, n)));
 
   if (existingShots.length === 0) {
-    console.error("gauntlet:diff — gauntlet/out/shots/ is empty. Run gauntlet:shots first.");
+    console.error(
+      "gauntlet:diff — gauntlet/out/shots/ is empty. Run gauntlet:shots first."
+    );
     process.exit(1);
   }
 
-  const baselineExists = fs.existsSync(BASELINE_DIR) && fs.readdirSync(BASELINE_DIR).length > 0;
+  const baselineExists =
+    fs.existsSync(BASELINE_DIR) && fs.readdirSync(BASELINE_DIR).length > 0;
 
   if (!baselineExists) {
     ensureDir(BASELINE_DIR);
@@ -106,9 +116,16 @@ function main() {
 
     const { width, height } = baseImg;
     const diffImg = new PNG({ width, height });
-    const mismatchedPixels = pixelmatch(baseImg.data, curImg.data, diffImg.data, width, height, {
-      threshold: PIXELMATCH_THRESHOLD,
-    });
+    const mismatchedPixels = pixelmatch(
+      baseImg.data,
+      curImg.data,
+      diffImg.data,
+      width,
+      height,
+      {
+        threshold: PIXELMATCH_THRESHOLD,
+      }
+    );
     const mismatchPercent = (mismatchedPixels / (width * height)) * 100;
 
     fs.writeFileSync(path.join(diffsDir, name), PNG.sync.write(diffImg));
@@ -126,14 +143,20 @@ function main() {
 
   fs.writeFileSync(
     path.join(OUT_DIR, "diff.json"),
-    JSON.stringify({ seeded: false, threshold: PIXELMATCH_THRESHOLD, images: results }, null, 2)
+    JSON.stringify(
+      { seeded: false, threshold: PIXELMATCH_THRESHOLD, images: results },
+      null,
+      2
+    )
   );
 
   const compared = results.filter((r) => r.mismatchPercent !== null);
   const worst = compared.slice().sort((a, b) => b.mismatchPercent - a.mismatchPercent)[0];
   console.log(
     `gauntlet:diff — compared ${compared.length}/${results.length} images against gauntlet/baseline/. ` +
-      (worst ? `Worst: ${worst.name} @ ${worst.mismatchPercent}%` : "no comparable images")
+      (worst
+        ? `Worst: ${worst.name} @ ${worst.mismatchPercent}%`
+        : "no comparable images")
   );
 }
 

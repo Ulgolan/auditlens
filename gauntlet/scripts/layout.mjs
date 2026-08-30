@@ -28,9 +28,12 @@ async function collectLayoutIssues(page) {
       while (node && node.nodeType === 1 && node.tagName !== "BODY") {
         let selector = node.tagName.toLowerCase();
         const siblings = node.parentElement
-          ? Array.from(node.parentElement.children).filter((c) => c.tagName === node.tagName)
+          ? Array.from(node.parentElement.children).filter(
+              (c) => c.tagName === node.tagName
+            )
           : [];
-        if (siblings.length > 1) selector += `:nth-of-type(${siblings.indexOf(node) + 1})`;
+        if (siblings.length > 1)
+          selector += `:nth-of-type(${siblings.indexOf(node) + 1})`;
         parts.unshift(selector);
         node = node.parentElement;
       }
@@ -84,7 +87,12 @@ async function collectLayoutIssues(page) {
       .filter((t) => t.rect.width > 1 && t.rect.height > 1);
 
     function intersects(a, b) {
-      return !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
+      return !(
+        a.right <= b.left ||
+        a.left >= b.right ||
+        a.bottom <= b.top ||
+        a.top >= b.bottom
+      );
     }
     function overlapArea(a, b) {
       const w = Math.min(a.right, b.right) - Math.max(a.left, b.left);
@@ -101,7 +109,10 @@ async function collectLayoutIssues(page) {
         if (!intersects(a.rect, b.rect)) continue;
 
         const area = overlapArea(a.rect, b.rect);
-        const minArea = Math.min(a.rect.width * a.rect.height, b.rect.width * b.rect.height);
+        const minArea = Math.min(
+          a.rect.width * a.rect.height,
+          b.rect.width * b.rect.height
+        );
         const overlapPercent = minArea > 0 ? (area / minArea) * 100 : 0;
         if (overlapPercent > tolerance) {
           results.overlaps.push({
@@ -119,7 +130,9 @@ async function collectLayoutIssues(page) {
     // actual source — and drop the ancestors it drags along with it.
     results.horizontalOverflow = results.horizontalOverflow.filter((entry) => {
       const prefix = entry.selector + " > ";
-      return !results.horizontalOverflow.some((other) => other.selector.startsWith(prefix));
+      return !results.horizontalOverflow.some((other) =>
+        other.selector.startsWith(prefix)
+      );
     });
 
     return results;
@@ -169,7 +182,11 @@ async function main() {
 
   fs.writeFileSync(
     path.join(OUT_DIR, "layout.json"),
-    JSON.stringify({ overlapPercentTolerance: OVERLAP_PERCENT_TOLERANCE, findings }, null, 2)
+    JSON.stringify(
+      { overlapPercentTolerance: OVERLAP_PERCENT_TOLERANCE, findings },
+      null,
+      2
+    )
   );
 
   const totalOverflow = findings.reduce((s, f) => s + f.horizontalOverflowCount, 0);

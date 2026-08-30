@@ -53,7 +53,9 @@ async function main() {
           page: pageDef.id,
           formFactor: formFactor.id,
           scores: {
-            performance: categories.performance ? Math.round(categories.performance.score * 100) : null,
+            performance: categories.performance
+              ? Math.round(categories.performance.score * 100)
+              : null,
             accessibility: categories.accessibility
               ? Math.round(categories.accessibility.score * 100)
               : null,
@@ -68,7 +70,10 @@ async function main() {
     }
   });
 
-  fs.writeFileSync(path.join(OUT_DIR, "perf.json"), JSON.stringify({ baseUrl: BASE_URL, runs }, null, 2));
+  fs.writeFileSync(
+    path.join(OUT_DIR, "perf.json"),
+    JSON.stringify({ baseUrl: BASE_URL, runs }, null, 2)
+  );
 
   console.log("gauntlet:perf — scores:");
   for (const run of runs) {

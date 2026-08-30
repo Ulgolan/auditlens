@@ -32,7 +32,11 @@ const SCAN_DIRS = ["components", "app", "lib"];
 const SCAN_EXTENSIONS = new Set([".ts", ".tsx"]);
 
 const TERMS = [
-  { name: "screen", pattern: /\bScreens?\b/g, note: "numbering system only — capitalised form" },
+  {
+    name: "screen",
+    pattern: /\bScreens?\b/g,
+    note: "numbering system only — capitalised form",
+  },
   { name: "document", pattern: /\bdocuments?\b/gi },
   { name: "issue", pattern: /\bissues?\b/gi },
   { name: "problem", pattern: /\bproblems?\b/gi },
@@ -71,7 +75,9 @@ function blankComments(content) {
 // whole-word "document" hit unrelated to the banned term. Blanked out the
 // same way as comments, preserving line numbers.
 function blankImportStatements(content) {
-  let out = content.replace(/^[ \t]*(?:import|export)\b[^\n]*$/gm, (m) => " ".repeat(m.length));
+  let out = content.replace(/^[ \t]*(?:import|export)\b[^\n]*$/gm, (m) =>
+    " ".repeat(m.length)
+  );
   // Dynamic imports don't start the line (e.g. `const { x } = await
   // import("@/lib/export-document")`) — blank just the call expression.
   out = out.replace(/\bimport\s*\([^)]*\)/g, (m) => " ".repeat(m.length));
@@ -159,7 +165,9 @@ function main() {
     }
   }
 
-  hits.sort((a, b) => (a.file === b.file ? a.line - b.line : a.file.localeCompare(b.file)));
+  hits.sort((a, b) =>
+    a.file === b.file ? a.line - b.line : a.file.localeCompare(b.file)
+  );
 
   fs.writeFileSync(
     path.join(OUT_DIR, "vocab.json"),

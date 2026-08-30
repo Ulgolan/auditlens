@@ -33,8 +33,12 @@ async function main() {
           });
           const page = await context.newPage();
           await page.goto(baseUrl + surface.path, { waitUntil: "networkidle" });
-          await page.waitForSelector("text=OVERALL ASSESSMENT", { timeout: 5000 }).catch(() => {});
-          await page.evaluate(() => document.fonts && document.fonts.ready).catch(() => {});
+          await page
+            .waitForSelector("text=OVERALL ASSESSMENT", { timeout: 5000 })
+            .catch(() => {});
+          await page
+            .evaluate(() => document.fonts && document.fonts.ready)
+            .catch(() => {});
           await page.waitForTimeout(300);
 
           const results = await new AxeBuilder({ page })
@@ -54,11 +58,16 @@ async function main() {
               impact: v.impact,
               help: v.help,
               helpUrl: v.helpUrl,
-              nodes: v.nodes.map((n) => ({ target: n.target, failureSummary: n.failureSummary })),
+              nodes: v.nodes.map((n) => ({
+                target: n.target,
+                failureSummary: n.failureSummary,
+              })),
             })),
           });
 
-          const contrastViolation = results.violations.find((v) => v.id === "color-contrast");
+          const contrastViolation = results.violations.find(
+            (v) => v.id === "color-contrast"
+          );
           if (contrastViolation) {
             for (const node of contrastViolation.nodes) {
               for (const check of [...(node.any || []), ...(node.all || [])]) {

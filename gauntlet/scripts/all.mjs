@@ -78,12 +78,18 @@ function writeSummary(timings, totalSeconds) {
       "gauntlet/out/layout.json",
       `${totalOverflow ?? "n/a"} horizontal overflows, ${totalOverlap ?? "n/a"} text overlaps`,
     ],
-    ["vocab", "gauntlet/out/vocab.json", `${vocab ? vocab.hitCount : "n/a"} banned-term hits`],
+    [
+      "vocab",
+      "gauntlet/out/vocab.json",
+      `${vocab ? vocab.hitCount : "n/a"} banned-term hits`,
+    ],
     [
       "perf",
       "gauntlet/out/lhci/*.json, gauntlet/out/perf.json",
       perf
-        ? perf.runs.map((r) => `${r.id}: P${r.scores.performance}/A${r.scores.accessibility}`).join(", ")
+        ? perf.runs
+            .map((r) => `${r.id}: P${r.scores.performance}/A${r.scores.accessibility}`)
+            .join(", ")
         : "n/a",
     ],
   ];
@@ -121,8 +127,14 @@ async function main() {
     for (const step of STEPS) {
       const stepStart = Date.now();
       console.log(`\n=== gauntlet:${step} ===`);
-      execFileSync("node", [`gauntlet/scripts/${step}.mjs`], { cwd: ROOT, stdio: "inherit" });
-      timings.push({ step, seconds: Number(((Date.now() - stepStart) / 1000).toFixed(1)) });
+      execFileSync("node", [`gauntlet/scripts/${step}.mjs`], {
+        cwd: ROOT,
+        stdio: "inherit",
+      });
+      timings.push({
+        step,
+        seconds: Number(((Date.now() - stepStart) / 1000).toFixed(1)),
+      });
     }
   });
 

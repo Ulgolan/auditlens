@@ -152,7 +152,9 @@ async function dumpElements(page) {
       while (node && node.nodeType === 1 && node.tagName !== "BODY") {
         let selector = node.tagName.toLowerCase();
         const siblings = node.parentElement
-          ? Array.from(node.parentElement.children).filter((c) => c.tagName === node.tagName)
+          ? Array.from(node.parentElement.children).filter(
+              (c) => c.tagName === node.tagName
+            )
           : [];
         if (siblings.length > 1) {
           selector += `:nth-of-type(${siblings.indexOf(node) + 1})`;
@@ -171,7 +173,12 @@ async function dumpElements(page) {
 
     return elements.map((el) => {
       const cs = getComputedStyle(el);
-      const borderSides = [cs.borderTopColor, cs.borderRightColor, cs.borderBottomColor, cs.borderLeftColor];
+      const borderSides = [
+        cs.borderTopColor,
+        cs.borderRightColor,
+        cs.borderBottomColor,
+        cs.borderLeftColor,
+      ];
       const borderUniform = borderSides.every((c) => c === borderSides[0]);
 
       return {
@@ -208,10 +215,14 @@ async function main() {
     const browser = await chromium.launch();
     try {
       for (const surface of SURFACE_PAGES) {
-        const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+        const context = await browser.newContext({
+          viewport: { width: 1280, height: 800 },
+        });
         const page = await context.newPage();
         await page.goto(baseUrl + surface.path, { waitUntil: "networkidle" });
-        await page.waitForSelector("text=OVERALL ASSESSMENT", { timeout: 5000 }).catch(() => {});
+        await page
+          .waitForSelector("text=OVERALL ASSESSMENT", { timeout: 5000 })
+          .catch(() => {});
         await page.evaluate(() => document.fonts && document.fonts.ready).catch(() => {});
         await page.waitForTimeout(300);
 
@@ -234,11 +245,13 @@ async function main() {
 
         for (const el of elements) {
           if (!legalColors.has(el.color)) record("color", el.color, el.selector);
-          if (!legalColors.has(el.backgroundColor)) record("backgroundColor", el.backgroundColor, el.selector);
+          if (!legalColors.has(el.backgroundColor))
+            record("backgroundColor", el.backgroundColor, el.selector);
           for (const side of flattenBorderColors(el.borderColor)) {
             if (!legalColors.has(side)) record("borderColor", side, el.selector);
           }
-          if (!legalFonts.has(el.fontFamily)) record("fontFamily", el.fontFamily, el.selector);
+          if (!legalFonts.has(el.fontFamily))
+            record("fontFamily", el.fontFamily, el.selector);
         }
 
         await context.close();
