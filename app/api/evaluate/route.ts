@@ -10,6 +10,58 @@ export const maxDuration = 300;
 export const runtime = "nodejs";
 
 // ═══════════════════════════════════════════════════════
+// RATE LIMIT — per-IP, in-memory
+//
+// This is a metering guard against a runaway client hammering a paid
+// endpoint, not a business throttle: a full four-framework audit plus the
+// overall pass is 5 calls, so the ceiling is set well above that to leave
+// room for retries and a few audits back-to-back from the one operator.
+//
+// CAVEAT: the Map lives in the function instance's memory. It resets on
+// every cold start, and a burst of concurrent requests can land on
+// separate warm instances that do not share this Map — so the limit is
+// per-instance, not a global guarantee. Acceptable for a single-operator
+// tool per Gate Zero; would need a shared store (e.g. Redis) to hold under
+// multi-instance concurrency.
+// ═══════════════════════════════════════════════════════
+
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
+const RATE_LIMIT_MAX_REQUESTS = 40;
+
+interface RateBucket {
+  count: number;
+  resetAt: number;
+}
+
+const rateBuckets = new Map<string, RateBucket>();
+
+function getClientIp(req: NextRequest): string {
+  const forwardedFor = req.headers.get("x-forwarded-for");
+  if (forwardedFor) return forwardedFor.split(",")[0].trim();
+  return req.headers.get("x-real-ip") || "unknown";
+}
+
+function checkRateLimit(ip: string): { allowed: boolean; retryAfterSeconds: number } {
+  const now = Date.now();
+  const bucket = rateBuckets.get(ip);
+
+  if (!bucket || now >= bucket.resetAt) {
+    rateBuckets.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return { allowed: true, retryAfterSeconds: 0 };
+  }
+
+  if (bucket.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return {
+      allowed: false,
+      retryAfterSeconds: Math.ceil((bucket.resetAt - now) / 1000),
+    };
+  }
+
+  bucket.count += 1;
+  return { allowed: true, retryAfterSeconds: 0 };
+}
+
+// ═══════════════════════════════════════════════════════
 // API HANDLER — one framework per request
 //
 // The client orchestrates: it calls this route once per selected
@@ -40,6 +92,21 @@ interface EvaluateBody {
 }
 
 export async function POST(req: NextRequest) {
+  const clientIp = getClientIp(req);
+  const rateLimit = checkRateLimit(clientIp);
+  if (!rateLimit.allowed) {
+    return new Response(
+      JSON.stringify({ error: "Too many requests. Please wait before retrying." }),
+      {
+        status: 429,
+        headers: {
+          "Content-Type": "application/json",
+          "Retry-After": String(rateLimit.retryAfterSeconds),
+        },
+      }
+    );
+  }
+
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return new Response(JSON.stringify({ error: "ANTHROPIC_API_KEY not configured" }), {
