@@ -12,6 +12,10 @@ agents) to judge against.
 
 They run on demand. `npm run gauntlet:all` is the one command that runs everything.
 
+**One-time setup, on a fresh clone:** after `npm install`, also run
+`npx playwright install chromium` once — Playwright's browser isn't part of the
+regular npm install, and nothing else here installs it for you.
+
 ## How to read SUMMARY.md
 
 Run `npm run gauntlet:all`, then open `gauntlet/out/SUMMARY.md`. It's one table:
