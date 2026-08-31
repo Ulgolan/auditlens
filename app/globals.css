@@ -39,10 +39,12 @@
   /* ---- The three voices ---- */
   --text-primary: var(--navy-soft);
   --text-secondary: var(--ink);
-  /* 0.55, not the kit's 0.45: this app spends its tertiary voice on 10–11px
-     metadata, where 0.45 lands at ~4.0:1 on white. 0.55 clears 4.5:1 and is
-     still the navy primitive, just less diluted. */
-  --text-tertiary: rgba(8, 11, 131, 0.55);
+  /* gauntlet run-1, ratio 4.89 (worst case, on --ivory; 5.03 on white).
+     0.55 measured at axe's rendered ~4.0:1 on white — short of 4.5:1 — for
+     this app's 10–11px metadata. 0.62 clears 4.5:1 on both grounds this
+     token is actually used against (white and ivory), still the navy
+     primitive, just less diluted. */
+  --text-tertiary: rgba(8, 11, 131, 0.62);
 
   /* ---- Structure ---- */
   --border: rgba(8, 11, 131, 0.16);

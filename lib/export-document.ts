@@ -114,7 +114,7 @@ export const DOCUMENT_CSS = `
   }
   .doc-head {
     display: flex; align-items: flex-start; justify-content: space-between;
-    gap: 24px; padding-bottom: 22px; margin-bottom: 26px;
+    flex-wrap: wrap; gap: 24px; padding-bottom: 22px; margin-bottom: 26px;
     border-bottom: 1px solid var(--border);
   }
   .doc-lockup { display: flex; align-items: center; gap: 12px; }
@@ -126,6 +126,7 @@ export const DOCUMENT_CSS = `
   .doc-title {
     font-size: 1.6rem; font-weight: 800; font-stretch: 125%;
     letter-spacing: -0.02em; color: var(--text-primary); line-height: 1.1;
+    overflow-wrap: break-word;
   }
   .doc-date {
     font-size: 0.82rem; letter-spacing: 0.08em; color: var(--text-tertiary);

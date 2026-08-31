@@ -25,7 +25,7 @@ export function SectionTabs({ sections, activeId, onSelect }: SectionTabsProps) 
   if (sections.length === 0) return null;
 
   return (
-    <div className="sticky top-0 z-30 -mx-6 px-6 py-3 mb-5 bg-ground/95 backdrop-blur-md border-b border-border">
+    <div className="sticky top-0 z-30 py-3 mb-5 bg-ground/95 backdrop-blur-md border-b border-border">
       <div
         className="flex gap-2 flex-wrap"
         role="tablist"

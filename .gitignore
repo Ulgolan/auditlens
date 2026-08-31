@@ -13,3 +13,6 @@ node_modules/
 # Gauntlet instrument output — regenerated on every run, never committed.
 gauntlet/out/*
 !gauntlet/out/.gitkeep
+
+# Lane baseline — local only, gauntlet run 1
+gauntlet/lane-baseline/

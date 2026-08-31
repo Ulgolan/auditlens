@@ -135,8 +135,8 @@ export function ExportDocument({
           <div className="doc-shots">
             {meta.screenshotUrls.map((url, i) => (
               <figure key={i}>
-                <img src={url} alt={`Screen ${i + 1}`} />
-                <figcaption className="font-mono">Screen {i + 1}</figcaption>
+                <img src={url} alt={`Screenshot ${i + 1}`} />
+                <figcaption className="font-mono">Screenshot {i + 1}</figcaption>
               </figure>
             ))}
           </div>

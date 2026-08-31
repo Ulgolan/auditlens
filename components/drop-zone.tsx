@@ -99,7 +99,7 @@ export function DropZone({ screenshots, onAdd, onRemove }: DropZoneProps) {
               >
                 <img
                   src={s.dataUrl}
-                  alt={`Screen ${i + 1}`}
+                  alt={`Screenshot ${i + 1}`}
                   className="h-[120px] w-auto block object-cover"
                 />
                 <div className="font-mono absolute top-1 left-1 bg-overlay rounded px-1.5 py-0.5 text-[10px] font-medium text-ivory">
