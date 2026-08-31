@@ -44,3 +44,18 @@ SUCCESS CRITERIA
 SHIP WINDOW
 2.0 core ships this weekend — target 2026-07-25. The anti-shelf clause.
 === END BRIEF ===
+
+=== POLARIS ADDENDUM v1.2 — 2026-09-01 ===
+PURPOSE EXPANSION (Commander ruling, "Story A"):
+AuditLens serves a second, co-official purpose: proving ground for
+ACP's vibecoding pipeline (harness → gauntlet → design gate → gate
+zero), in service of freelance diversification as an AI-driven UXer.
+Instrument work on this repo is in-scope when it hardens the pipeline.
+It never outranks the field: no new instrument lap opens while the
+trust batch or live-fire clocks are idle AND unblocked.
+
+SC WINDOW (cures the v1.1 defect — "within weeks" now has a number):
+Live-fire (incl. one text-only run) + trust batch 10/10 complete by
+2026-09-30. Clock governs forward from 2026-09-01; the July–August
+drift stays on the record as ledgered.
+=== END ADDENDUM ===
