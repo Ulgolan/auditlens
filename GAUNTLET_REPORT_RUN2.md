@@ -384,7 +384,7 @@ every scanned surface, at both viewports.
 | Lanes | 3 | 1 opened, 2 not opened (no material) |
 | Cycles per lane | 4 | 1 |
 | Builder + critic spawns | 24 | **3** (1 routing proof, 1 builder, 1 critic) |
-| Wall-clock from cycle 1 | 120 min | ~13 min |
+| Wall-clock from cycle 1 | 120 min | **25 min** (cycle 1 start 22:49:44 EEST, PR open + CI green 23:14 EEST); lane work itself closed at ~11 min, the remainder is run-close |
 | `gauntlet:all` | 240s | 212.2s (cycle 0), 213s (final) |
 
 No cap hit, no lane CAPPED, no stop condition fired at any point in the run.

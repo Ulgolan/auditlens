@@ -1004,13 +1004,15 @@ exists to fix — not an independent finding. Per the key, an unused lane is a
 legitimate outcome, not a shortfall.
 
 **CAPS — none hit.** Lanes 1 of 3 opened. Cycles 1 of 4. Spawns **3 of 24** (1
-routing proof, 1 builder, 1 critic). Wall-clock ~15 min of 120 from cycle 1
-(started 22:49:44 EEST). `gauntlet:all` 212.2s and 213s, both under 240s. No
-stop condition fired at any point.
+routing proof, 1 builder, 1 critic). Wall-clock **25 min of 120** from cycle 1
+(started 22:49:44 EEST; lane work closed at ~11 min, PR open with CI green at
+23:14 EEST — the remainder is run-close, not lane work). `gauntlet:all` 212.2s
+and 213s, both under 240s. No stop condition fired at any point.
 
 >> BATON
-STATE: branch `gauntlet/run-2`, one app commit `1031a92` plus docs, PR opened
-against `main`, CI harness to be confirmed green. **NOT MERGED — the foreman
+STATE: branch `gauntlet/run-2`, one app commit `1031a92` plus docs, PR [#10](https://github.com/Ulgolan/auditlens/pull/10)
+opened against `main`, CI harness **green** (harness 51s, Vercel preview
+deployed). **NOT MERGED — the foreman
 stops at the PR; merge is the Commander's word.** FREEZE run 2 still open at
 root; its THAW condition is Tower certification of this run's report.
 CERTIFIED (by the cycle-1 critic, fresh spawn, evidence per C7): all ten
