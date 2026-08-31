@@ -914,3 +914,122 @@ post-intro executor economics for run 2's spawns.
 
 Session formalities: valve usage 0, overrides 0. Commander carries
 nothing forward except ratification words on the scars.
+
+### 2026-08-31 — Gauntlet RUN 2, branch `gauntlet/run-2` — Lane 1 DONE, lanes 2-3 not opened
+
+Under IGNITION KEY v1.2, as amended by tribunal 2026-08-31 (contingent-lane
+authority Commander-ratified "free"). Foreman Opus (Claude Code), builders +
+critics Sonnet, fresh spawn each cycle. Bar = rulebook (option A, v1.2).
+Branch cut from `origin/main` at `b25f3501`. One app commit: `1031a92`.
+Report: `GAUNTLET_REPORT_RUN2.md`.
+
+**PRE-FLIGHT, all seven PASS.** Reference = `gauntlet/baseline/` (DESIGN GATE
+31.08 approved state) + `app/globals.css` tokens + rulebook; option B retired.
+FREEZE.md unchanged since the setup-2 merge (`git log 7f004af..origin/main --
+FREEZE.md` empty). Gate Zero PASS carried from the corrected 2026-08-30 table.
+Routing proof: spawn returned "Claude Sonnet 5, model ID: claude-sonnet-5".
+Server ground truth confirmed in `lib.mjs` (PORT 4173, `next start`; idle `/`,
+idle-armed `/?fixture=gauntlet&view=idle`).
+
+*Recorded, not hidden:* **local `main` was stale** at `7f004af` (the setup-2
+merge), one commit behind `origin/main` at `b25f350` (PR #9, the session-close
+ledger). The branch was cut from `origin/main`, which is the SHA the key names.
+No ref was fast-forwarded or rewritten.
+
+**CYCLE 0 (no edits), 212.2s, exit 0** — under the 240s threshold. All five
+declared expectations MATCHED, zero drift, no STOP: 40 PNGs; diff 40/40 @
+0.0000% vs `gauntlet/baseline/`; a11y idle-armed exactly 1 `color-contrast`
+violation per viewport at 3.06:1 (`#fff3f0` on `#ff4d00`, target
+`.py-[1.15em]`); a11y idle (cold) 0 violations both viewports; vocab 9 hits,
+all in `lib/prompts.ts` (8) + `app/api/evaluate/route.ts` (1), in-scope 0.
+
+**FIRST GROUND TRUTH on the idle surfaces — recorded, not graded** (no ledgered
+measurement existed; setup-2 ran these but never receipted them): styles `idle`
+159 elements / 0 unlisted, `idle-armed` 161 / 0. Layout 40 findings entries, all
+`horizontalOverflowCount: 0, overlapCount: 0`, idle surfaces included at both
+viewports in all four states. Perf `idle` 96/100/96/100 mobile and
+100/100/96/100 desktop; `idle-armed` 96/**95**/96/100 and 100/**95**/96/100.
+
+**LANE 1 (mandatory, Commander-ruled) — DONE at cycle 1 of 4.** Run Audit CTA
+armed state `text-ivory` -> `text-navy`, `app/page.tsx:757`, one variable. Cold
+pill at `:758` untouched. No new hue/hex: `--navy: #080b83` predates the change
+(`app/globals.css:23`, token at `:100`, introduced in `b040022`), confirmed by
+`git log -S`. Builder pre-commit lint/test/format:check all exit 0.
+
+Critic (fresh spawn) ran `gauntlet:all` (exit 0, 213s) and
+`gauntlet:diff --against gauntlet/lane-baseline/shots` (exit 0). **All ten
+rulebook rows PASS** — R1, R2/3, R4, R4b, R5a, R5b, R5c, R7, R8, R9 — each with
+file+field evidence. R7 flake protocol not invoked (no FAIL row). R8: diff is
+`app/page.tsx | 2 +-`, `package.json` byte-identical, zero engine/prompt files.
+
+**BASELINE -> FINAL:** axe violations 2 -> **0**; contrast failures 2 -> **0**;
+Run Audit CTA armed contrast **3.06:1 -> 4.56:1** (#080B83 on #FF4D00, clears
+WCAG AA 4.5:1); Lighthouse accessibility on `idle-armed` **95 -> 100** at both
+viewports, now 100 on all eight runs; overflows 0 -> 0, overlaps 0 -> 0, unlisted
+style values 0 -> 0, in-scope vocab 0 -> 0; perf/best-practices/SEO unchanged.
+**Zero WCAG exemptions claimed** — R4's clause went unused because
+`contrastFailures` is empty, and the cold disabled pill needed no 1.4.3 claim
+because axe raises nothing against it.
+
+**The 4.56:1 is measured, not inherited.** The critic was told to treat this
+ledger's own prior 4.56:1 as a claim to check, not a fact to repeat, and to show
+its arithmetic. It read `color: rgb(8,11,131)` and
+`backgroundColor: rgb(255,77,0)` from `styles.json`'s CTA element (identified by
+its 18.032px vertical padding, what `.py-[1.15em]` computes to), linearised
+both, and got luminances 0.01930 / 0.26568 -> **4.56**. Agreement, not citation.
+
+**DECLARATION CORRECTED BEFORE GRADING — worth the certifying Tower's eye.** The
+builder's first declaration named 2 expected-to-move shots and carried an
+explicit self-named gap: it had not checked whether `idle-armed` has
+`scrolled`/`reduced-motion` variants. It has eight shots, not two. Under R9 an
+under-declaration fails as hard as an over-declaration, so the foreman sent it
+back to close the gap under C2 — traced pixel evidence naming the mechanism, no
+code change permitted. It returned two distinct mechanisms, both verified rather
+than assumed: (1) the `view=idle` fixture is applied client-side, so
+`js-disabled` renders the **cold** pill and does not move; (2)
+`applyStatePostNav` (`lib.mjs:191-198`) optional-chains
+`getElementById("gauntlet-tabbar-anchor")?.scrollIntoView(...)`, and that anchor
+lives only inside the report panel (`app/page.tsx:827`), so on idle surfaces the
+scroll is a no-op and `scrolled` is pixel-identical to `top` — both rendering
+**armed**, both moving. Corrected split 6 move / 34 unchanged. The critic then
+measured exactly that: `diff.json` shows exactly 6 nonzero images, the declared
+six (mobile 0.0509%, desktop 0.0228%), and 34 at `mismatchPercent: 0`,
+`status: "compared"`, with no dimension-mismatch status anywhere in the file.
+
+**LANES 2-3 NOT OPENED.** The key authorises contingent lanes only from cycle-0
+FIRST-GROUND-TRUTH findings on the idle surfaces. There were none: styles and
+layout read clean at zero, and the only sub-100 perf cell (`idle-armed`
+accessibility 95) was Lighthouse scoring the same CTA contrast failure Lane 1
+exists to fix — not an independent finding. Per the key, an unused lane is a
+legitimate outcome, not a shortfall.
+
+**CAPS — none hit.** Lanes 1 of 3 opened. Cycles 1 of 4. Spawns **3 of 24** (1
+routing proof, 1 builder, 1 critic). Wall-clock **25 min of 120** from cycle 1
+(started 22:49:44 EEST; lane work closed at ~11 min, PR open with CI green at
+23:14 EEST — the remainder is run-close, not lane work). `gauntlet:all` 212.2s
+and 213s, both under 240s. No stop condition fired at any point.
+
+>> BATON
+STATE: branch `gauntlet/run-2`, one app commit `1031a92` plus docs, PR [#10](https://github.com/Ulgolan/auditlens/pull/10)
+opened against `main`, CI harness **green** (harness 51s, Vercel preview
+deployed). **NOT MERGED — the foreman
+stops at the PR; merge is the Commander's word.** FREEZE run 2 still open at
+root; its THAW condition is Tower certification of this run's report.
+CERTIFIED (by the cycle-1 critic, fresh spawn, evidence per C7): all ten
+rulebook rows PASS; axe 0 across all eight runs; `contrastFailures` empty;
+computed CTA contrast 4.56:1; declaration 6/34 measured exact against the lane
+baseline via `--against`; diff scope one file, `package.json` byte-identical.
+OPEN: (1) Tower diff-cert against tarballs, receipts per C7, BEFORE the merge
+word is requested. (2) Commander eye + merge word. (3) **POST-MERGE re-seed of
+`gauntlet/baseline/`** — six PNGs legitimately moved
+(`idle-armed__{mobile,desktop}__{top,scrolled,reduced-motion}`), the other 34
+already byte-correct; own commit, ledgered, only after the eye. This is the
+standing law from setup-2, and it now has a durable home in
+`GAUNTLET_REPORT_RUN2.md`'s run-close checklist section 5 rather than in memory
+— the C8 gap is closed. (4) Prompts-vocab key for the 9 parked hits — separate
+key. (5) Station 12, the Polaris audit, runs on the run-2 certified state.
+TRAPS: `gauntlet/baseline/` is CANON — no re-seed without a Commander DESIGN
+GATE ruling. `gauntlet/run-1-final/` is provenance — never delete, never
+overwrite. `SUMMARY.md`'s heading string always reads "cycle 0" regardless of
+which cycle produced it; do not cite it as evidence of a cycle number. Receipts
+must carry the measuring command's OWN exit code, stderr unsuppressed.

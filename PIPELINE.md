@@ -1,8 +1,8 @@
 # PIPELINE — AuditLens 2.0
 Opened: 2026-07-24 · DS slot: own canon (Ivory Loom) · Brief: [POLARIS.md](./POLARIS.md)
 
-NOW:  gauntlet run 2 (setup-2 merged; key v1.2 pending cycle-0 timing)
-NEXT: 12 — Polaris audit against the 2.0 brief (deferred behind run 2: run 1 certified two instrument debts — idle blind spot, R5a/R5c contradiction — that an audit would only re-flag; audit runs on the run-2 certified state; Commander ruling 2026-08-31)
+NOW:  gauntlet run 2 — lanes complete, PR open against main, NOT merged (Lane 1 DONE at cycle 1; lanes 2-3 not opened, no cycle-0 finding to author them from; awaiting Tower diff-cert, then Commander eye + merge word, then the post-merge baseline re-seed)
+NEXT: 12 — Polaris audit against the 2.0 brief (both run-1 instrument debts are now closed: the idle blind spot was instrumented in setup-2 and measured in run 2, and the R5a/R5c contradiction was resolved by the C1 rewording, graded PASS this run; the audit runs on the run-2 certified state once merged — Commander ruling 2026-08-31)
 
 | # | Station | Status | Evidence | Date |
 |---|---|---|---|---|
@@ -15,7 +15,7 @@ NEXT: 12 — Polaris audit against the 2.0 brief (deferred behind run 2: run 1 c
 | 6 | Studio (Figma) — conditional | SKIPPED: option B retired for AuditLens 2.0 — Commander ruled 2026-08-31 that the render approved at DESIGN GATE 31.08 is canon; `gauntlet/baseline/` serves as reference. | LEDGER 2026-08-30, 2026-08-31 | |
 | 7 | Propagate tokens | DONE | Tokens copied deliberately into `app/globals.css` (no stock Tailwind colours survive), Phase 4 commits; 0 unlisted style values confirmed by `gauntlet:styles` in run 1 | 2026-08-31 |
 | 8 | Build in sprints | DONE | Merged PRs [#1](https://github.com/Ulgolan/auditlens/pull/1) (emoji excision), [#2](https://github.com/Ulgolan/auditlens/pull/2) (harness), [#3](https://github.com/Ulgolan/auditlens/pull/3) (gauntlet setup + Gate Zero, `57fcb1a`), [#5](https://github.com/Ulgolan/auditlens/pull/5) (gauntlet run 1, `befdb6e`); full sprint list in LEDGER | 2026-08-31 |
-| 9 | Gauntlet — conditional | DONE | PR [#3](https://github.com/Ulgolan/auditlens/pull/3) (setup + instruments) and PR [#5](https://github.com/Ulgolan/auditlens/pull/5) (`GAUNTLET_REPORT.md`, run 1 certified, `befdb6e`); run 2 opened, branch `gauntlet/setup-2` | 2026-08-31 |
+| 9 | Gauntlet — conditional | DONE | PR [#3](https://github.com/Ulgolan/auditlens/pull/3) (setup + instruments), PR [#5](https://github.com/Ulgolan/auditlens/pull/5) (`GAUNTLET_REPORT.md`, run 1 certified, `befdb6e`), PR [#8](https://github.com/Ulgolan/auditlens/pull/8) (setup 2 — idle surfaces, 40-shot baseline, `--against`); run 2 executed on branch `gauntlet/run-2`, `GAUNTLET_REPORT_RUN2.md`, app commit `1031a92` — axe 2→0, CTA contrast 3.06:1→4.56:1, Lighthouse a11y 100 on all eight runs. PR open, NOT merged | 2026-08-31 |
 | 10 | DESIGN GATE | DONE | DESIGN GATE 31.08 — Commander approved secondary CTAs ivory→navy text, header wrap at 390; Run Audit CTA ruling deferred to run 2 — LEDGER 2026-08-31 | 2026-08-31 |
 | 11 | Gate Zero → ship | DONE | Gate Zero table PASS across all seven checks (corrections applied) — LEDGER 2026-08-30; production live at `3958808`, https://auditlens-8b3pzche8-popescu-alexandrus-projects.vercel.app | 2026-08-30 |
 | 12 | Polaris audit — conditional | TODO | | |

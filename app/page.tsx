@@ -754,7 +754,7 @@ export default function Home() {
                 font-mono w-full py-[1.15em] px-6 rounded-pill text-[0.98rem] font-medium uppercase tracking-[0.12em] transition-transform duration-150
                 ${
                   canEvaluate
-                    ? "bg-accent text-ivory cursor-pointer hover:-translate-y-[2px]"
+                    ? "bg-accent text-navy cursor-pointer hover:-translate-y-[2px]"
                     : "border border-border text-text-tertiary cursor-not-allowed"
                 }
               `}
