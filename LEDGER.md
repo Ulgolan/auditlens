@@ -531,12 +531,32 @@ Anthropic account credit. Until that happens, no PR against this repo can
 go fully green, and this one stays open rather than merging on a false
 "harness passed."
 
-**What's stale for the next worker:** the harness-red state above (a
-one-time credit top-up should clear it — re-run the PR's harness afterward,
-nothing else should need touching). Gate Zero #2/#3's two COMMANDER
-billing/plan actions, still open. The vocab/contrast/layout findings above,
-listed not fixed. Option B (Claude Design reference frames, pixel-diff vs
+**GATE ZERO — CORRECTIONS (same session, after Commander action):**
+2. Secrets/secret-scanning — the "branch protection fully off / needs plan
+   upgrade" finding above was **wrong**: it read the legacy branch-protection
+   endpoint instead of rulesets. Verified via `/rulesets`: ruleset
+   "main-harness" (id `20875261`) is active on `main`, required status check
+   "harness". Repo has been public since 30 Aug 12:37 UTC. Push protection is
+   ON at the user level. Proof on PR #3 thread. **PASS.**
+3. Wallet guard — **PASS.** Anthropic console monthly spend limit set to $30
+   by Commander. Vercel Hobby has no spend toggle at all, hard limits only —
+   that half of Gate Zero #3 was never an open action, just a plan
+   constraint. Proof on PR #3 thread.
+5. Rate limit — reconfirmed at the code level, not just live: the limiter at
+   `app/api/evaluate/route.ts:51` runs before the client call at `:202`, and
+   the hermetic test asserts `fetch` is never invoked once the limit trips.
+   The earlier version of this test drove a real handler loop and spent
+   Anthropic API credit in CI; replaced 31 Aug. **PASS.**
+
+PR #3 merged at `57fcb1a` — harness green including the live smoke eval,
+production deployed.
+
+**What's stale for the next worker:** the harness-red state above is
+resolved (Commander topped up Anthropic credit; PR #3's harness went green
+and it merged). Gate Zero #2 and #3 are now PASS per the corrections above —
+only Gate Zero's non-blocking findings (vocab/contrast/layout) remain listed
+not fixed. Option B (Claude Design reference frames, pixel-diff vs
 reference) — return ticket, still parked, untouched this lap.
 
 >> BATON
-HARNESS: 6 tests green locally (12 total incl. rate-limit) · gauntlet:all green, 124.9s · CI harness RED — Anthropic account credit balance too low, blocks any PR right now, not code · signals: Gate Zero #2 (secret scanning unavailable on plan), #3 (Vercel spend limit) both open COMMANDER ACTIONS
+HARNESS: 6 tests green locally (12 total incl. rate-limit) · gauntlet:all green, 124.9s · CI harness GREEN on `main` after Commander's Anthropic credit top-up · PR #3 merged 57fcb1a · Gate Zero #2 and #3 both PASS (corrected — see above), Gate Zero #5 PASS
