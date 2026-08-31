@@ -26,7 +26,7 @@ export function ReportRenderer({ content }: ReportRendererProps) {
           return (
             <h1
               key={i}
-              className="font-display text-[28px] font-extrabold text-text-primary mt-8 mb-3 border-b border-border pb-2"
+              className="font-display text-[28px] font-extrabold text-text-primary mt-8 mb-3 border-b border-border pb-2 [overflow-wrap:break-word]"
             >
               {cleanMarkdown(trimmed.slice(2))}
             </h1>
@@ -36,7 +36,7 @@ export function ReportRenderer({ content }: ReportRendererProps) {
           return (
             <h2
               key={i}
-              className="font-display text-[21px] font-bold text-text-primary mt-7 mb-2.5"
+              className="font-display text-[21px] font-bold text-text-primary mt-7 mb-2.5 [overflow-wrap:break-word]"
             >
               {cleanMarkdown(trimmed.slice(3))}
             </h2>
@@ -44,7 +44,7 @@ export function ReportRenderer({ content }: ReportRendererProps) {
 
         if (trimmed.startsWith("### "))
           return (
-            <h3 key={i} className="text-[19px] font-semibold text-text-primary mt-6 mb-2">
+            <h3 key={i} className="text-[19px] font-semibold text-text-primary mt-6 mb-2 [overflow-wrap:break-word]">
               {cleanMarkdown(trimmed.slice(4))}
             </h3>
           );
@@ -53,7 +53,7 @@ export function ReportRenderer({ content }: ReportRendererProps) {
           return (
             <h4
               key={i}
-              className="text-[17px] font-semibold text-text-secondary mt-4 mb-1.5"
+              className="text-[17px] font-semibold text-text-secondary mt-4 mb-1.5 [overflow-wrap:break-word]"
             >
               {cleanMarkdown(trimmed.slice(5))}
             </h4>

@@ -565,7 +565,7 @@ export default function Home() {
     <div className="min-h-screen bg-ground">
       {/* Header — north-star as the product mark, lockup per the brand kit. */}
       <header className="px-6 py-4 border-b border-border bg-card">
-        <div className="max-w-[1040px] mx-auto flex items-center justify-between">
+        <div className="max-w-[1040px] mx-auto flex items-center justify-between flex-wrap gap-y-2.5">
           {/* The lockup is the way home. */}
           <button
             onClick={goHome}

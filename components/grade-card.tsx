@@ -88,7 +88,7 @@ export function GradeCard({ sections }: GradeCardProps) {
 
         {/* Severity tallies. The numeral stays navy and a grid-locked swatch
             carries the hue — the same rule the severity banners follow. */}
-        <div className="flex gap-6">
+        <div className="flex flex-wrap gap-6">
           <Tally label="Critical" count={criticalCount} swatch="bg-critical" />
           <Tally label="Minor" count={minorCount} swatch="bg-minor" />
           <Tally label="Pass" count={passCount} swatch="bg-pass" />
