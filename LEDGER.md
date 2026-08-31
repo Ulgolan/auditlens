@@ -1112,3 +1112,59 @@ TRAPS: `gauntlet/run-1-final/` is provenance — never delete, never overwrite.
 eye-approves-then-re-seed law and by nothing else — the next re-seed needs the
 same authority. `FREEZE.md` stays in place until a Commander ruling retires it.
 Receipts must carry the measuring command's OWN exit code, stderr unsuppressed.
+
+### 2026-09-01 — STATION 12: Polaris audit vs the 2.0 brief — amended and closed
+
+Audit ran on run-2 certified state. Tribunal (Architect/Sniper/User
+Advocate) returned AMBER on the Tower's own draft; four amendments
+applied. Commander rulings 2026-09-01: (1) "Story A" — the instrument
+track (PRs #1–#10) was deliberate pipeline-proving in service of
+freelance diversification → upgraded from Off Heading to DELIBERATELY
+RE-ROUTED; ruling postdates the work, noted transparently, accepted on
+Commander authority. (2) HOTICO qualifies as live-fire target — sealed
+pre-run, no retroactive disqualification.
+
+FINDINGS AS AMENDED:
+- ON HEADING: all three non-negotiables held (deriveCompleteness gates
+  grade + export; green-band honesty flag resolved on main; export
+  self-contained with declared HTML caveat). Audience and out-of-scope
+  fences fully intact — zero auth/multi-tenant/mobile/pricing hits.
+  Core input scope (screenshots + text-concepts) live.
+- RE-ROUTED: instrument track per ruling (1); Station 6 skip per
+  Commander ruling 2026-08-31.
+- OFF HEADING (stands on the record): SC1 live-fire 0 runs, SC2 trust
+  batch 0/10, unmoved since 2026-07-27. Mitigation: credit outage —
+  endpoints 2026-07-31 (T3, chat) / 2026-08-31 restored (T2, LEDGER),
+  continuity INFERRED not verified.
+- BRIEF DEFECT: "within weeks" unnumbered — cured by Addendum v1.2.
+
+VERDICT: CORRECTABLE DRIFT — held. Single failure axis (field
+deployment); goal expanded, not shifted. Significant-divergence
+trigger ("multiple core elements off heading") explicitly considered
+and declined on the single-axis test.
+
+RULED SEQUENCE: live-fire #1 = full screenshot audit of hotico-proto
+(counts SC1 main event + batch 1/10); live-fire #2 = the planned
+HOTICO change audited as TEXT-ONLY concept pre-build (satisfies
+text-only clause + batch 2/10); batch 3/10+ targets of opportunity,
+FORGE-adjacent sites earn double. Prompts-vocab key sequences AFTER
+batch lap one. Production liveness re-verified by Commander's eye
+before live-fire #1 (last cert 2026-08-30 Gate Zero).
+
+>> BATON
+STATE: branch docs/station-12-polaris, one commit — addendum v1.2
+appended to POLARIS.md, this entry, PIPELINE station 12 → DONE with
+NOW/NEXT updated (same-commit rule). PR against main. DIRECT PUSH TO
+MAIN FORBIDDEN. NOT MERGED — merge is the Commander's word.
+CERTIFIED: n/a this lap (docs-only); Tower diff-certs the PR from an
+independent tarball before the merge word is requested.
+OPEN: (1) Commander eye + merge word on this PR. (2) Commander thumb
+liveness check on production URL, then live-fire #1 key. (3) FREEZE.md
+retirement — THAW condition met 2026-08-31, successor ruling is the
+Commander's, not inferred. (4) Parked pill-wrap taste finding —
+candidate lane, next FREEZE. (5) Prompts-vocab key, after batch lap 1.
+TRAPS: sealed v1.1 brief text is IMMUTABLE — addendum appends only.
+LEDGER append-only. gauntlet/run-1-final/ is provenance — never
+delete. gauntlet/baseline/ is CANON. FREEZE.md stays in place until a
+Commander ruling retires it. Receipts carry the measuring command's
+OWN exit code, stderr unsuppressed.

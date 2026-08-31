@@ -1,8 +1,8 @@
 # PIPELINE — AuditLens 2.0
 Opened: 2026-07-24 · DS slot: own canon (Ivory Loom) · Brief: [POLARIS.md](./POLARIS.md)
 
-NOW:  12 — Polaris audit against the 2.0 brief (both run-1 instrument debts closed; runs on run-2 certified state)
-NEXT: prompts-vocab key (9 parked hits, separate key)
+NOW:  Live-fire #1 — full screenshot audit of hotico-proto (SC1 + trust batch 1/10; Commander liveness check on production first)
+NEXT: Live-fire #2 — HOTICO planned change as TEXT-ONLY concept audit (text-only clause + batch 2/10); then prompts-vocab key
 
 | # | Station | Status | Evidence | Date |
 |---|---|---|---|---|
@@ -18,6 +18,6 @@ NEXT: prompts-vocab key (9 parked hits, separate key)
 | 9 | Gauntlet — conditional | DONE | PR [#3](https://github.com/Ulgolan/auditlens/pull/3) (setup + instruments), PR [#5](https://github.com/Ulgolan/auditlens/pull/5) (`GAUNTLET_REPORT.md`, run 1 certified, `befdb6e`), PR [#8](https://github.com/Ulgolan/auditlens/pull/8) (setup 2 — idle surfaces, 40-shot baseline, `--against`); run 2 executed on branch `gauntlet/run-2`, `GAUNTLET_REPORT_RUN2.md`, app commit `1031a92` — axe 2→0, CTA contrast 3.06:1→4.56:1, Lighthouse a11y 100 on all eight runs. PR open, NOT merged | 2026-08-31 |
 | 10 | DESIGN GATE | DONE | DESIGN GATE 31.08 — Commander approved secondary CTAs ivory→navy text, header wrap at 390; Run Audit CTA ruling deferred to run 2 — LEDGER 2026-08-31 | 2026-08-31 |
 | 11 | Gate Zero → ship | DONE | Gate Zero table PASS across all seven checks (corrections applied) — LEDGER 2026-08-30; production live at `3958808`, https://auditlens-8b3pzche8-popescu-alexandrus-projects.vercel.app | 2026-08-30 |
-| 12 | Polaris audit — conditional | TODO | | |
+| 12 | Polaris audit — conditional | DONE | Station 12 amended audit + Addendum v1.2 in POLARIS.md — LEDGER 2026-09-01; verdict Correctable drift, SC window sealed 2026-09-30 | 2026-09-01 |
 
 Rules: a station is DONE only with evidence in the Evidence column. Mandatory stations (0,1,2,3,4,7,8,10,11) may not be SKIPPED. Conditional stations skipped carry a one-line reason. The Tower reads this file at session open and rules on NOW only. The Hands updates NOW/NEXT at session close, in the same commit as the LEDGER entry.
