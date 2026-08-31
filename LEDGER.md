@@ -595,3 +595,19 @@ Run 2 backlog: option B reference frames (Claude Design, per surface) →
 pixel-diff row live; idle screen surface; Run Audit CTA ruling; `--against`
 flag; stdout redirect; 9 parked prompt vocab hits need a prompts-scope
 decision (prompts are OUT of visual freeze; separate key).
+
+### 2026-08-31 — PIPELINE.md seeded at station 12
+
+`PIPELINE.md` created from the doctrine template (per KEY_doctrine-foundry-spine.md),
+branch `docs/pipeline`. Stations 0-11 marked DONE against ledgered evidence
+(commit shas / PR links per row) — with one correction to the Commander's
+dictated truths: **station 6 (Studio) marked SKIPPED, not DONE.** Option B
+(Claude Design reference frames per surface, pixel-diff vs reference) was
+never run; it is explicitly parked as a return ticket in this ledger's
+2026-08-30 entry and still sits in the 2026-08-31 run-2 backlog. Run 1 used
+the rulebook bar (option A) only. Marking it DONE would have contradicted
+this file's own record, so it is SKIPPED with that reason instead, per
+PIPELINE.md's own rule that conditional skips carry a one-line reason.
+NOW set to "12 — Polaris audit against the 2.0 brief"; NEXT set to
+"gauntlet run 2 (option B reference frames, idle surface, Run Audit CTA
+ruling)".
