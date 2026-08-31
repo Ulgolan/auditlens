@@ -7,7 +7,7 @@ Bar = rulebook (option A). Reference frames parked for run 2.*
 ## Header
 
 - **Branch:** `gauntlet/run-1`, created from `main` at `57fcb1a`.
-- **Preview URL:** _(filled at push)_
+- **Preview URL:** https://auditlens-git-gauntlet-run-1-popescu-alexandrus-projects.vercel.app
 - **Wall-clock start (cycle 1):** 2026-08-31 13:06 local.
 
 ### Pre-flight (all seven)
