@@ -13,6 +13,7 @@ import {
   applyStatePreNav,
   applyStatePostNav,
   gotoAndSettle,
+  waitSelectorForSurface,
 } from "./lib.mjs";
 
 async function main() {
@@ -33,7 +34,10 @@ async function main() {
             const page = await context.newPage();
 
             await applyStatePreNav(page, state);
-            await gotoAndSettle(page, baseUrl + surface.path, { jsEnabled });
+            await gotoAndSettle(page, baseUrl + surface.path, {
+              jsEnabled,
+              waitSelector: waitSelectorForSurface(surface.id),
+            });
             await applyStatePostNav(page, state);
 
             const name = shotName(surface.id, viewport.name, state);

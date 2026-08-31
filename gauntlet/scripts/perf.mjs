@@ -11,6 +11,8 @@ import { ROOT, OUT_DIR, LHCI_DIR, BASE_URL, ensureDir, withServer } from "./lib.
 const PAGES = [
   { id: "report", path: "/?fixture=gauntlet" },
   { id: "export", path: "/?fixture=gauntlet&view=export" },
+  { id: "idle", path: "/" },
+  { id: "idle-armed", path: "/?fixture=gauntlet&view=idle" },
 ];
 
 const FORM_FACTORS = [
