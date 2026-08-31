@@ -434,5 +434,109 @@ Branch `harness/activation-lap`, PR [#2](https://github.com/Ulgolan/auditlens/pu
 
 Noted in passing, unchanged by this lap: `npm audit` still reports 4 high-severity vulnerabilities (Next.js, postcss, sharp) — same set flagged 2026-07-24 and re-confirmed 2026-08-06, fix path still requires a semver-major Next.js bump. Out of scope — "one variable: the harness."
 
+### 2026-08-30 — Gauntlet setup + Gate Zero, branch `gauntlet/setup` — PR #3 opened, NOT MERGED (harness red on an external blocker)
+
+Instruments installed per the ignition key. Commits `73a3c72`..`a0176c1`, PR
+[#3](https://github.com/Ulgolan/auditlens/pull/3) opened against `main`.
+
+**Ground truth, before the first commit:** single-page app, one route — export
+document has no URL at all (browser download via a hidden `<a download>`,
+`lib/export-document.ts`). No Playwright/axe/Lighthouse/stylelint present.
+User-facing strings live in `components/**`, `lib/types.ts` labels, and — per
+`IA_CANON.md`'s own "structural prompt vocabulary" language — the authored
+system-prompt copy in `lib/prompts.ts` and `app/api/evaluate/route.ts` too.
+`/api/evaluate` had `maxDuration` set but zero rate limiting. `@theme inline`'s
+Tailwind-prefixed color aliases (`--color-navy` etc.) are **not** separately
+emitted as runtime custom properties — Tailwind inlines their resolved value
+straight into the utilities it generates instead (confirmed empirically,
+cost an hour of chasing false positives in `gauntlet:styles` before landing
+on probing the plain primitive names). No app fixture existed (only a
+test-only one, `tests/fixtures/completed-report.ts`).
+
+**Built:** offline fixture (`?fixture=gauntlet`, `&view=export` — the export
+surface renders `ExportDocument` in-page instead of triggering its real
+download, since it has no URL to visit otherwise) · per-IP rate limit on
+`/api/evaluate` (40 req/10 min, in-memory, `tests/rate-limit.test.ts` joins
+the harness) · seven `gauntlet:*` instruments (`shots`, `diff`, `styles`,
+`a11y`, `layout`, `vocab`, `perf`) + `gauntlet:all` orchestrator writing
+`gauntlet/out/SUMMARY.md` · cycle-0 baseline shots committed to
+`gauntlet/baseline/` · `gauntlet/README.md`, `FREEZE.md`. Also fixed a real
+bug in the pre-existing `.gitignore`: its unanchored `out/` rule was silently
+swallowing `gauntlet/out/` too (now scoped to `/out/`, the Next static-export
+dir it actually meant).
+
+**Instrument table (files / headline number):**
+| shots | `gauntlet/out/shots/*.png` | 24 PNGs (3 surfaces × 2 viewports × 4 states) |
+| diff | `gauntlet/out/diff.json` + `diffs/*.png` | 0.00% on all 24 (self-consistency, both a local run and a fresh `git clone` + `npm ci`) |
+| styles | `gauntlet/out/styles.json` | 0 unlisted colour/font values / 1609 elements |
+| a11y | `gauntlet/out/a11y.json` | 4 axe violations, 48 contrast failures |
+| layout | `gauntlet/out/layout.json` | 42 horizontal overflows, 3 text overlaps |
+| vocab | `gauntlet/out/vocab.json` | **13 hits, not 0** |
+| perf | `gauntlet/out/lhci/*.json` | report mobile 96/96/96/100 · desktop 100/96/96/100 · export mobile 96/96/96/100 · desktop 100/96/96/100 |
+
+**Cycle-0 timing:** `gauntlet:all` = **124.9s** (this session's dev env) /
+**126.6s** (fresh clone, verified separately) — the number future caps get
+set from. Per instrument: shots 30.9s, diff 4.2s, styles 2.5s, a11y 5.5s,
+layout 28.7s, vocab 0.1s, perf 44.4s.
+
+**Real findings this pass surfaced (not fixed — FREEZE.md, zero pixel
+polish):** `--text-tertiary` measures ~4.0:1 on white at the sizes it's
+actually used at, short of the 4.5:1 the inline comment in `globals.css`
+claims it clears — the comment's own math looks wrong, worth a fresh look
+next lap. The accent CTA button (vermilion/ivory, 13.6px) measures 3.06:1.
+The header's button group doesn't wrap at 390px, and the export document
+(never tuned for mobile, evidently) overflows its headings and header lockup
+at the same width. `gauntlet:vocab` found 13 hits — all match or extend
+`LEDGER.md`'s own 2026-07-31 GAP-LIST 2.0, still zero-executed seven weeks
+later.
+
+**GATE ZERO:**
+1. RLS — N/A, no Supabase.
+2. Secrets/secret-scanning — key confirmed nowhere in git history (the one
+   `sk-ant` hit is README's own placeholder text) and gitignored locally.
+   **Secret scanning itself cannot be turned on**: the repo is private, and
+   GHAS (which secret scanning needs on a private repo) isn't offered on
+   this plan — confirmed via the API (`security_and_analysis: null`,
+   rulesets/branch-protection both 403 "Upgrade to GitHub Pro or make this
+   repository public"). Contradicts CLAUDE.md's "ruleset requiring status
+   checks" claim: branch protection is **fully off** right now — the harness
+   runs on every PR but nothing blocks a merge on red. COMMANDER ACTION:
+   plan upgrade or make the repo public; no in-between toggle exists.
+3. Wallet guard — COMMANDER ACTION, path only: Vercel Dashboard → Team
+   Settings → Billing → Spend Management.
+4. Input discipline — zero `dangerouslySetInnerHTML` anywhere, confirmed by
+   grep before and after this session's changes.
+5. Rate limit — was missing entirely; added, tested, proven live
+   (`gauntlet/proof-429.png`: 41st request from one client → HTTP 429).
+6. Server-side auth — N/A, single operator, matches `IA_CANON.md`.
+7. Business-data flag — confirmed zero `fs`/storage calls persisting
+   uploaded material server-side.
+
+**THE BLOCKER — harness is currently RED on `main` too, not just this PR.**
+PR #3's harness failed at `Smoke eval`: `Claude API returned 400: "Your
+credit balance is too low to access the Anthropic API."` Traced with
+`npm run eval:smoke` locally (same request, same account) — same error,
+confirming it's an **Anthropic account billing state**, unrelated to this
+branch's code. It also means the ANTHROPIC_API_KEY secret got added to the
+GitHub repo sometime after 2026-08-14 (that lap's harness skipped
+`eval:smoke` with a warning because the secret didn't exist yet) — so this
+is the first PR to actually exercise it, and it's exposed a real gap: **any
+PR against this repo right now, including one that changes nothing, would
+fail the harness the same way.** Also reproduced live: one concept-mode,
+single-framework ("Accessibility") audit run against the Vercel preview for
+this branch got the same 400 on every section — and the app's honesty layer
+handled it exactly as designed (both sections declared "did not complete,"
+no grade issued, nothing silently swallowed). COMMANDER ACTION: top up
+Anthropic account credit. Until that happens, no PR against this repo can
+go fully green, and this one stays open rather than merging on a false
+"harness passed."
+
+**What's stale for the next worker:** the harness-red state above (a
+one-time credit top-up should clear it — re-run the PR's harness afterward,
+nothing else should need touching). Gate Zero #2/#3's two COMMANDER
+billing/plan actions, still open. The vocab/contrast/layout findings above,
+listed not fixed. Option B (Claude Design reference frames, pixel-diff vs
+reference) — return ticket, still parked, untouched this lap.
+
 >> BATON
-HARNESS: 5 tests green · last full eval 2026-08-14 (local, manual) · signals n/a
+HARNESS: 6 tests green locally (12 total incl. rate-limit) · gauntlet:all green, 124.9s · CI harness RED — Anthropic account credit balance too low, blocks any PR right now, not code · signals: Gate Zero #2 (secret scanning unavailable on plan), #3 (Vercel spend limit) both open COMMANDER ACTIONS

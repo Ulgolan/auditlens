@@ -9,7 +9,15 @@
     "lint": "eslint .",
     "format:check": "prettier --check .",
     "test": "vitest run",
-    "eval:smoke": "tsx eval/smoke.ts"
+    "eval:smoke": "tsx eval/smoke.ts",
+    "gauntlet:shots": "node gauntlet/scripts/shots.mjs",
+    "gauntlet:diff": "node gauntlet/scripts/diff.mjs",
+    "gauntlet:styles": "node gauntlet/scripts/styles.mjs",
+    "gauntlet:a11y": "node gauntlet/scripts/a11y.mjs",
+    "gauntlet:layout": "node gauntlet/scripts/layout.mjs",
+    "gauntlet:vocab": "node gauntlet/scripts/vocab.mjs",
+    "gauntlet:perf": "node gauntlet/scripts/perf.mjs",
+    "gauntlet:all": "node gauntlet/scripts/all.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
@@ -19,13 +27,18 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/eslintrc": "^3.3.6",
+    "@lhci/cli": "^0.15.1",
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "eslint": "^9.39.5",
     "eslint-config-next": "^15.1.0",
+    "pixelmatch": "^7.2.0",
+    "pngjs": "^7.0.0",
     "prettier": "3.9.6",
     "tailwindcss": "^4.0.0",
     "tsx": "^4.23.12",

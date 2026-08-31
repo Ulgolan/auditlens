@@ -12,7 +12,10 @@ const compat = new FlatCompat({
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
-    ignores: [".next/**", "node_modules/**", "out/**", "next-env.d.ts"],
+    // gauntlet/ is standalone Node infrastructure (Playwright/axe/Lighthouse
+    // scripts), not app code — Next's React-oriented rules don't apply and
+    // gauntlet/out/ is gitignored instrument output anyway.
+    ignores: [".next/**", "node_modules/**", "out/**", "next-env.d.ts", "gauntlet/**"],
   },
   // March 404 tripwire: a hardcoded Claude model string anywhere in
   // application source outside lib/ai-config.ts is a lint error. The

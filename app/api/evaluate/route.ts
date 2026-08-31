@@ -5,9 +5,16 @@ import {
   buildOverallSystemPrompt,
 } from "@/lib/prompts";
 import { CLAUDE_MODEL } from "@/lib/ai-config";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const maxDuration = 300;
 export const runtime = "nodejs";
+
+function getClientIp(req: NextRequest): string {
+  const forwardedFor = req.headers.get("x-forwarded-for");
+  if (forwardedFor) return forwardedFor.split(",")[0].trim();
+  return req.headers.get("x-real-ip") || "unknown";
+}
 
 // ═══════════════════════════════════════════════════════
 // API HANDLER — one framework per request
@@ -40,6 +47,21 @@ interface EvaluateBody {
 }
 
 export async function POST(req: NextRequest) {
+  const clientIp = getClientIp(req);
+  const rateLimit = checkRateLimit(clientIp);
+  if (!rateLimit.allowed) {
+    return new Response(
+      JSON.stringify({ error: "Too many requests. Please wait before retrying." }),
+      {
+        status: 429,
+        headers: {
+          "Content-Type": "application/json",
+          "Retry-After": String(rateLimit.retryAfterSeconds),
+        },
+      }
+    );
+  }
+
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return new Response(JSON.stringify({ error: "ANTHROPIC_API_KEY not configured" }), {
