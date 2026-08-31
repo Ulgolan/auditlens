@@ -32,14 +32,17 @@ total wall-clock for the whole run.
 
 ## The seven instruments
 
-- **shots** — screenshots. Three surfaces (`report`, `tabbar`, `export`), two
-  viewports (mobile 390×844, desktop 1280×800), four states (top, scrolled, reduced
-  motion, JavaScript disabled) — 24 PNGs, named `<surface>__<viewport>__<state>.png`.
+- **shots** — screenshots. Five surfaces (`report`, `tabbar`, `export`, `idle`,
+  `idle-armed`), two viewports (mobile 390×844, desktop 1280×800), four states (top,
+  scrolled, reduced motion, JavaScript disabled) — 40 PNGs, named
+  `<surface>__<viewport>__<state>.png`.
 - **diff** — compares this run's shots against `gauntlet/baseline/` (the "before"
-  picture) and reports a mismatch percentage per image, plus a visual diff image.
+  picture) and reports a mismatch percentage per image, plus a visual diff image. See
+  "How to set the baseline" for the default comparison, and "`--against`" for
+  comparing against a different directory.
 - **styles** — dumps computed colour/background/border/font/spacing values for every
-  element on the report screen and export document, and flags any colour or font
-  that doesn't trace back to a token in `app/globals.css`.
+  element on the report screen, export document, and both idle screens, and flags
+  any colour or font that doesn't trace back to a token in `app/globals.css`.
 - **a11y** — runs an accessibility scanner (axe) and separately lists every piece of
   text that doesn't meet the required contrast ratio against its background.
 - **layout** — flags content that spills sideways off the page, and pieces of text
@@ -47,7 +50,28 @@ total wall-clock for the whole run.
 - **vocab** — greps the banned-word list in `IA_CANON.md` against the app's own
   labels, buttons, and prompt copy. Lists hits; does not fix them.
 - **perf** — runs Lighthouse (performance/accessibility/best-practices/SEO scores)
-  on both surfaces, both viewports.
+  on all four in-scope pages, both viewports.
+
+## The two idle surfaces
+
+Run 1 only scanned `report`, `tabbar`, and `export` — every one of those requires a
+completed audit to exist, so the screen an operator actually lands on first (before
+any material is loaded) was never scanned by anything. That screen turned out to
+matter: it's where the Run Audit button lives, and the button has two states the
+report screen never shows.
+
+- **`idle`** — the cold screen, no fixture at all (`/`). No material loaded, no
+  framework selected, the Run Audit button disabled. WCAG 1.4.3 exempts inactive
+  controls from the contrast requirement, so this screen scanning clean is expected,
+  not a pass being claimed on a technicality.
+- **`idle-armed`** — the same screen with the gauntlet fixture's concept text and
+  frameworks loaded (`/?fixture=gauntlet&view=idle`), but no report mounted. This is
+  the one place the Run Audit button renders *enabled* — `bg-accent text-ivory`,
+  3.06:1, the known contrast failure that `report` and `export` structurally cannot
+  expose because the button doesn't exist on either of those screens.
+
+Two surfaces, not one, because "loads" and "is usable" are different claims and the
+button only fails contrast in the second state.
 
 ## How to set the baseline
 
@@ -56,7 +80,15 @@ future run gets compared against. `gauntlet:diff` seeds it automatically the fir
 time it runs with nothing in `gauntlet/baseline/` yet. To reset it deliberately later
 (e.g. after a change is intentionally approved), delete the relevant PNGs from
 `gauntlet/baseline/` and run `gauntlet:shots` then `gauntlet:diff` again — it'll copy
-the new shots in as the new baseline.
+the new shots in as the new baseline. See "Reference" below for when re-seeding
+requires a Commander ruling rather than being a routine operator step.
+
+### `--against`
+
+`gauntlet:diff --against <dir>` compares `gauntlet/out/shots/` against `<dir>` instead
+of `gauntlet/baseline/` — e.g. a lane baseline mid-run, without an out-of-repo
+throwaway script. An empty or missing `<dir>` always exits 1 naming it; only the
+default `gauntlet/baseline/` path auto-seeds when empty.
 
 ## How to add a mask region
 
@@ -90,6 +122,27 @@ Both are gated purely on that query parameter, in `app/page.tsx`. With the param
 absent, the app behaves exactly as it does in production — verified locally before
 this was committed.
 
+## Logs
+
+`npm run gauntlet:all` no longer prints each instrument's full output to your
+terminal — the console shows one line per step (seconds elapsed, log file path), plus
+the `next build` step before it. The full output lives in `gauntlet/out/logs/`: one
+`<step>.log` per instrument (`shots.log`, `diff.log`, `styles.log`, `a11y.log`,
+`layout.log`, `vocab.log`, `perf.log`) plus `build.log` for the production build. A
+failing step still fails the run and still tells you which log to open.
+
+## Reference
+
+Run 1 used the rulebook bar (option A) — critic rows checked against the ignition
+key plus `app/globals.css`'s tokens. Option B (Claude Design reference frames per
+surface, pixel-diffed against a designed reference) was parked at gauntlet setup and
+never run; **it is retired for AuditLens 2.0**, not merely postponed — there is no
+`gauntlet/reference/` folder and there will not be one. `gauntlet/baseline/` is the
+reference now: the render approved at DESIGN GATE 31.08 is canon. Re-seeding it isn't
+a routine operator step — it happens only after a Commander DESIGN GATE ruling
+approves the new render, exactly as it did for run 2's setup (see `LEDGER.md`,
+2026-08-31).
+
 ## A few things worth knowing before trusting a "0"
 
 - **styles**: only checks colour and font-family against `app/globals.css`'s tokens.
@@ -102,9 +155,9 @@ this was committed.
 - **vocab**: lexical, not semantic. It finds the literal banned word inside a quoted
   string or JSX text; it can't tell "the model is instructed not to say this" from
   "this is actually being said to the user." Read the hits.
-- **a11y** / **perf**: only scan `report` and `export` — `tabbar` renders the exact
-  same DOM as `report` (just captured differently for `shots`), so a third scan
-  would just repeat the first.
+- **a11y** / **perf**: scan `report`, `export`, `idle`, and `idle-armed` — never
+  `tabbar`, which renders the exact same DOM as `report` (just captured differently
+  for `shots`), so a fifth scan would just repeat the first.
 - Every instrument runs against a real `next start` production build on a dedicated
   port (4173) — not `next dev`, which shows a dev-tools badge that would show up in
   every screenshot and skew every style/layout reading.
