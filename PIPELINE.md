@@ -1,8 +1,8 @@
 # PIPELINE — AuditLens 2.0
 Opened: 2026-07-24 · DS slot: own canon (Ivory Loom) · Brief: [POLARIS.md](./POLARIS.md)
 
-NOW:  gauntlet run 2 — lanes complete, PR open against main, NOT merged (Lane 1 DONE at cycle 1; lanes 2-3 not opened, no cycle-0 finding to author them from; awaiting Tower diff-cert, then Commander eye + merge word, then the post-merge baseline re-seed)
-NEXT: 12 — Polaris audit against the 2.0 brief (both run-1 instrument debts are now closed: the idle blind spot was instrumented in setup-2 and measured in run 2, and the R5a/R5c contradiction was resolved by the C1 rewording, graded PASS this run; the audit runs on the run-2 certified state once merged — Commander ruling 2026-08-31)
+NOW:  12 — Polaris audit against the 2.0 brief (both run-1 instrument debts closed; runs on run-2 certified state)
+NEXT: prompts-vocab key (9 parked hits, separate key)
 
 | # | Station | Status | Evidence | Date |
 |---|---|---|---|---|

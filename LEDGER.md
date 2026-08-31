@@ -1033,3 +1033,82 @@ GATE ruling. `gauntlet/run-1-final/` is provenance — never delete, never
 overwrite. `SUMMARY.md`'s heading string always reads "cycle 0" regardless of
 which cycle produced it; do not cite it as evidence of a cycle number. Receipts
 must carry the measuring command's OWN exit code, stderr unsuppressed.
+
+### 2026-08-31 — Baseline RE-SEED to run-2-approved `main`, branch `chore/baseline-reseed-run2`
+
+**THE STANDING LAW EXECUTED.** Eye approves -> merge -> re-seed -> ledger. The
+Commander's eye PASS and merge word landed 2026-08-31; PR #10 is merged and
+`origin/main` sits at `2c3bf5fa`. This lap does the third and fourth steps and
+nothing else.
+
+**PRE-GATE — TREE PROOF, NOT ANCESTRY.** `git show origin/main:app/page.tsx |
+sed -n '757p'` returned
+`? "bg-accent text-navy cursor-pointer hover:-translate-y-[2px]"` — the
+`text-navy` Lane 1 fix is in the tree on `main`, not merely reachable from it.
+`git cat-file -e origin/main:GAUNTLET_REPORT_RUN2.md` exit 0 — the certified
+report exists on `main`. `origin/main` = `2c3bf5fa491dd4b733c8e6dba1125b174a1485d9`,
+matching the sha named at key authoring. Local `main` ran stale (behind by 7,
+at `7f004af`) and was synced with `git pull --ff-only` — fast-forward
+`7f004af..2c3bf5f`, exit 0, no rebase, no rewrite. Working tree clean before
+any work (`git status --porcelain` empty).
+
+**MEASUREMENT.** `npm run gauntlet:shots` — 40 PNGs to `gauntlet/out/shots/`,
+own exit code **0**, stderr unsuppressed. `npm run gauntlet:diff` (default,
+`against: "gauntlet/baseline"`, `threshold: 0.1`) — 40/40 compared, own exit
+code **0**. `diff.json` shows **exactly 6** nonzero images and **34** at
+`mismatchPercent: 0`; every one of the 40 carries `status: "compared"`, so
+there are **zero dimension changes** in the file. The six are precisely the
+declared set: `idle-armed__mobile__{top,scrolled,reduced-motion}` at 0.0509%
+(443 mismatched pixels of 870090 each) and
+`idle-armed__desktop__{top,scrolled,reduced-motion}` at 0.0228% (443 of 1946880
+each). Identical pixel counts across all six, mobile and desktop alike — the
+CTA glyph colour change, and nothing else, exactly as the certified run-2
+report declared.
+
+**BYTE DETERMINISM RE-PROVED.** `cmp` over the 34 expected-identical pairs
+(`gauntlet/baseline/X` vs `gauntlet/out/shots/X`): **34 identical, 0
+differing**. Informational per the key, and it held — the setup-2 finding that
+the renderer is byte-deterministic reproduces on a second independent shot
+batch.
+
+**THE RE-SEED.** All 40 PNGs replaced from `gauntlet/out/shots/` — one shot
+batch, one provenance, per the setup-2 precedent. `git status --porcelain`
+after the copy lists **exactly 6 modified files**, the same six, and none of
+the 34. The byte-identical replacements recorded as nothing, as predicted. No
+byte drift on a pixel-identical shot; the STOP condition did not fire.
+
+**RETRIEVABILITY.** The pre-re-seed baseline — the run-1-approved 40 PNGs — is
+retrievable at `2c3bf5fa` (`git show 2c3bf5fa:gauntlet/baseline/<name>.png`).
+`gauntlet/run-1-final/` remains untouched provenance. Nothing outside
+`gauntlet/baseline/`, `LEDGER.md` and `PIPELINE.md` was written this lap: no
+`app/`, no `lib/`, no `components/`, no `package.json`, no `FREEZE.md`, no
+script.
+
+**FREEZE RUN 2 — THAW CONDITION MET.** `FREEZE.md`'s stated THAW condition was
+Tower certification of the run-2 report. That certification landed 2026-08-31.
+The condition is met and recorded here. The file is **left in place** — a
+FREEZE's successor is a Commander ruling, not a Hands deletion. No session
+lifts it by inference.
+
+**PARKED — TASTE FINDING (verbatim, Commander 2026-08-31):**
+"Audience-context pills wrap raggedly at 390 — passes all gauntlet rules
+(0 overflow/overlap/contrast), taste finding, Commander 2026-08-31. Candidate
+lane for the next FREEZE: options sketched (2-col grid / full-width stack /
+equalized padding), Commander's eye decides."
+
+>> BATON
+STATE: branch `chore/baseline-reseed-run2`, one commit — the re-seed plus this
+LEDGER entry and the PIPELINE update, per PIPELINE's own same-commit rule. PR
+opened against `main`. **DIRECT PUSH TO MAIN IS FORBIDDEN** — the main-harness
+ruleset rejects it (clade-V scar, this week). **NOT MERGED — the lap stops at
+the PR; merge is the Commander's word.**
+OPEN: (1) Commander merge word on this PR. (2) Station 12, the Polaris audit
+against the 2.0 brief — both run-1 instrument debts are closed, and it runs on
+the run-2 certified state. (3) Prompts-vocab key for the 9 parked hits —
+separate key. (4) The parked pill-wrap taste finding above, as a candidate lane
+for the next FREEZE.
+TRAPS: `gauntlet/run-1-final/` is provenance — never delete, never overwrite.
+`gauntlet/baseline/` remains CANON; this re-seed was authorised by the standing
+eye-approves-then-re-seed law and by nothing else — the next re-seed needs the
+same authority. `FREEZE.md` stays in place until a Commander ruling retires it.
+Receipts must carry the measuring command's OWN exit code, stderr unsuppressed.
