@@ -593,7 +593,7 @@ export default function Home() {
                 disabled={!canExport || exporting}
                 className={`font-mono rounded-pill px-4 py-[0.7em] text-[0.85rem] font-medium uppercase tracking-[0.1em] transition-transform duration-150 ${
                   canExport && !exporting
-                    ? "bg-accent text-ivory cursor-pointer hover:-translate-y-[2px]"
+                    ? "bg-accent text-text-primary cursor-pointer hover:-translate-y-[2px]"
                     : "border border-border text-text-tertiary cursor-not-allowed"
                 }`}
               >
@@ -623,7 +623,7 @@ export default function Home() {
             <div className="ml-auto flex gap-2.5">
               <button
                 onClick={resetAll}
-                className="font-mono rounded-pill bg-accent text-ivory px-4 py-[0.6em] text-[0.82rem] font-medium uppercase tracking-[0.1em] cursor-pointer transition-transform duration-150 hover:-translate-y-[2px]"
+                className="font-mono rounded-pill bg-accent text-text-primary px-4 py-[0.6em] text-[0.82rem] font-medium uppercase tracking-[0.1em] cursor-pointer transition-transform duration-150 hover:-translate-y-[2px]"
               >
                 Discard and start over
               </button>
