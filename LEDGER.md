@@ -560,3 +560,38 @@ reference) — return ticket, still parked, untouched this lap.
 
 >> BATON
 HARNESS: 6 tests green locally (12 total incl. rate-limit) · gauntlet:all green, 124.9s · CI harness GREEN on `main` after Commander's Anthropic credit top-up · PR #3 merged 57fcb1a · Gate Zero #2 and #3 both PASS (corrected — see above), Gate Zero #5 PASS
+
+### 2026-08-31 — Gauntlet RUN 1 (certified, merged)
+
+Branch `gauntlet/run-1`, PR [#5](https://github.com/Ulgolan/auditlens/pull/5),
+merged at `befdb6e`. Key v1.1, rulebook bar (option A). Foreman Opus, 8 Sonnet
+spawns (routing proof: Sonnet 5), 4 cycles across 3 lanes, 52 min of 150,
+~752k sub-agent tokens, no cap hit.
+
+BASELINE → FINAL: contrast 48→0, axe 4→0, overflows 42→0 (390 and 1280),
+overlaps 3→0, in-scope vocab 4→0 (9 prompt hits parked by FREEZE), unlisted
+style values 0→0, Lighthouse a11y 96→100 on all four surfaces. Zero WCAG
+exemptions claimed.
+
+DESIGN GATE 31.08: Commander approved secondary CTAs ivory→navy text and
+header wrap at 390. Run Audit CTA (idle screen, 3.06:1) out of run-1 fence,
+untouched, ruling pending for run 2.
+
+Certification notes (Tower):
+1. Instruments cover in-scope surfaces only — idle input screen never
+   scanned, so "0 contrast" is true of the fence, not the app; run 2 adds
+   idle as a surface.
+2. Key defect: R5a and R5c contradicted each other at 1280; foreman ruled
+   "findings may only decrease, never introduce"; ruling correct, key
+   amended.
+3. Lane 3 R9 closed by corrected declaration with traced pixel evidence, no
+   code change; v1.2 rule: redeclaration requires traced evidence.
+4. Out-of-repo throwaway diff used to compare against lane baseline; run 2:
+   `gauntlet:diff` gets `--against`.
+5. Foreman context cost: instrument stdout should go to files, foreman
+   reads SUMMARY.md only.
+
+Run 2 backlog: option B reference frames (Claude Design, per surface) →
+pixel-diff row live; idle screen surface; Run Audit CTA ruling; `--against`
+flag; stdout redirect; 9 parked prompt vocab hits need a prompts-scope
+decision (prompts are OUT of visual freeze; separate key).
