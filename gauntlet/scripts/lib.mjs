@@ -17,6 +17,7 @@ export const SHOTS_DIR = path.join(OUT_DIR, "shots");
 export const BASELINE_DIR = path.join(ROOT, "gauntlet", "baseline");
 export const MASKS_DIR = path.join(ROOT, "gauntlet", "masks");
 export const LHCI_DIR = path.join(OUT_DIR, "lhci");
+export const LOGS_DIR = path.join(OUT_DIR, "logs");
 
 // A dedicated port, distinct from the operator's own `npm run dev` on 3000.
 export const PORT = 4173;
@@ -152,7 +153,20 @@ export async function withServer(fn) {
 
   if (!alreadyUp) {
     console.log(`[gauntlet] no server on ${BASE_URL} — building...`);
-    execSync("npx next build", { cwd: ROOT, stdio: "inherit" });
+    ensureDir(LOGS_DIR);
+    const buildLogPath = path.join(LOGS_DIR, "build.log");
+    const fd = fs.openSync(buildLogPath, "w");
+    try {
+      execSync("npx next build", { cwd: ROOT, stdio: ["ignore", fd, fd] });
+    } catch (err) {
+      console.error(
+        `[gauntlet] next build failed. See ${path.relative(ROOT, buildLogPath)}`
+      );
+      throw err;
+    } finally {
+      fs.closeSync(fd);
+    }
+    console.log(`[gauntlet] build log: ${path.relative(ROOT, buildLogPath)}`);
     console.log(`[gauntlet] starting production server on ${BASE_URL}...`);
     stop = await startServer();
   } else {
