@@ -44,7 +44,10 @@ export function ReportRenderer({ content }: ReportRendererProps) {
 
         if (trimmed.startsWith("### "))
           return (
-            <h3 key={i} className="text-[19px] font-semibold text-text-primary mt-6 mb-2 [overflow-wrap:break-word]">
+            <h3
+              key={i}
+              className="text-[19px] font-semibold text-text-primary mt-6 mb-2 [overflow-wrap:break-word]"
+            >
               {cleanMarkdown(trimmed.slice(4))}
             </h3>
           );
