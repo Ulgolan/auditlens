@@ -14,11 +14,13 @@
 import { chromium } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
-import { OUT_DIR, ensureDir, withServer } from "./lib.mjs";
+import { OUT_DIR, ensureDir, withServer, waitSelectorForSurface } from "./lib.mjs";
 
 const SURFACE_PAGES = [
   { id: "report", path: "/?fixture=gauntlet" },
   { id: "export", path: "/?fixture=gauntlet&view=export" },
+  { id: "idle", path: "/" },
+  { id: "idle-armed", path: "/?fixture=gauntlet&view=idle" },
 ];
 
 // Every `--color-*` alias under @theme inline in app/globals.css, by its
@@ -221,7 +223,7 @@ async function main() {
         const page = await context.newPage();
         await page.goto(baseUrl + surface.path, { waitUntil: "networkidle" });
         await page
-          .waitForSelector("text=OVERALL ASSESSMENT", { timeout: 5000 })
+          .waitForSelector(waitSelectorForSurface(surface.id), { timeout: 5000 })
           .catch(() => {});
         await page.evaluate(() => document.fonts && document.fonts.ready).catch(() => {});
         await page.waitForTimeout(300);

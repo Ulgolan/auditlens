@@ -6,7 +6,7 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { ROOT, OUT_DIR, SHOTS_DIR, ensureDir, withServer } from "./lib.mjs";
+import { ROOT, OUT_DIR, SHOTS_DIR, LOGS_DIR, ensureDir, withServer } from "./lib.mjs";
 
 const STEPS = ["shots", "diff", "styles", "a11y", "layout", "vocab", "perf"];
 const TWENTY_MINUTES_SECONDS = 20 * 60;
@@ -120,21 +120,30 @@ ${timingRows}
 
 async function main() {
   ensureDir(OUT_DIR);
+  ensureDir(LOGS_DIR);
   const timings = [];
   const overallStart = Date.now();
 
   await withServer(async () => {
     for (const step of STEPS) {
       const stepStart = Date.now();
-      console.log(`\n=== gauntlet:${step} ===`);
-      execFileSync("node", [`gauntlet/scripts/${step}.mjs`], {
-        cwd: ROOT,
-        stdio: "inherit",
-      });
-      timings.push({
-        step,
-        seconds: Number(((Date.now() - stepStart) / 1000).toFixed(1)),
-      });
+      const logPath = path.join(LOGS_DIR, `${step}.log`);
+      const relLogPath = path.relative(ROOT, logPath);
+      const fd = fs.openSync(logPath, "w");
+      try {
+        execFileSync("node", [`gauntlet/scripts/${step}.mjs`], {
+          cwd: ROOT,
+          stdio: ["ignore", fd, fd],
+        });
+      } catch (err) {
+        console.error(`gauntlet:all — step "${step}" FAILED. See ${relLogPath}`);
+        throw err;
+      } finally {
+        fs.closeSync(fd);
+      }
+      const seconds = Number(((Date.now() - stepStart) / 1000).toFixed(1));
+      timings.push({ step, seconds });
+      console.log(`[gauntlet:all] ${step} — ${seconds}s — ${relLogPath}`);
     }
   });
 

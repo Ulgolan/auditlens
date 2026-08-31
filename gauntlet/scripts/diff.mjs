@@ -1,4 +1,5 @@
-// gauntlet:diff — pixelmatch between gauntlet/out/shots/ and gauntlet/baseline/.
+// gauntlet:diff — pixelmatch between gauntlet/out/shots/ and gauntlet/baseline/
+// (or, with --against <dir>, an arbitrary comparison directory).
 import fs from "node:fs";
 import path from "node:path";
 import { PNG } from "pngjs";
@@ -11,6 +12,25 @@ import {
   ensureDir,
   allShotNames,
 } from "./lib.mjs";
+
+/**
+ * `--against <dir>` compares gauntlet/out/shots/ against an arbitrary
+ * directory instead of gauntlet/baseline/ — e.g. a lane baseline, or
+ * gauntlet/run-1-final/, without needing an out-of-repo throwaway script
+ * (gauntlet run 1's foreman had to write one; see LEDGER.md 2026-08-31).
+ * Seed-when-empty (see below) applies ONLY to the default gauntlet/baseline/
+ * path — an empty --against dir is always an error, never silently seeded.
+ */
+function parseAgainstArg(argv) {
+  const idx = argv.indexOf("--against");
+  if (idx === -1) return null;
+  const dir = argv[idx + 1];
+  if (!dir) {
+    console.error("gauntlet:diff --against requires a directory argument.");
+    process.exit(1);
+  }
+  return path.resolve(process.cwd(), dir);
+}
 
 // pixelmatch's own default — how different a pixel's colour must be (0..1)
 // before it counts as a mismatch. Sub-pixel antialiasing jitter in font
@@ -55,10 +75,25 @@ function main() {
     process.exit(1);
   }
 
-  const baselineExists =
-    fs.existsSync(BASELINE_DIR) && fs.readdirSync(BASELINE_DIR).length > 0;
+  const against = parseAgainstArg(process.argv.slice(2));
+  const compareDir = against ?? BASELINE_DIR;
+  const isDefaultPath = against === null;
 
-  if (!baselineExists) {
+  if (against !== null) {
+    const dirExists = fs.existsSync(against) && fs.statSync(against).isDirectory();
+    const hasFiles = dirExists && fs.readdirSync(against).length > 0;
+    if (!hasFiles) {
+      console.error(
+        `gauntlet:diff --against ${against} — directory is empty or does not exist.`
+      );
+      process.exit(1);
+    }
+  }
+
+  const baselineExists =
+    isDefaultPath && fs.existsSync(compareDir) && fs.readdirSync(compareDir).length > 0;
+
+  if (isDefaultPath && !baselineExists) {
     ensureDir(BASELINE_DIR);
     for (const name of existingShots) {
       fs.copyFileSync(path.join(SHOTS_DIR, name), path.join(BASELINE_DIR, name));
@@ -68,6 +103,7 @@ function main() {
       JSON.stringify(
         {
           seeded: true,
+          against: path.relative(process.cwd(), BASELINE_DIR),
           note: "No baseline existed — current shots were copied to gauntlet/baseline/ as the new baseline. Nothing was compared.",
           images: [],
         },
@@ -87,7 +123,7 @@ function main() {
   const results = [];
   for (const name of existingShots) {
     const shotPath = path.join(SHOTS_DIR, name);
-    const basePath = path.join(BASELINE_DIR, name);
+    const basePath = path.join(compareDir, name);
 
     if (!fs.existsSync(basePath)) {
       results.push({ name, status: "no-baseline", mismatchPercent: null });
@@ -141,10 +177,17 @@ function main() {
     });
   }
 
+  const againstLabel = path.relative(process.cwd(), compareDir) || ".";
+
   fs.writeFileSync(
     path.join(OUT_DIR, "diff.json"),
     JSON.stringify(
-      { seeded: false, threshold: PIXELMATCH_THRESHOLD, images: results },
+      {
+        seeded: false,
+        against: againstLabel,
+        threshold: PIXELMATCH_THRESHOLD,
+        images: results,
+      },
       null,
       2
     )
@@ -153,7 +196,7 @@ function main() {
   const compared = results.filter((r) => r.mismatchPercent !== null);
   const worst = compared.slice().sort((a, b) => b.mismatchPercent - a.mismatchPercent)[0];
   console.log(
-    `gauntlet:diff — compared ${compared.length}/${results.length} images against gauntlet/baseline/. ` +
+    `gauntlet:diff — compared ${compared.length}/${results.length} images against ${againstLabel}/. ` +
       (worst
         ? `Worst: ${worst.name} @ ${worst.mismatchPercent}%`
         : "no comparable images")

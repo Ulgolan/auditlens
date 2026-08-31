@@ -65,18 +65,32 @@ export default function Home() {
   const sectionAnchorRef = useRef<HTMLDivElement>(null);
 
   /**
-   * Gauntlet fixture mode — `?fixture=gauntlet` (optionally `&view=export`).
+   * Gauntlet fixture mode — `?fixture=gauntlet` (optionally `&view=export`
+   * or `&view=idle`).
    *
    * Loads a stored, scrubbed report so the report screen and the export
    * document can be screenshotted offline, with no live API call and no
    * real client material. `gauntletView` stays `null` — and the rest of
    * this component behaves exactly as it does in production — unless the
    * query param is present. See gauntlet/README.md.
+   *
+   * `view=idle` is the one exception to "loads a completed report": it
+   * arms the Run Audit button (concept text + frameworks selected) but
+   * leaves `evalPhase` at `"idle"` and mounts no report — the armed input
+   * screen, not a run in progress. Screenshots stay unloaded on purpose,
+   * matching a text-only concept audit rather than a visual one.
    */
   const [gauntletView, setGauntletView] = useState<"app" | "export" | null>(null);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("fixture") !== "gauntlet") return;
+
+    if (params.get("view") === "idle") {
+      setConceptText(gauntletFixture.conceptText);
+      setFrameworks(gauntletFixture.frameworks);
+      setGauntletView("app");
+      return;
+    }
 
     setScreenshots(
       gauntletFixture.screenshots.map((s) => ({

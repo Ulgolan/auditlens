@@ -14,6 +14,7 @@ import {
   applyStatePreNav,
   applyStatePostNav,
   gotoAndSettle,
+  waitSelectorForSurface,
 } from "./lib.mjs";
 
 // Overlap tolerance: ignore trivial sub-pixel/antialiasing overlaps between
@@ -157,7 +158,10 @@ async function main() {
             const page = await context.newPage();
 
             await applyStatePreNav(page, state);
-            await gotoAndSettle(page, baseUrl + surface.path, { jsEnabled });
+            await gotoAndSettle(page, baseUrl + surface.path, {
+              jsEnabled,
+              waitSelector: waitSelectorForSurface(surface.id),
+            });
             await applyStatePostNav(page, state);
 
             const issues = await collectLayoutIssues(page);

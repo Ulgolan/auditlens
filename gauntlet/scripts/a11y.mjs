@@ -4,18 +4,28 @@
 // this exact threshold, so its violations are extracted directly rather
 // than re-derived).
 //
-// Only "report" and "export" are scanned — "tabbar" is the same DOM as
-// "report" (see gauntlet/scripts/lib.mjs), so a third scan would just
-// duplicate "report"'s results under a different name.
+// "report", "export", "idle" and "idle-armed" are scanned — "tabbar" is
+// the same DOM as "report" (see gauntlet/scripts/lib.mjs), so a third
+// scan would just duplicate "report"'s results under a different name.
+// "idle" and "idle-armed" are a genuinely different DOM neither "report"
+// nor "export" render (run 1's blind spot — see gauntlet/README.md).
 import AxeBuilder from "@axe-core/playwright";
 import { chromium } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
-import { OUT_DIR, VIEWPORTS, ensureDir, withServer } from "./lib.mjs";
+import {
+  OUT_DIR,
+  VIEWPORTS,
+  ensureDir,
+  withServer,
+  waitSelectorForSurface,
+} from "./lib.mjs";
 
 const SURFACE_PAGES = [
   { id: "report", path: "/?fixture=gauntlet" },
   { id: "export", path: "/?fixture=gauntlet&view=export" },
+  { id: "idle", path: "/" },
+  { id: "idle-armed", path: "/?fixture=gauntlet&view=idle" },
 ];
 
 async function main() {
@@ -34,7 +44,7 @@ async function main() {
           const page = await context.newPage();
           await page.goto(baseUrl + surface.path, { waitUntil: "networkidle" });
           await page
-            .waitForSelector("text=OVERALL ASSESSMENT", { timeout: 5000 })
+            .waitForSelector(waitSelectorForSurface(surface.id), { timeout: 5000 })
             .catch(() => {});
           await page
             .evaluate(() => document.fonts && document.fonts.ready)

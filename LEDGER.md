@@ -611,3 +611,230 @@ PIPELINE.md's own rule that conditional skips carry a one-line reason.
 NOW set to "12 — Polaris audit against the 2.0 brief"; NEXT set to
 "gauntlet run 2 (option B reference frames, idle surface, Run Audit CTA
 ruling)".
+
+### 2026-08-31 — Gauntlet setup 2, branch `gauntlet/setup-2` — PR [#8](https://github.com/Ulgolan/auditlens/pull/8) opened
+
+Executor: Sonnet, Claude Code. Nine commits, `aa60882`..`02a4cb5`, per Ignition
+Key v1.2.
+
+**GROUND TRUTH, answered before the first edit (key's Q1-Q8):**
+1. Cold `/` makes zero `/api/evaluate` or `api.anthropic.com` requests —
+   proven with a Playwright request log (14 requests, all static assets/
+   fonts/scripts). Cleared to proceed.
+2. `hasMaterial` goes true on concept text alone
+   (`hasVisuals || concept.length > 0`, `app/page.tsx`). No `view=idle`
+   branch existed; built to set only `conceptText` + `frameworks`, leave
+   `evalPhase` at `"idle"`, set `gauntletView` `"app"`.
+3. `#gauntlet-tabbar-anchor` lives only inside the `showReport` branch —
+   absent on both idle surfaces, so `scrolled` duplicates `top` there.
+   Default held (all four states, 40 shots): duplicate-state cost is
+   ~20s total, nowhere near the >10s deviation trigger.
+4. Confirmed exactly four surface lists: `lib.mjs` `SURFACES` (consumed
+   directly by both `shots.mjs` and `layout.mjs`, so neither needed a
+   separate edit), `a11y.mjs` `SURFACE_PAGES`, `styles.mjs`
+   `SURFACE_PAGES`, `perf.mjs` `PAGES`.
+5. **Killed part of the brief — see "BASELINE RE-SEED" below.** The
+   key's assumption ("`gauntlet/baseline/report__mobile__top.png` is
+   exactly 390 wide") was wrong; it measured 409.
+6. `withServer`'s `next build` and `all.mjs`'s step spawns are the only
+   two top-level `stdio: "inherit"` sources. `perf.mjs`'s own
+   `execFileSync` call for the `lighthouse` CLI also sets
+   `stdio: "inherit"`, but it inherits through whichever of the two wraps
+   it — no independent third source once those two are redirected.
+7. `.prettierignore` excludes `node_modules`, `.next`, `out`,
+   `*.tsbuildinfo`, `package-lock.json`, `*.md` — not `gauntlet/**`.
+   `format:check` already covered the scripts; confirmed, not amended.
+8. `all.mjs`'s `writeSummary` reads `diff.images[].mismatchPercent` —
+   confirmed the `--against` addition keeps that shape.
+
+**BASELINE RE-SEED — a Tower self-own, ruled and Commander-ratified this
+session.** The Ignition Key's PHYSICS section stated as non-negotiable:
+"Before seeding anything new, `gauntlet:diff` must read 0.00% on all 24
+existing baseline shots." That was written from run 1's cycle-0 report and
+never re-measured against current `main`. It does not hold: `gauntlet/
+baseline/` was committed once at `e9d7afb` (PR #3, pre-run-1) and never
+re-seeded after run 1's approved layout/contrast fixes merged
+(`befdb6e`). Measured on a clean, unmodified checkout of `main`, before
+any edit this session: `gauntlet:diff` read 18/24 compared (6 size-
+mismatches — the three `report__mobile__*` and three `export__mobile__*`
+shots) with a worst mismatch of 10.14% on `tabbar__mobile__top.png`. This
+drift is consistent with run 1's approved composite diff, measured
+against the original baseline across all three lanes combined (not a
+claim that it *matches* the report's own 10.18%, which was measured
+lane-3-only against the lane baseline — a different denominator; the two
+numbers are close because lanes 1-2 moved that shot ~0.05% on their own).
+
+Tower ruling (Commander-ratified) on how to proceed, executed exactly as
+given:
+> TOWER RULING, Commander-ratified. The 24/24 0.00% precondition was the
+> Tower's error — written from run-1's cycle-0 report, never re-measured
+> against current main. Record that in the LEDGER entry as a Tower
+> self-own. Your drift is expected and identified: it is exactly run 1's
+> approved, merged diff (your 10.14% worst on tabbar__mobile__top matches
+> the report's declared 10.18% on that shot; your 6 size-mismatches match
+> the report's declared R9 DIMENSION CHANGEs). Proceed on this branch,
+> same mission, amended order:
+> 1. REORDER: build DO 5 (gauntlet:diff --against) FIRST. It is
+>    instruments-only and independent — its first real use is step 2.
+> 2. From clean main state, run gauntlet:shots, then
+>    gauntlet:diff --against gauntlet/run-1-final. Expect 0.00% on all
+>    24. Tolerance: nonzero but ≤0.05% confined to glyph antialiasing =
+>    report per shot and proceed; anything above 0.05% or any size
+>    mismatch = STOP, main has drifted beyond the approved state and that
+>    is a new finding.
+> 3. If clean: re-seed gauntlet/baseline/ — replace all 24 PNGs from the
+>    fresh shots — as its own commit: "gauntlet: re-seed baseline to
+>    run-1-approved main (Commander ratified 2026-08-31)". The pre-run-1
+>    baseline stays retrievable at e9d7afb; say so in the LEDGER.
+> 4. The zero-visual-change proof now reads: every commit AFTER the
+>    re-seed must diff 0.00% (all 24, then all 40 once idle is seeded)
+>    against the re-seeded baseline.
+> 5. DO NOT amendment: "never overwrite the 24 baseline PNGs" is lifted
+>    for step 3's commit only, exactly once, under this ruling. Every
+>    other line of the key stands.
+> 6. LEDGER additions: this ruling verbatim; and a standing gap for the
+>    Tower's run-key: "baseline re-seed after an approved run" becomes an
+>    explicit post-merge step so this never relies on memory again.
+>
+> TOWER AMENDMENT to the baseline ruling (post-tribunal), four points:
+> 1. SEQUENCING: the re-seed commit must be captured from a tree with
+>    ZERO app-file commits on the branch — instruments-only (--against)
+>    may precede it; the view=idle fixture commit (DO 2) may not.
+> 2. DO 4 corrected: the sha256 byte-identical proof refers to the 24
+>    RE-SEEDED PNGs from here on; the pre-ruling originals are history at
+>    e9d7afb.
+> 3. TOLERANCE: the 0.05% band is Tower-inferred, not measured. Nonzero
+>    ≤0.05% passes ONLY if the diff PNG shows scattered glyph-edge
+>    pixels; any contiguous rectangle or band = STOP and report the shot,
+>    regardless of percentage.
+> 4. LEDGER wording: record the drift as "consistent with run 1's
+>    approved composite diff" ... Do not write "matches the declared
+>    number" — that grades the claim above its evidence.
+
+Executed: `aa60882` (`--against` flag, instruments-only, precedes the
+re-seed) → `gauntlet:shots` + `gauntlet:diff --against gauntlet/run-1-final`
+on that tree, still zero app-file commits → **24/24 compared, 0.00% on
+every shot, sha256-confirmed byte-identical to `gauntlet/run-1-final/`**
+(cleaner than the ≤0.05% tolerance — exactly 0, no contiguous band to
+even inspect) → `7eb0e81` re-seeds all 24 `gauntlet/baseline/` PNGs from
+those shots → `ab7f8d8` (the `view=idle` fixture commit, DO 2) only after
+the re-seed, per the sequencing amendment. **Standing gap logged for the
+next run-key author, per the ruling's point 6: "re-seed the baseline
+after an approved run" must become an explicit post-merge step in the
+run-close checklist — this cannot be left to memory again.**
+
+**Per-instrument changes:**
+- `diff.mjs` — `--against <dir>` flag. Compares `gauntlet/out/shots/`
+  against an arbitrary directory instead of `gauntlet/baseline/`.
+  Seed-when-empty stays scoped to the default path only; an empty or
+  missing `--against` dir always exits 1 naming it. `diff.json` now
+  records `against`.
+- `lib.mjs` — `SURFACES` grows from 3 to 5: `idle` (`/`) and
+  `idle-armed` (`/?fixture=gauntlet&view=idle`). New
+  `waitSelectorForSurface()` routes idle surfaces to
+  `"text=EVALUATION FRAMEWORKS"` (existing markup) instead of
+  `"text=OVERALL ASSESSMENT"` (which idle screens never render), so the
+  post-nav wait resolves immediately instead of timing out after 5s.
+  `withServer`'s `next build` now writes to `gauntlet/out/logs/
+  build.log` instead of streaming to the terminal — unconditionally,
+  for every `gauntlet:*` script, not just `gauntlet:all`.
+- `shots.mjs`, `layout.mjs` — both already iterated `lib.mjs`'s
+  `SURFACES` directly, so the new surfaces apply for free; both now pass
+  `waitSelectorForSurface(surface.id)` into `gotoAndSettle`.
+- `a11y.mjs`, `styles.mjs` — each had their own inline duplicate of the
+  same "OVERALL ASSESSMENT" 5s-timeout wait (neither used `lib.mjs`'s
+  shared `gotoAndSettle`); both fixed the same way, both gained the two
+  idle `{ id, path }` pairs.
+- `perf.mjs` — gained the two idle `{ id, path }` pairs. Lighthouse
+  handles its own load-waiting, no wait-selector fix needed.
+- `all.mjs` — each step's stdout+stderr now goes to
+  `gauntlet/out/logs/<step>.log`; console prints one line per step
+  (seconds + log path). A failing step still fails the run, still names
+  the step, still gives the log path, before rethrowing.
+
+**40-shot confirmation.** `gauntlet:shots` writes 40 PNGs (5 surfaces × 2
+viewports × 4 states), verified on both the local dev env and a fresh
+`git clone` + `npm ci` + `npx playwright install chromium`.
+
+**Cycle-0 timing (run-2's new cap baseline):** local dev env **213.5s**,
+fresh clone **215s**. Both well under the 240s stop threshold in the key
+— no stop condition fired, no optimisation needed or attempted.
+Per-instrument (fresh clone): shots 50s, diff 5.5s, styles 4.4s, a11y
+10s, layout 47.4s, vocab 0.1s, perf 86.3s.
+
+**`view=idle` production-inert proof.** `app/page.tsx`'s fixture effect
+gained one new branch, gated on the same `?fixture=gauntlet` param as the
+existing `view=export` branch — with the param absent the component is
+byte-for-byte what it was before this session. Verified live in the
+browser pane: `/?fixture=gauntlet&view=idle` renders the input panel with
+"Run Audit · 4 frameworks" armed (`bg-accent text-ivory`, confirmed via
+computed style — 3.06:1, the known defect); production `/` renders the
+disabled pill with unchanged copy ("Add a screenshot or describe the
+concept to begin"), `disabled: true`, confirmed via computed DOM read.
+
+**Option B retirement — recorded with the Commander's reason.** Per
+`gauntlet/README.md`'s new Reference section, `FREEZE.md`, and
+`PIPELINE.md` station 6: option B (Claude Design reference frames per
+surface, pixel-diffed against a designed reference) is retired for
+AuditLens 2.0, not merely parked — there is no `gauntlet/reference/`
+folder and none is planned. Commander's stated reason: the render
+approved at DESIGN GATE 31.08 is canon, and `gauntlet/baseline/` serves
+as the reference going forward. Re-seeding it is no longer a routine
+operator step — it requires a Commander DESIGN GATE ruling, exactly as
+this session's own re-seed did.
+
+**VERIFY, receipts:**
+- Fresh clone + `npm ci` + `npx playwright install chromium`:
+  `gauntlet:all` exit 0, 40 PNGs, `SUMMARY.md` 7 rows, `logs/` has one
+  file per step + `build.log` (8 files), console prints ~15 lines (2 npm
+  banner + 3 build/server + 7 step + 1 blank + 1 done) instead of the
+  full instrument output.
+- `gauntlet:diff` default: 40/40 compared, 0.00% on every shot.
+  `--against gauntlet/baseline`: identical (same target). `--against
+  /tmp/empty`: exit 1, names the dir.
+- `npm run format:check`, `npm run lint` (0 errors, 3 pre-existing
+  `<img>` warnings from run 1's backlog — unrelated, untouched), `npm run
+  test` (6 files / 13 tests): all green locally before push.
+- `a11y.json` `idle-armed__mobile` and `idle-armed__desktop`: both show
+  one `color-contrast` violation, `#fff3f0` on `#ff4d00`, actual ratio
+  **3.06**, required 4.5:1, target `.py-\[1\.15em\]` — the Run Audit
+  button, present at both viewports, exactly as the key expected.
+- `a11y.json` `idle__mobile` and `idle__desktop` (cold): **0** violations
+  at both. Axe does not flag the disabled pill's text at all — no rule
+  fires on it, consistent with WCAG 1.4.3 exempting inactive controls
+  (quoted in `FREEZE.md`).
+
+**What's stale for the next worker:** the standing gap above (re-seed the
+baseline after every approved run — logged, not yet turned into a
+checklist step anywhere durable). Run 1's lint backlog (3 `<img>` →
+`next/image` warnings) is untouched, unrelated to this session. The Run
+Audit CTA's actual contrast fix (`text-ivory` → `text-navy`, 4.56:1,
+Commander-ruled this session per `FREEZE.md`) is recorded, not executed —
+that is run 2's lane's job, not this setup lap's. This entry was written
+and committed before the PR was merged — confirm merge state before
+trusting NOW/NEXT in `PIPELINE.md` as current.
+
+>> BATON
+STATE: PR [#8](https://github.com/Ulgolan/auditlens/pull/8) open against
+main, branch `gauntlet/setup-2`, 9 commits, CI harness **green**
+(format/lint/test/eval:smoke), Vercel preview deployed. Not yet merged
+at LEDGER close.
+CERTIFIED: 40 PNGs; `gauntlet:diff` 40/40 @ 0.00% against the re-seeded
+baseline; 24 re-seeded baseline PNGs sha256-confirmed byte-identical to
+`gauntlet/run-1-final/`; format/lint/test green locally and in CI;
+idle-armed contrast failure (3.06:1, both viewports) and idle cold
+cleanliness both confirmed in a11y.json; `view=idle` proven
+production-inert live in browser.
+OPEN: PR #8 merge (harness is green — merge is a Commander/desk call,
+not this session's to make unprompted). Run-2 backlog per FREEZE.md:
+idle input screen lanes (contrast/layout/a11y builder work), Run Audit
+CTA → text-navy execution, 9 parked prompt vocab hits (separate key),
+surface-list consolidation into lib.mjs (parked, not this lap).
+NEXT: once PR #8 merges, run 2's builder/critic lanes against the
+now-armed idle surfaces — the Run Audit CTA fix is the headline item,
+ruled this session, not yet executed.
+TRAPS: gauntlet/baseline/ drifting silently after a future approved run
+is the exact failure this session found and fixed once — the standing
+gap above exists specifically so nobody has to rediscover it by hand
+again. `gauntlet/run-1-final/` is now provenance evidence for the
+re-seed, not just a report artifact — do not delete it.

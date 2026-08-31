@@ -17,6 +17,7 @@ export const SHOTS_DIR = path.join(OUT_DIR, "shots");
 export const BASELINE_DIR = path.join(ROOT, "gauntlet", "baseline");
 export const MASKS_DIR = path.join(ROOT, "gauntlet", "masks");
 export const LHCI_DIR = path.join(OUT_DIR, "lhci");
+export const LOGS_DIR = path.join(OUT_DIR, "logs");
 
 // A dedicated port, distinct from the operator's own `npm run dev` on 3000.
 export const PORT = 4173;
@@ -31,18 +32,43 @@ export const VIEWPORTS = [
 // prefers-reduced-motion; JavaScript disabled.
 export const STATES = ["top", "scrolled", "reduced-motion", "js-disabled"];
 
-// Three in-scope surfaces (FREEZE.md). "report" is a full-page capture of
-// the whole report screen; "tabbar" is a full VIEWPORT (not full-page)
-// capture of the same URL, so the "scrolled" state is the one that
-// actually brings the sticky tab bar into frame — that is what makes it a
-// distinct surface from "report" rather than a duplicate of it. "export"
-// is the export document, captured via the gauntlet fixture's in-page
-// render path (see gauntlet/README.md — the real export has no URL).
+// Five in-scope surfaces (FREEZE.md, run 2). "report" is a full-page
+// capture of the whole report screen; "tabbar" is a full VIEWPORT (not
+// full-page) capture of the same URL, so the "scrolled" state is the one
+// that actually brings the sticky tab bar into frame — that is what makes
+// it a distinct surface from "report" rather than a duplicate of it.
+// "export" is the export document, captured via the gauntlet fixture's
+// in-page render path (see gauntlet/README.md — the real export has no
+// URL). "idle" is the cold input screen with no fixture at all — the
+// disabled Run Audit pill, a genuinely different DOM that "report" and
+// "tabbar" never render (they both require a completed fixture report to
+// exist). "idle-armed" is the same input screen with the fixture's
+// concept text and frameworks loaded but no report mounted — the Run
+// Audit CTA in its enabled state, which only appears once material is
+// present (see the fixture's view=idle branch in app/page.tsx).
 export const SURFACES = [
   { id: "report", path: "/?fixture=gauntlet", fullPage: true },
   { id: "tabbar", path: "/?fixture=gauntlet", fullPage: false },
   { id: "export", path: "/?fixture=gauntlet&view=export", fullPage: true },
+  { id: "idle", path: "/", fullPage: true },
+  { id: "idle-armed", path: "/?fixture=gauntlet&view=idle", fullPage: true },
 ];
+
+/**
+ * Which selector proves the page has actually mounted its real content,
+ * for gotoAndSettle's post-navigation wait. The report/tabbar/export
+ * surfaces all render a completed fixture report, which always includes
+ * an Overall Assessment; the two idle surfaces never do; both idle and
+ * idle-armed always render the input panel's frameworks label instead.
+ * Waiting on a selector the target screen actually has (rather than
+ * timing out waiting for one it never will) is what keeps an idle shot
+ * from costing a needless 5s per capture.
+ */
+export function waitSelectorForSurface(surfaceId) {
+  return surfaceId.startsWith("idle")
+    ? "text=EVALUATION FRAMEWORKS"
+    : "text=OVERALL ASSESSMENT";
+}
 
 export function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
@@ -127,7 +153,20 @@ export async function withServer(fn) {
 
   if (!alreadyUp) {
     console.log(`[gauntlet] no server on ${BASE_URL} — building...`);
-    execSync("npx next build", { cwd: ROOT, stdio: "inherit" });
+    ensureDir(LOGS_DIR);
+    const buildLogPath = path.join(LOGS_DIR, "build.log");
+    const fd = fs.openSync(buildLogPath, "w");
+    try {
+      execSync("npx next build", { cwd: ROOT, stdio: ["ignore", fd, fd] });
+    } catch (err) {
+      console.error(
+        `[gauntlet] next build failed. See ${path.relative(ROOT, buildLogPath)}`
+      );
+      throw err;
+    } finally {
+      fs.closeSync(fd);
+    }
+    console.log(`[gauntlet] build log: ${path.relative(ROOT, buildLogPath)}`);
     console.log(`[gauntlet] starting production server on ${BASE_URL}...`);
     stop = await startServer();
   } else {
@@ -162,19 +201,26 @@ export async function applyStatePostNav(page, state) {
 
 /**
  * Navigate and wait for a stable paint: fonts loaded, and — when JS is
- * enabled — the fixture's own content actually mounted (it loads inside a
- * useEffect, so first paint is the plain idle screen). With JS disabled
- * this never resolves, on purpose: that IS the js-disabled state, and the
- * capture that results (the idle screen) is the honest answer for a fully
- * client-rendered app.
+ * enabled — the target screen's own content actually mounted (it loads
+ * inside a useEffect, so first paint is the plain idle screen). With JS
+ * disabled this never resolves, on purpose: that IS the js-disabled
+ * state, and the capture that results (the idle screen) is the honest
+ * answer for a fully client-rendered app.
+ *
+ * waitSelector defaults to the completed-report marker; pass
+ * waitSelectorForSurface(surface.id) for a surface that never renders one
+ * (see there) so the wait resolves on content the page actually has
+ * instead of timing out after 5s.
  */
-export async function gotoAndSettle(page, url, { jsEnabled }) {
+export async function gotoAndSettle(
+  page,
+  url,
+  { jsEnabled, waitSelector = "text=OVERALL ASSESSMENT" }
+) {
   await page.goto(url, { waitUntil: "networkidle" });
 
   if (jsEnabled) {
-    await page
-      .waitForSelector("text=OVERALL ASSESSMENT", { timeout: 5000 })
-      .catch(() => {});
+    await page.waitForSelector(waitSelector, { timeout: 5000 }).catch(() => {});
   }
 
   await page.evaluate(() => document.fonts && document.fonts.ready).catch(() => {});
