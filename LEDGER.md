@@ -838,3 +838,79 @@ is the exact failure this session found and fixed once — the standing
 gap above exists specifically so nobody has to rediscover it by hand
 again. `gauntlet/run-1-final/` is now provenance evidence for the
 re-seed, not just a report artifact — do not delete it.
+
+### 2026-08-31 — Tower session close (setup-2 arc) — appended by doc-only micro-lap
+
+>> BATON — Tower session close, 2026-08-31 (gauntlet setup-2 arc)
+
+STATE: PR #8 merged to main; post-merge verified byte-identical to the
+certified branch tarball (diff -rq, diff's own exit code 0, zero stdout,
+zero stderr, unfiltered). Run 2 instruments live: 5 surfaces, 40-shot
+baseline. Baseline re-seeded = run-1-final = DESIGN GATE 31.08 approved
+state, and is now the DESIGN REFERENCE: option B RETIRED for AuditLens
+2.0 by Commander ruling ("solid as it gets; features yes, redesign no").
+FREEZE run 2 open at root. PIPELINE: NOW = gauntlet run 2, NEXT =
+station 12 Polaris audit (deferral reason in the file, Commander-
+ratified). Cycle-0 for run 2: 213.5s local / 215s fresh clone.
+
+CERTIFIED (Tower, against tarballs, this session): setup-2 diff scope
+exact (8 scripts, 24 re-seeded + 16 new baseline PNGs, page.tsx fixture
+block only, FREEZE/PIPELINE/LEDGER/README; package.json byte-identical,
+zero new deps); re-seed provenance by cmp on all 24 pairs vs
+run-1-final; all 16 idle PNG dimensions correct (390/1280); both idle
+states eye-checked from committed baselines (cold = disabled pill,
+armed = RUN AUDIT · 4 FRAMEWORKS). OBSERVED, not re-run: CI harness
+green, 40/40 @ 0.00%, a11y idle-armed 3.06:1 both viewports / idle
+cold clean.
+
+OPEN (next Tower, in order):
+1. Cold-review the proposed scars below; Commander ratifies; Hands lap
+   commits ratified scars to acp-doctrine/SCAR-LEDGER.md.
+2. Author run-key v1.2 from measured ground: caps from 213s cycle-0;
+   lane 1 = idle-armed Run Audit CTA text-ivory → text-navy
+   (Commander-ruled 2026-08-31, FREEZE-recorded, NOT yet executed);
+   further lanes from the idle a11y/layout findings; changelog:
+   redeclaration requires traced evidence; R5c reworded "no desktop
+   finding introduced — decrease or hold"; READ FIRST drops CLAUDE.md
+   (none exists in this repo — parked finding, LEDGER 2026-08-06);
+   builder pre-commit verify adds format:check; foreman reads
+   SUMMARY.md only, instrument logs handed to critics by path.
+3. After run-2 merge + Commander eye: RE-SEED BASELINE per the standing
+   law born this session (eye approves → merge → re-seed → ledger).
+   Propagation of that law into acp-doctrine templates/gauntlet/ is
+   queued, not done.
+4. Prompts-vocab key (9 parked hits) — separate key, after run 2.
+
+PROPOSED SCARS (all clade I, one session — cold reviewer weighs one
+scar with four incidents vs separate scars):
+S1: Key v1.2 PHYSICS stated "0.00% on all 24" from run-1's cycle-0
+    report, never re-measured against current main. Caught by a Hands
+    that measured before obeying. Root cause also produced the standing
+    re-seed law.
+S2: The correcting ruling overclaimed — "10.14% matches the declared
+    10.18%" graded an inference as verification (different comparanda:
+    composite-vs-original vs lane-3-vs-lane-baseline). Caught by
+    self-applied Tribunal.
+S3: The post-merge receipt "diff exit: 0" reported a pipeline tail's
+    exit (always 0) with stderr suppressed — the shown proof did not
+    prove the stated claim. Caught by self-applied Tribunal; re-run
+    clean. "Absence from a filtered read is not absence," convicted
+    twice in one arc.
+S4: The micro-lap key claimed a doc-only exemption permitting
+    direct commits to main — contradicted by the repo's own
+    main-harness ruleset, documented in this LEDGER's 2026-08-30
+    entry and read by the Tower at session open. Caught by the
+    Hands at push. The doc-only exemption is process doctrine
+    (skip preview/eye), never a bypass of repo rules.
+
+TRAPS: gauntlet/baseline/ is CANON now, not a scratch "before" — no
+re-seed without a Commander DESIGN GATE ruling. gauntlet/run-1-final/
+is provenance evidence — never delete. The armed-idle fixture view is
+production-inert by a return-early branch — any future fixture-effect
+edit re-proves inertness. Verification receipts must capture the
+measuring command's OWN exit code, never a pipeline tail's, never with
+stderr suppressed. Sonnet 5 intro pricing ends 2026-08-31 — assume
+post-intro executor economics for run 2's spawns.
+
+Session formalities: valve usage 0, overrides 0. Commander carries
+nothing forward except ratification words on the scars.
