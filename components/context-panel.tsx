@@ -62,7 +62,7 @@ export function ContextPanel({
               >
                 <img
                   src={s.dataUrl}
-                  alt={`Screen ${i + 1}`}
+                  alt={`Screenshot ${i + 1}`}
                   className="h-14 w-auto block"
                 />
                 <div className="font-mono absolute bottom-0.5 left-1 bg-overlay rounded px-1 py-px text-[9px] font-medium text-ivory">
