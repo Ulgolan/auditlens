@@ -1168,3 +1168,230 @@ LEDGER append-only. gauntlet/run-1-final/ is provenance — never
 delete. gauntlet/baseline/ is CANON. FREEZE.md stays in place until a
 Commander ruling retires it. Receipts carry the measuring command's
 OWN exit code, stderr unsuppressed.
+
+### 2026-09-02 — Fable 5.1 A/B (parked finding, branch `exp/fable-ab`, NOT merged)
+
+Same-input quality/cost comparison: Sonnet 5 @ effort medium (current
+production config) vs Claude Fable 5.1 @ effort low, identical 7
+screenshots + task text + audience + all four frameworks, run by the
+Commander in the browser on both configs. Branch left unmerged for
+the Commander's ruling — this is a parked finding, not a decision.
+
+GROUND TRUTH (answered before any edit):
+- `CLAUDE_MODEL` is a hard constant, `lib/ai-config.ts:8` — not env-driven.
+- `output_config.effort` is one inline literal, `app/api/evaluate/route.ts:221`,
+  shared by all 4 framework calls AND the Overall pass — not per-framework.
+- `tests/model-config.test.ts` only asserts the pattern `/^claude-/` and
+  that the route imports the constant rather than hardcoding one — it does
+  NOT pin a model name or effort value. The swap did not go red.
+- No per-request token/cost usage is captured anywhere in `app/` or `lib/`
+  (grep clean) and none is logged in this file from past runs — the cost
+  columns below are ESTIMATE, not measurement.
+- CORRECTION to the brief's premise: `max_tokens` was never a flat 16000.
+  It's 32000 per framework call / 16000 for Overall (`route.ts:216`,
+  raised there specifically to fix v1's shared-16000 truncation bug).
+  Left unchanged for this A/B — effort "low" needs less thinking headroom
+  than "medium" already ran fine with.
+- `claude-fable-5-1` and `output_config.effort: "low"` both confirmed
+  against bundled documentation (not memory) before editing.
+
+EDITS: two one-line changes, `lib/ai-config.ts:8` (model string) and
+`route.ts:221` (effort literal). Lint: 0 errors. `git diff main..exp/fable-ab
+--stat` — exactly these two files, one line each.
+
+EXPORTS (outside repo, never committed):
+`~/projects/acp-command-center/experiments/fable-ab/sonnet-medium.html`
+`~/projects/acp-command-center/experiments/fable-ab/fable-low.html`
+
+#### Comparison table
+
+| Metric | Sonnet 5 @ medium | Fable 5.1 @ low |
+|---|---|---|
+| Grade | **D** | **C** |
+| Section status (all 4 frameworks + Overall) | Complete, no truncation banner, no WITHHELD, no retry — footer: "Complete audit — all sections finished" | Same — "Complete audit — all sections finished" |
+| Self-reported critical count (Overall pass's own synthesis text) | 8 critical (3 State-stress, all "entirely unverified/undesigned"; 5 A11y — color-only indicator, 2 touch-targets, modal focus trap, alt text) | 2 confirmed critical (homepage motif labeling — cross-flagged by Nielsen H6 + CW Step 1 + A11y §8; systemic low-contrast mono label layer — A11y §1) + "15+" minor. Fable's Overall pass explicitly excludes its own State-stress criticals from the count as "verification debt, not findings" since every screenshot shows only the Ideal state — a stricter/different counting philosophy than Sonnet's, which folds unverified-state criticals straight into its 8 |
+| Severity mentions detected per framework, P/M/C (see methodology below) | Nielsen 0/6/0¹ · CW 0/2/0¹ · State 1/1/3 · A11y 0/12/5 | Nielsen 2/7/1 · CW 0/3/2 · State 1/2/3 (heading) + 0/2/3 (body, sub-items) · A11y 0/9/2 |
+| Visible output, chars (parsed from export body text) | 35,410 total (Nielsen 8,976 · CW 6,639 · State 5,038 · A11y 10,367 · Overall 4,390) | 60,238 total (Nielsen 15,219 · CW 11,393 · State 9,841 · A11y 16,267 · Overall 7,518) — **70% more visible prose at LOW effort than Sonnet at MEDIUM** |
+| Wall-clock (sum of 5 sequential `POST /api/evaluate`, dev server log, ms) | 201.4s (56.9+33.1+27.0+51.2+33.2) | 465.9s (124.5+88.7+67.7+133.9+51.1) — **2.3x slower despite the lower effort label** |
+| Console spend delta (Commander-measured, ground truth) | **$0.24** | **$2.09** |
+| Estimated cost — methodology below | $0.218 (floor) – $0.306 (assumption) | $1.377 (floor) – $2.130 (assumption) |
+| Variables that differed | model: `claude-sonnet-5`; effort: `medium`; `max_tokens`: 32000/16000 (unchanged) | model: `claude-fable-5-1`; effort: `low`; `max_tokens`: 32000/16000 (unchanged, no bump made) |
+
+¹ Sonnet's Nielsen/CW severity tags render as icon pills (`aria-label="X finding"`)
+inside body prose rather than literal `[TAG]` text in the heading, unlike Fable's
+Nielsen/State which puts the tag in the h3 heading itself. Both formats were
+counted (see methodology) but pill-based counts are a likelier undercount since
+not every rendered pill's surrounding prose was hand-verified against all 10
+heuristics / 6-7 steps. Treat the P/M/C row as directional, not certified —
+the self-reported critical counts one row up are the more trustworthy signal
+since they're the model's own tally against its own findings.
+
+#### Cost estimate — full arithmetic (Tower amendment to DO-4)
+
+**1. Image tokens.** Formula (Anthropic Vision docs, `docs/en/build-with-claude/vision.md`,
+fetched live 2026-09-02): *"Claude views images in patches instead of pixels.
+Each patch is a 28×28-pixel block... An image costs ⌈width/28⌉ × ⌈height/28⌉
+visual tokens."* Two resolution tiers exist: standard (max long edge 1568px,
+max 1568 tokens) and high-resolution (max long edge 2576px, max 4784 tokens,
+"Claude 4.7 and later models"). **ASSUMPTION, stated explicitly**: both
+Sonnet 5 and Fable 5.1 are post-4.7-generation models and get the
+high-resolution tier — the docs table names the tier by generation, not by
+these two specific model strings, so this is inferred, not confirmed. Since
+the assumption is applied identically to both models, it cannot itself
+explain the cost RATIO between them (see §4).
+
+The 7 screenshots (extracted from the exported HTML's embedded base64 PNGs,
+`python3` + `struct.unpack('>II', png_bytes[16:24])`) are 2778–2798px wide,
+1590–1762px tall — all exceed the 2576px cap, so all 7 get downscaled
+(preserving aspect ratio to fit the long edge, then a further `sqrt` scale
+if patch count still exceeds 4784) before tokenizing:
+
+| Screenshot (orig) | Downscaled to | Tokens |
+|---|---|---|
+| 2778×1594 | ~2552×1464 | 4,876 |
+| 2798×1762 | ~2439×1536 | 4,840 |
+| 2790×1590 | ~2552×1454 | 4,784 |
+| 2786×1598 | ~2552×1464 | 4,876 |
+| 2796×1592 | ~2552×1453 | 4,784 |
+| 2780×1608 | ~2528×1462 | 4,823 |
+| 2784×1592 | ~2552×1459 | 4,876 |
+| **Total, all 7** | | **33,859** |
+
+**2. Cache model.** The route resends all 7 images on every one of the 4
+framework calls (not on the Overall call, which has no images). `cache_control:
+ephemeral` sits on the last image and on the `materialContext+taskContext`
+text block — together, one cacheable prefix of `33,859 + ~78` tokens
+(text: measured 160-char `materialContext` + an **ASSUMED** ~150-char
+`taskScenario`, since the actual task text isn't captured anywhere and
+wasn't read from the Commander's Desktop per standing precedent). First
+framework call WRITES this prefix to cache; the next 3 READ it. **The
+`system` field is a plain string with no `cache_control` — it is NOT
+cached at all and is paid at full input price on all 5 calls.** (Parked
+observation, not fixed per DO-NOT: this is a real cost inefficiency in the
+current architecture, separate from this A/B.)
+
+Cache pricing used: Sonnet 5 write = 1.25× input ($2.50/MTok, standard 5-min-TTL
+multiplier), read = 0.1× input ($0.20/MTok, standard). Fable 5.1 write = 1.25×
+input ($12.50/MTok, no override documented), read = **$0.25/MTok flat** — an
+explicit rate stated in Fable 5.1's own documentation, not the standard 0.1×
+formula (which would be $1.00/MTok on a $10/MTok input model).
+
+**3. Output tokens.** Visible text = exported HTML body chars ÷ 4 (per-framework
+counts in the table above). Thinking is invisible in the export (Fable 5.1's
+`display` defaults to "omitted"; both requests use `thinking: {type:"adaptive"}`
+unchanged). **Two labelled scenarios, not one number:**
+- **Floor (thinking = 0)** — a known-wrong lower bound, since both models ran
+  with thinking on (Fable 5.1 cannot disable it at all; Sonnet 5's adaptive
+  thinking was on and unconfigured).
+- **Assumption (thinking = 1× visible tokens)** — an explicitly labelled,
+  unverified rule of thumb, not derived from telemetry (none exists, per GT4).
+
+**Full per-call arithmetic** (uncached input = system prompt + volatile
+framework instruction, neither cached; both paid every call):
+
+| | Sonnet floor | Sonnet +1×think | Fable floor | Fable +1×think |
+|---|---|---|---|---|
+| Uncached input (system+instr, tok) | 12,051 | 12,051 | 17,476 | 17,476 |
+| Cache write (tok, ×1) | 33,936 | 33,936 | 33,936 | 33,936 |
+| Cache read (tok, ×3) | 101,810 | 101,810 | 101,810 | 101,810 |
+| Output (tok) | 8,852 | 17,705 | 15,060 | 30,119 |
+| **Cost** | **$0.218** | **$0.306** | **$1.377** | **$2.130** |
+
+**4. Reproducing the measured 9x ratio.** Measured: $2.09 / $0.24 = **8.71x**.
+Estimated, same thinking assumption applied uniformly to both models: 6.32x
+(floor) to 6.96x (+1×). **Neither uniform assumption reaches the measured
+ratio.** A hybrid — Sonnet ≈ floor ($0.218, i.e. near-zero invisible
+thinking) and Fable ≈ +1× ($2.130, i.e. thinking ≈ visible-text volume) —
+lands at **9.77x**, within ~12% of measured and far closer than either
+uniform scenario.
+
+**Missing factor, named as asked: thinking-volume asymmetry, not cache
+misses**, on the balance of evidence — though GT4 (no usage telemetry)
+means this can't be certified, only argued:
+- A cache-miss-only hypothesis (Fable's 4× image-resend all paying full
+  input price, zero cache benefit, floor output) lands at $2.285 for Fable
+  alone — also plausible in isolation, but it has nothing to say about why
+  SONNET's absolute cost is so low, since Sonnet's cache behavior is
+  identical in kind. It explains one side of the ratio, not both.
+- The asymmetric-thinking hypothesis explains both sides at once: Sonnet 5's
+  thinking is adaptive and can run near-negligible on a well-specified task
+  at effort medium; Fable 5.1's thinking is **always on and cannot be
+  disabled at any effort level** — "low" effort narrows it but does not
+  zero it out. This is independently corroborated by wall-clock: Fable
+  took 2.3x longer end-to-end despite the lower effort label, and
+  autoregressive token generation (thinking included) is the part of a
+  request that scales with wall-clock — a cache miss on input tokens would
+  not produce anywhere near that latency multiplier.
+- Restated plainly: I cannot certify which factor dominates without
+  per-request usage telemetry, which this app doesn't capture (GT4).
+  Thinking-volume asymmetry fits the combined evidence (ratio + wall-clock)
+  better than cache misses alone.
+
+#### Findings raised by only one model, per framework
+
+Not exhaustive — this is a diff of headline/self-reported findings and
+structurally distinct items (extra sections, extra steps), not a
+line-by-line read of all ~80 sub-findings across both reports. Presented
+without a verdict; that's the Commander's read.
+
+**Sonnet-only:**
+- Nielsen H6 (Recognition Rather Than Recall): missing persistent
+  header/breadcrumb reminding the user which project/client they're
+  reading once scrolled past the hero — a *within-case-study* recall
+  problem. (Fable's H6 is a different, homepage-level finding — see below.)
+- A11y: modal focus trap flagged as CRITICAL ("verify in live product") —
+  no equivalent critical-tagged focus-trap finding surfaced in Fable's A11y
+  §5 Focus Indicators section.
+- Overall Quick Win: restyle the "PROJECTS." label itself (no button
+  styling/hover cue) — framed as a label-styling problem, distinct from
+  Fable's framing of the same homepage area (below).
+- 6 CW steps (vs Fable's 7) — Sonnet's Step 2 (modal interaction) and
+  Step 3 (transition into case study) are collapsed into fewer, coarser
+  steps than Fable's split.
+
+**Fable-only:**
+- Nielsen H6 (Recognition Rather Than Recall) — **CRITICAL**: four
+  unlabelled homepage "pixel motifs" are the only route into the work,
+  "PROJECTS." sits 200–250px away detached from the cluster; screen readers
+  get four nameless controls. Cross-flagged by name across three sections
+  (H6, CW Step 1, A11y §8) and named as one of Fable's only two confirmed
+  criticals. This is the closest Fable finding to Sonnet's homepage-related
+  observations, but the framing is materially different (missing element
+  *labels*, with an explicit accessibility/screen-reader angle) from
+  Sonnet's "PROJECTS. needs button styling."
+- A11y §1 (Contrast ratio) — **CRITICAL**: names it a *systemic* failure of
+  one shared mono-label text style across rail/eyebrows/meta-bar/hero
+  stats/ticker/footer, all estimated ~2.5–4:1, framed as "one token, one
+  fix." Sonnet's contrast findings are not surfaced as a single named
+  systemic layer.
+- Extra a11y item beyond the prescribed 8 WCAG criteria: **"Motion"**
+  (auto-playing/animated entry-screen content), not present in Sonnet's
+  A11y section.
+- Extra a11y item: **"Metrics to instrument"** as a standalone subsection
+  — Sonnet's metric tags stay embedded per-finding (P/B/A) rather than
+  collected into their own section.
+- 7th CW step ("Move on to the next case") broken out separately; Sonnet's
+  6-step walkthrough doesn't give this its own step.
+- Overall "What's Working Well": names 4 specific PASS items ("progress
+  rail does two jobs cleanly," "escape hatches consistent and generously
+  sized," etc.) — more granular and more numerous than Sonnet's 3 broader
+  positive observations.
+
+Verdict (02.09, verified on the live site and by keyboard traversal):
+Fable 5.1 at effort low becomes the production model. Screen 7 close
+button measures ~50px — Fable correct, Sonnet's critical incorrect.
+Inactive rail dots are hollow and clickable — Fable's WCAG 1.4.1 pass
+correct, Sonnet's critical incorrect. Systemic mono-label contrast
+finding accepted. Screen 7 card traps focus and Escape restores it —
+Sonnet's unverified focus-trap critical did not reproduce. Fable
+detected the reverse screenshot order; Sonnet's critical count differs
+between its header (7) and its Overall (8). Cost ratio (~9×) accepted:
+usage is low-volume and the console spend cap bounds worst-case spend.
+No model toggle or tiering. Follow-ups: usage telemetry (#13), refusal
+handling (#14); portfolio fixes (motif labels, mono token contrast)
+tracked in the portfolio repo.
+
+STATE: branch `exp/fable-ab`, two one-line edits + this LEDGER entry,
+unmerged, no PR opened. `main` untouched (`git status` on `main` clean;
+verified before switching off it). Left checked out on `exp/fable-ab`
+per the brief — awaiting the Commander's ruling, not a merge.

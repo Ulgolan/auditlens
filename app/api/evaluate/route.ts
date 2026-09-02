@@ -218,7 +218,7 @@ export async function POST(req: NextRequest) {
         // when `thinking` is omitted, so v1 was already spending part of
         // its budget on invisible reasoning without saying so anywhere.
         thinking: { type: "adaptive" },
-        output_config: { effort: "medium" },
+        output_config: { effort: "low" },
         stream: true,
         system,
         messages: [{ role: "user", content }],
