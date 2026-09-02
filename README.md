@@ -46,7 +46,7 @@ Open [http://localhost:3000](http://localhost:3000).
 - **Next.js 15** — App Router
 - **TypeScript** — Full type safety
 - **Tailwind CSS v4** — Styling with custom design tokens
-- **Claude Sonnet 4** — Evaluation engine via streaming API
+- **Claude Fable 5.1 (effort low)** — Evaluation engine via streaming API
 - **Vercel** — Deploy target (optional)
 
 ## Project Structure

@@ -1377,9 +1377,19 @@ without a verdict; that's the Commander's read.
   sized," etc.) — more granular and more numerous than Sonnet's 3 broader
   positive observations.
 
-VERDICT: Quality verdict pending Commander read of both reports side by
-side. This entry certifies the numbers and the arithmetic that produced
-them, not which model's audit is better.
+Verdict (02.09, verified on the live site and by keyboard traversal):
+Fable 5.1 at effort low becomes the production model. Screen 7 close
+button measures ~50px — Fable correct, Sonnet's critical incorrect.
+Inactive rail dots are hollow and clickable — Fable's WCAG 1.4.1 pass
+correct, Sonnet's critical incorrect. Systemic mono-label contrast
+finding accepted. Screen 7 card traps focus and Escape restores it —
+Sonnet's unverified focus-trap critical did not reproduce. Fable
+detected the reverse screenshot order; Sonnet's critical count differs
+between its header (7) and its Overall (8). Cost ratio (~9×) accepted:
+usage is low-volume and the console spend cap bounds worst-case spend.
+No model toggle or tiering. Follow-ups: usage telemetry (#13), refusal
+handling (#14); portfolio fixes (motif labels, mono token contrast)
+tracked in the portfolio repo.
 
 STATE: branch `exp/fable-ab`, two one-line edits + this LEDGER entry,
 unmerged, no PR opened. `main` untouched (`git status` on `main` clean;
