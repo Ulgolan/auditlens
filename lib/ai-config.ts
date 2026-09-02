@@ -5,4 +5,4 @@
  * a hardcoded "claude-*" literal anywhere else in application source is a
  * lint error, not a warning. This is the March 404 tripwire.
  */
-export const CLAUDE_MODEL = "claude-sonnet-5";
+export const CLAUDE_MODEL = "claude-fable-5-1";
