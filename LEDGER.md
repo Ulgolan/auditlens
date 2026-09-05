@@ -1395,3 +1395,121 @@ STATE: branch `exp/fable-ab`, two one-line edits + this LEDGER entry,
 unmerged, no PR opened. `main` untouched (`git status` on `main` clean;
 verified before switching off it). Left checked out on `exp/fable-ab`
 per the brief — awaiting the Commander's ruling, not a merge.
+
+### 2026-09-04 — LIVE-FIRE #1 (filed 2026-09-05)
+
+**SC1 1/1 DONE (as scoped, Commander ruling). SC2 trust batch 1/10.**
+
+Target: hotico-proto homepage (client prototype, private repo). 11 desktop
+Chrome viewport captures, journey order, numbered. The site's second page
+was not captured — runs as LIVE-FIRE #1b. Audience: General Public.
+Frameworks: 4/4. Written concept + task scenario supplied.
+
+Deployment: https://auditlens-i8qjixloq-popescu-alexandrus-projects.vercel.app
+— Vercel Production · Current · source main @ f5582ee (dashboard
+screenshot, T1). Production alias: auditlens-eta.vercel.app. The 08-30
+URL (8b3pzche8) was a per-build address frozen at 3958808 (Sonnet build);
+retired from PIPELINE in this commit. Rule: per-build URLs are recorded in
+run entries; PIPELINE carries the alias.
+
+Engine proof: (1) dashboard row = f5582ee, the Fable build (T1);
+(2) Anthropic console credits 7.11 → 3.95 USD, delta 3.16 USD, wall-clock
+≈10 min, Commander-reported (T2 — screenshot the console for run #1b).
+A/B reference: Fable 2.09 USD / 466 s on 7 shots → scaled ≈3.28 USD;
+Sonnet scaled ≈0.40 USD. Model name is not surfaced in UI or export
+(grep, T1) — the console is the proof of engine.
+
+Completeness: footer "Complete audit — all sections finished"; all four
+framework sections present; no truncation or WITHHELD banner. Export
+6.0 MB, 13 embedded images (11 originals + logo + motif), stored outside
+any repo. The client does not see the raw export.
+
+Protocol, re-ratified this session (was chat-only until now): desktop
+Chrome only; two-bucket findings split (client repo / this repo);
+contrast values are pixel estimates — DOM-measure before anyone obeys;
+raw export stays with the Commander.
+
+Tower error, self-owned: the Tower-drafted concept description asserted
+a page feature that the material did not show and referenced a page not
+captured. The feature claim was never pulled (residue). The tool opened
+every framework with a scope note and declined to credit the unseen; the
+Commander's eye then confirmed the feature is indeed absent, so the
+affected findings stand — the description changed wording, not verdict.
+Proposed scar, clade I, pending cold review by the next Tower.
+
+Commander rulings, session 04→05.09: (1) run #1 counts for SC1 as scoped
+— "full" in the 09-01 sequence was the Tower's tightening, not the
+brief's; the second page runs as #1b. (2) The 09-02 A/B pair does not
+count toward SC2 (27.07 precedent stands). (3) Bucket split approved;
+client bucket filed in the client repo after #1b, in one entry.
+
+PRODUCT FINDINGS (this repo):
+1. PASS — scope-note behaviour. Operator description contradicted the
+   material; the tool wrote "not evidenced" rather than crediting.
+   Non-negotiable #1, field-proven unprompted.
+2. PASS — the accessibility section self-declares its contrast values as
+   pixel estimates to be confirmed against CSS tokens.
+3. Finding — the description field is a liability vector: one wrong
+   operator sentence coloured five findings across four frameworks.
+   Candidate: a pre-run reconciliation line or guidance text. Parked
+   (instrument lap; SC clocks are running).
+4. Finding — the header count and the Overall section's deduplicated
+   count differ; explained inline, but a reader sees the big number
+   first. Parked.
+5. Finding — export embeds original screenshots while the model receives
+   ≤1920×1080 JPEGs (page.tsx:130–175). First field instance of the 09-04
+   Tower pull finding. Parked.
+6. Finding — no brand-token input; the tool graded a brand colour as
+   foreign to the system. Parked.
+7. Data point for #13 (telemetry): 11 shots, 3.16 USD, ≈10 min.
+8. Not exercised: the registered mobile downscale bug (desktop-only
+   protocol). Stays registered.
+
+Also on record from the 09-04 Tower pull: the 09-02 A/B §1 cost arithmetic
+tokenised the export's original PNGs; the API received ≤1920×1080 JPEGs,
+so image tokens are overstated ≈1.8× for both models. Verdict unaffected
+(console spend is ground truth); §4 reconciliation weakened. Parked.
+
+### 2026-09-05 — Correction: the 2026-09-02 Fable A/B entry is merged
+
+The entry at line 1172 is titled "NOT merged" and its STATE block says
+"unmerged, no PR opened". Ground truth (Tower pull 04/05.09, codeload +
+commits feed, T1): merged as PR #15, squash cd874fb, 2026-09-02;
+production model on main is claude-fable-5-1 at effort low
+(lib/ai-config.ts:8, route.ts:221). The merge appended the verdict but
+left heading and STATE stale. Append-only law: this note corrects; the
+original stands as written. The 09-02 entry carries no BATON — the grep
+for the last BATON returned the 09-01 session until this session's BATON
+below. Trash-never-delete: exp/fable-ab was absent from origin (codeload
+404, 04.09). exp/fable-ab has no local copy on this machine; not
+restorable here. Its commits survive in squash cd874fb (#15).
+
+### 2026-09-05 — Retroactive: PR #16 format gate (merged 2026-09-04 11:04Z, unledgered)
+
+chore(harness): format gate on commit — .claude/hooks/format-gate.sh,
+PreToolUse on Bash; refuses `git commit` while `prettier --check` is red;
+checks only, never rewrites; .prettierignore excludes *.md so doctrine
+docs are out of scope. Squash f5582ee. Filed by the Tower one day late:
+the lap shipped without a LEDGER entry, and it opened as an instrument
+lap while both SC clocks sat idle and unblocked, which Addendum v1.2
+rules out. Recorded, not convicted — the merge was the Commander's word.
+Live-fire #1 ran on this build.
+
+>> BATON (2026-09-05)
+NEXT: LIVE-FIRE #1b — second page of hotico-proto, same protocol, batch
+2/10. Before the run: verify the Vercel Production row = current main;
+screenshot the console before/after for a T1 spend receipt. Then file the
+client bucket for #1 + #1b in the hotico-proto LEDGER, one entry, one
+curated list for the client. Then LIVE-FIRE #2 — planned client change as
+TEXT-ONLY concept audit, batch 3/10. Then prompts-vocab key.
+SC window closes 2026-09-30 (POLARIS.md). SC1 1/1. SC2 1/10.
+OPEN: doctrine SCAR-LEDGER filing — KEY-E commit≠push, clade I (Commander
+ratified 04.09); Tower description-residue scar, clade I (proposed, cold
+review pending). Both file in acp-doctrine, separate micro-key.
+OPEN: Tour project instructions — precedence pointer, Commander undecided.
+OPEN: issues #13 telemetry, #14 refusal handling.
+OPEN: estate — auditlens and acp-doctrine are public repos; review what
+their docs say about the client. Not this lap.
+TRAPS: this repo is PUBLIC — no client findings here, ever. PIPELINE
+carries the alias; per-build URLs go in run entries. Format gate ignores
+*.md. Read the tail raw: the 09-02 entry has no BATON of its own.
